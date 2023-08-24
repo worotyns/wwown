@@ -4,6 +4,8 @@ Slackbot that enter to each channel and monitor engagement.
 
 It's experiment for monitor who work on what now?
 
+Example: https://wwown.fly.dev/
+
 ---
 
 ## Setup env
