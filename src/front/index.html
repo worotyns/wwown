@@ -1,0 +1,26 @@
+<html>
+
+  <head>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+      <script defer src="https://unpkg.com/@shaun/alpinejs-router@1.x.x/dist/es6.min.js"></script>
+      <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+      <script src="main.js"></script>
+  </head>
+
+  <body x-init="$router.config({ mode: 'hash' })">
+      <h3 style="text-align: center;">who works on what now?</h3>
+      <a x-link href="/">Dashboard</a><span> | </span>
+      <a x-link href="/dashboard/top">Top5</a><span> | </span>
+      <a x-link href="/resources">Resources</a>
+      <template x-route="/" template="/dashboard.html"></template>
+      <template x-route="/dashboard/top" template="/dashboard_top.html"></template>
+      <template x-route="/resources" template="/resources.html"></template>
+      <template x-route="/users/:user_id/today" template="/users_today.html"></template>
+      <template x-route="/users/:user_id/last" template="/users_last.html"></template>
+      <template x-route="/users/:user_id/top" template="/users_top.html"></template>
+      <template x-route="/channels/:channel_id/today" template="/channels_today.html"></template>
+      <template x-route="/channels/:channel_id/last" template="/channels_last.html"></template>
+      <template x-route="/channels/:channel_id/top" template="/channels_top.html"></template>
+  </body>
+
+</html>

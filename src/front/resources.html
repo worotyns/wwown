@@ -1,0 +1,24 @@
+<div x-data="data()" x-init="load('/resources')">
+    <h5>Channels</h5>
+    <ul>
+        <template x-for="item in items" :key="item.resource_id">
+            <li x-show="item.resource_id.startsWith('C')">
+                <span x-text="item.label"></span>
+                <a x-link :href="'/channels/' + item.resource_id + '/last'">[#last]</a>
+                <a x-link :href="'/channels/' + item.resource_id + '/today'">[#today]</a>
+                <a x-link :href="'/channels/' + item.resource_id + '/top'">[#top]</a>
+            </li>
+        </template>
+    </ul>
+    <h5>Users</h5>
+    <ul>
+        <template x-for="item in items" :key="item.resource_id">
+            <li x-show="item.resource_id.startsWith('U')">
+                <span x-text="item.label"></span>
+                <a x-link :href="'/users/' + item.resource_id + '/last'">[@last]</a>
+                <a x-link :href="'/users/' + item.resource_id + '/top'">[@top]</a>
+                <a x-link :href="'/users/' + item.resource_id + '/today'">[@today]</a>
+            </li>
+        </template>
+    </ul>
+</div>
