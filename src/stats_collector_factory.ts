@@ -82,19 +82,27 @@ export class StatsCollectorFactory {
                             stats (channel_id, user_id, day, type, value, last_activity_ts) 
                             VALUES (?, ?, ?, ?, ?, ?)
                         `, [
-                        update.channel, update.user, update.day, update.type, update.value, Date.now()
+                        update.channel, update.user, update.day, update.type, 0, Date.now()
                     ]);
 
                     const existing = await this.repository.get(`
-                        SELECT rowid as id, channel_id, user_id, day, type, value, last_activity_ts FROM stats
-                    `);
+                        SELECT rowid as id, channel_id, user_id, day, type, value, last_activity_ts 
+                        FROM stats
+                        WHERE channel_id = ? AND user_id = ? AND day = ? AND type = ?
+                    `, [
+                        update.channel, 
+                        update.user, 
+                        update.day, 
+                        update.type
+                    ]);
                     
                     await this.repository.run(`
                         UPDATE stats
-                        SET value = value + 1,
+                        SET value = value + ?,
                             last_activity_ts = ?
                         WHERE channel_id = ? AND user_id = ? AND day = ? AND type = ?
                     `, [
+                        existing.value,
                         Date.now(),
                         existing.channel_id,
                         existing.user_id,

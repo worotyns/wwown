@@ -80,6 +80,7 @@ export class StatsCollector<T extends Record<string, any>> {
 
     async dumpAndClean() {
         await this.dump(this.getState());
+        console.log(JSON.stringify(this.getState()));
         this.state.clear();
     }
 
