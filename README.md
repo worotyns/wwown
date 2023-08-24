@@ -6,7 +6,9 @@ It's experiment for monitor who work on what now?
 
 ---
 
-
+## Setup env
+`cp .env.example .env`
+`vim .env`
 
 ## Development
 0. Build
