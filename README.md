@@ -70,6 +70,11 @@ settings:
   token_rotation_enabled: false
 ```
 
+## Required tokens:
+ - Signing Secret
+ - App Token with "connection:write" scope (starts with: xapp-)
+ - Bot Token - after add to workspace you will get it (starts with: xoxb-)
+ 
 ## Deployment via fly.io
 1. FlyIO Secrets
 ```sh
