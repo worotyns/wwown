@@ -4,7 +4,11 @@ Slackbot that enter to each channel and monitor engagement.
 
 It's experiment for monitor who work on what now?
 
+## Demo
+
 Example: https://wwown.fly.dev/
+
+Invitation link: https://join.slack.com/t/wwown-rocks/shared_invite/zt-21ktjx6on-0rsvgzU8Y6T1_BEOy2cLGg
 
 ---
 
