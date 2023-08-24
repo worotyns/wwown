@@ -21,6 +21,10 @@
       <template x-route="/channels/:channel_id/today" template="/channels_today.html"></template>
       <template x-route="/channels/:channel_id/last" template="/channels_last.html"></template>
       <template x-route="/channels/:channel_id/top" template="/channels_top.html"></template>
+      <span x-data="progressApp()">
+        <small style="text-align: center;">
+          <pre x-text="progressTemplate"></pre>
+        </small>
+      </span>
   </body>
-
 </html>
