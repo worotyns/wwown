@@ -17,7 +17,7 @@ export class TimeTrackingService {
         return startOfDay;
     }
 
-    static extractTimeAndDescription(timeString: string): TimeTrackItem {
+    static extractTimeAndDescription(timeString: string, date = new Date()): TimeTrackItem {
         const timeRegex = /(\d+d)?(\d+h)?(\d+m)?\s*(.*)/;
         const matches = timeString.match(timeRegex);
     
@@ -33,7 +33,7 @@ export class TimeTrackingService {
         const totalMinutes = days * 24 * 60 + hours * 60 + minutes;
         const durationInSeconds = totalMinutes * 60;
     
-        const endTime = new Date();
+        const endTime = date;
 
         return {
             startTime: new Date(endTime.getTime() - (durationInSeconds * 1000)), 
