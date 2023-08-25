@@ -45,7 +45,7 @@ function timeAgo(date) {
     }
   }
 
-function formatDuration(durationInSeconds) {
+function duration(durationInSeconds) {
   const days = Math.floor(durationInSeconds / (24 * 3600));
   const hours = Math.floor((durationInSeconds % (24 * 3600)) / 3600);
   const minutes = Math.floor((durationInSeconds % 3600) / 60);
