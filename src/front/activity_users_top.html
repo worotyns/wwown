@@ -11,7 +11,7 @@
             </tr>
         </thead>
         <tbody>
-            <template x-for="item in items" :key="item.channel_id + item.user_id">
+            <template x-for="(item, index) in items" :key="index">
                 <tr>
                     <td><span x-text="'#' + item.channel_label"></span></td>
                     <td><span x-text="'@' + item.user_label"></span></td>
