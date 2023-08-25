@@ -1,0 +1,30 @@
+<div x-data="data()" x-init="load('/activity/users/' + $router.params.user_id + '/today')">
+    <h5>Check what topics was user engaged and when</h5>
+    <table>
+        <thead>
+            <tr>
+                <th>#channel</th>
+                <th>@user</th>
+                <th>interactions</th>
+                <th>last interaction</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template x-for="item in items" :key="item.channel_id + item.user_id">
+                <tr>
+                    <td><span x-text="'#' + item.channel_label"></span></td>
+                    <td><span x-text="'@' + item.user_label"></span></td>
+                    <td><span x-text="item.total_value"></span></td>
+                    <td><span x-text="timeAgo(item.last_activity_at)"></span></td>
+                    <td>
+                        <a x-link :href="'/channels/' + item.channel_id + '/today'">[#today]</a>
+                        <a x-link :href="'/channels/' + item.channel_id + '/last'">[#last]</a>
+                        <a x-link :href="'/users/' + item.user_id + '/top'">[@top]</a>
+                        <a x-link :href="'/users/' + item.user_id + '/last'">[@last]</a>
+                    </td>
+                </tr>                    
+            </template>
+        </tbody>
+    </table>
+</div>

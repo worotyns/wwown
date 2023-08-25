@@ -1,0 +1,27 @@
+<div x-data="data()" x-init="load('/timetracking/dashboard/last')">
+    <h5>Last registered time</h5>
+    <table>
+        <thead>
+            <tr>
+                <th>#channel</th>
+                <th>@user</th>
+                <th>duration</th>
+                <th>description</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template x-for="item in items" :key="item.channel_id + item.user_id">
+                <tr>
+                    <td><span x-text="'#' + item.channel_label"></span></td>
+                    <td><span x-text="'@' + item.user_label"></span></td>
+                    <td><span x-text="duration(item.total_duration)"></span></td>
+                    <td><span x-text="item.description"></span></td>
+                    <td>
+                        &nbsp;
+                    </td>
+                </tr>
+            </template>
+        </tbody>
+    </table>
+</div>
