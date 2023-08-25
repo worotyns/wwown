@@ -1,6 +1,6 @@
 import { Repository } from "./repository";
 
-export class ApiService {
+export class ActivityService {
     constructor(
         private readonly repository: Repository
     ) {
@@ -174,12 +174,6 @@ export class ApiService {
             ORDER BY last_activity_at DESC, total_value DESC
             LIMIT ?;
             `, [userId, items])
-    }
-
-    async getResources() {
-        return this.repository.all(`
-            SELECT resource_id, label FROM mapping;
-        `)
     }
 
 }

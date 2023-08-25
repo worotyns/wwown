@@ -3,13 +3,16 @@ import { ProcessManager } from "./process_manager";
 import { Repository } from "./repository";
 import { BotFactory } from "./slack";
 import { StatsCollectorFactory } from "./stats_collector_factory";
-import { ApiService } from './api_service';
+import { ActivityService } from './activity_service';
 import { ApiServer } from './api_server';
+import { MigrationManager } from './migration_manager';
+import { TimeTrackingService } from './time_tracking_service';
+import { ResourcesService } from './resources_service';
 
 (async () => {
     const repository = new Repository(process.env.SQLITE_DB_PATH || null);
     
-    Repository.firstInitializeDBIfNotInitializedBefore(repository);
+    await MigrationManager.initializeDb(repository);
 
     const collectorFactory = new StatsCollectorFactory(repository);
 
@@ -23,8 +26,14 @@ import { ApiServer } from './api_server';
 
     const [app, slackHelper] = botFactory.create();
 
-    const apiService = new ApiService(repository);
-    const apiServer = new ApiServer(apiService);
+    const resourceService = new ResourcesService(repository);
+    const activityService = new ActivityService(repository);
+    const timeTrackingService = new TimeTrackingService(repository);
+    const apiServer = new ApiServer(
+        resourceService,
+        activityService,
+        timeTrackingService
+    );
 
     ProcessManager.create([
         async () => {

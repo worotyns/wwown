@@ -1,34 +1,7 @@
 import sqlite3 from "sqlite3";
-import fs from "fs";
 
 export class Repository {
     private readonly db: sqlite3.Database;
-
-    static async runMigrations(repository: Repository) {
-        const path = `${__dirname}/../migrations`;
-        const dir = fs.readdirSync(path);
-
-        for (const file of dir) {
-            console.log(`Running... ${file}`);
-            const query = fs.readFileSync(`${path}/${file}`);
-            await repository.exec(query.toString('utf8'));
-        }
-    }
-
-    static async firstInitializeDBIfNotInitializedBefore(repository: Repository) {
-        let shouldInitialize = false;
-        try {
-            await repository.run(`SELECT * FROM stats`);
-        } catch(error) {
-            shouldInitialize = true;
-            console.log(" ERROR ", error);
-        } finally {
-            if (shouldInitialize) {
-                console.log("Running migrations");
-                Repository.runMigrations(repository);
-            }
-        }
-    } 
 
     constructor(
         filename: string | null
