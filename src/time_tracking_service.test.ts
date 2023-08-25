@@ -139,26 +139,31 @@ describe("time_tracking_service", function () {
     );
   });
 
-  it("durationPerChannelAndDescriptionInTimeRange", async function () {
+  it("durationOfChannelAndDescriptionInTimeRange", async function () {
     const results = await timeTrackingService
-      .durationPerChannelAndDescriptionInTimeRange(
+      .durationOfChannelAndDescriptionInTimeRange(
+        'channel_2',
         new Date("2023-01-01"),
-        new Date("2023-01-05"),
+        new Date("2023-01-09"),
       );
 
     assert.deepEqual(results, [
       {
-        channel_id: "channel_1",
-        channel_label: "channel1",
-        description: "ticket_xyz",
-        total_duration: 21600,
+        channel_id: 'channel_2',
+        channel_label: 'channel2',
+        description: 'feature_xyz',
+        total_duration: 14400,
+        user_id: 'user_1',
+        user_label: 'user1'
       },
       {
-        channel_id: "channel_2",
-        channel_label: "channel2",
-        description: "feature_xyz",
-        total_duration: 7200,
-      },
+        channel_id: 'channel_2',
+        channel_label: 'channel2',
+        description: 'feature_xyz',
+        total_duration: 21600,
+        user_id: 'user_2',
+        user_label: 'user2'
+      }
     ]);
   });
 

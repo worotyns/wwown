@@ -3,6 +3,7 @@ import Fastify, { FastifyInstance } from "fastify";
 import { TimeTrackingService } from "./time_tracking_service";
 import { ResourcesService } from "./resources_service";
 import path from "path";
+import { IncidentService } from "./incident_service";
 
 interface ApiOptions {
   port: string;
@@ -14,22 +15,22 @@ export class ApiServer {
     if (!range) {
       return null;
     }
-    
+
     const now = new Date();
     const periods = range.split(",");
-  
-    const parsedDates = periods.map(period => {
+
+    const parsedDates = periods.map((period) => {
       const regex = /(-?\d+)([dhmqy])/;
       const match = period.match(regex);
-  
+
       if (!match) {
         return null;
       }
-  
+
       const value = parseInt(match[1]);
       const unit = match[2];
       let durationInMilliseconds = 0;
-  
+
       switch (unit) {
         case "d":
           durationInMilliseconds = value * 24 * 60 * 60 * 1000;
@@ -47,14 +48,14 @@ export class ApiServer {
           durationInMilliseconds = value * 365 * 24 * 60 * 60 * 1000; // Approximating with 365 days per year
           break;
       }
-  
+
       return new Date(now.getTime() + durationInMilliseconds);
     });
-  
-    if (parsedDates.some(date => date === null)) {
+
+    if (parsedDates.some((date) => date === null)) {
       return null;
     }
-  
+
     return parsedDates as [Date, Date];
   }
 
@@ -64,6 +65,7 @@ export class ApiServer {
     private readonly resourcesService: ResourcesService,
     private readonly activityService: ActivityService,
     private readonly timeTrackingService: TimeTrackingService,
+    private readonly incidentService: IncidentService,
     private readonly opts: ApiOptions = {
       port: process.env.API_SERVER_PORT || "4000",
       bindAddres: process.env.API_SERVER_BIND_ADDR || "0.0.0.0",
@@ -122,7 +124,6 @@ export class ApiServer {
      */
     this.fastify.get("/timetracking/dashboard/last", async (request) => {
       const [startDate, endDate] = this.parseT(request.query);
-      console.log(startDate.getTime(), endDate.getTime())
       return await this.timeTrackingService
         .durationPerChannelAndUserAndDescriptionInTimeRange(
           startDate,
@@ -140,6 +141,23 @@ export class ApiServer {
         startDate,
       );
     });
+
+    /**
+     * Returns sum of channel, duration for channel time tracking
+     * channels.html
+     */
+    this.fastify.get(
+      "/timetracking/channels/:channelid/sum",
+      async (request) => {
+        const [startDate, endDate] = this.parseT(request.query);
+        return await this.timeTrackingService
+          .durationOfChannelAndDescriptionInTimeRange(
+            this.getParam(request.params, "channelid"),
+            startDate,
+            endDate,
+          );
+      },
+    );
 
     /**
      * Returns channel time range top users
@@ -174,7 +192,7 @@ export class ApiServer {
 
     /**
      * Returns top users of channel (knowledge master)
-     * channels.html   
+     * channels.html
      */
     this.fastify.get(
       "/activity/channels/:channelid/top",
@@ -209,7 +227,7 @@ export class ApiServer {
         this.parseLimit(request.query),
       );
     });
-    
+
     /**
      * Returns last n- time registrations for user
      * users.html
@@ -225,6 +243,19 @@ export class ApiServer {
       },
     );
 
+    /**
+     * Returns last n- incidents
+     * dashboard.html
+     */
+    this.fastify.get(
+      "/incidents/dashboard/last",
+      async (request) => {
+        return await this.incidentService
+          .getLastIncidents(
+            this.parseLimit(request.query),
+          );
+      },
+    );
   }
 
   run() {

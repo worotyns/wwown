@@ -62,4 +62,41 @@
             </tbody>
         </table>
     </div>
+
+    <div x-data="data()" x-init="load('/incidents/dashboard/last?l=10')">
+        <h5>Last 10 registered incidents</h5>
+        <table>
+            <thead>
+                <tr>
+                    <th>channel</th>
+                    <th>user</th>
+                    <th>start time</th>
+                    <th>end time</th>
+                    <th>duration</th>
+                    <th>description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in items" :key="index">
+                    <tr>
+                        <td>
+                            <a x-link :href="'/channels/' + item.channel_id + ''">
+                                <span x-text="'#' + item.channel_label"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <a x-link :href="'/users/' + item.user_id + ''">
+                                <span x-text="'@' + item.user_label"></span>
+                            </a>
+                        </td>
+                        <td><span x-text="date(item.start_time)"></span></td>
+                        <td><span x-text="date(item.end_time)"></span></td>
+                        <td><span x-text="duration(item.total_duration)"></span></td>
+                        <td><span x-text="item.description"></span></td>
+                    </tr>                    
+                </template>
+            </tbody>
+        </table>
+    </div>
+
 </section>

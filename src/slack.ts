@@ -1,16 +1,18 @@
 import { App } from '@slack/bolt';
 import { StatsCollector } from './stats_collector';
 import { DayChannel, Mapping } from './stats_collector_factory';
-import { SlackHelper } from './slack_helper';
+import { IntentionType, SlackHelper } from './slack_helper';
 import { Logger } from './logger';
 import { WebClient } from '@slack/web-api';
 import { TimeTrackingService } from './time_tracking_service';
+import { IncidentService } from './incident_service';
 
 export class BotFactory {
   constructor(
     private readonly statsCollector: StatsCollector<DayChannel>,
     private readonly mappingCollector: StatsCollector<Mapping>,
     private readonly timeTrackingService: TimeTrackingService,
+    private readonly incidentService: IncidentService,
     private readonly logger: Logger,
   ) {
 
@@ -58,9 +60,22 @@ export class BotFactory {
     app.event('app_mention', async ({ event, context, client, say }) => {
       try {
         const withoutMention = slackHelper.removeAngleBracketText(event.text);
-        const {startTime, endTime, description} = TimeTrackingService.extractTimeAndDescription(withoutMention);
-        await this.timeTrackingService.registerTimeTrackingItem(event.channel, event.user!, startTime, endTime, description);
-        await slackHelper.addReaction(event.channel, event.ts, 'clock1')
+        const [incidentType, inputWithoutCommand] = slackHelper.detectIntentionOnTextBased(withoutMention);
+        const {startTime, endTime, description} = TimeTrackingService.extractTimeAndDescription(inputWithoutCommand);
+
+        switch(incidentType) {
+          case IntentionType.NotRecognized:
+            await say(`<@${event.user}>! Not recognized command, use for example prompt: "incident: 5h30m outgage of rabbit" or "time: 5h ticket xyz" `);
+            break;
+          case IntentionType.TimeTracking:
+            await this.timeTrackingService.registerTimeTrackingItem(event.channel, event.user!, startTime, endTime, description);
+            await slackHelper.addReaction(event.channel, event.ts, 'clock1')
+            break;
+          case IntentionType.Incident:
+            await this.incidentService.registerIncidentItem(event.channel, event.user!, startTime, endTime, description);
+            await slackHelper.addReaction(event.channel, event.ts, 'fire')
+            break;
+        }
       }
       catch (error: any) {
         await say(`<@${event.user}>! Error: ${error.message}`);

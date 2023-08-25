@@ -4,6 +4,12 @@ import { Mapping } from "./stats_collector_factory";
 import { Logger } from "./logger";
 import { WebClient } from "@slack/web-api";
 
+export enum IntentionType {
+    NotRecognized,
+    TimeTracking,
+    Incident,
+}
+
 export class SlackHelper {
 
     private cache: Map<string, string> = new Map();
@@ -15,6 +21,16 @@ export class SlackHelper {
         private readonly webClient: WebClient
     ) {
 
+    }
+
+    public detectIntentionOnTextBased(input: string): [IntentionType, string] {
+        if (input.includes('incident:')) {
+            return [IntentionType.Incident, input.replace('inciident:', '')]
+        } else if (input.includes('time:')) {
+            return [IntentionType.TimeTracking, input.replace('inciident:', '')];
+        } else {
+            return [IntentionType.NotRecognized, input]
+        }
     }
 
     public removeAngleBracketText(inputString: string) {

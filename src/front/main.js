@@ -71,3 +71,7 @@ function duration(durationInSeconds) {
 
   return parts.join(' ');
 }
+
+function date(ts) {
+  return new Date(ts).toLocaleString()
+}

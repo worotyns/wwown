@@ -9,6 +9,7 @@ import { MigrationManager } from './migration_manager';
 import { TimeTrackingService } from './time_tracking_service';
 import { ResourcesService } from './resources_service';
 import { createLogger } from './logger';
+import { IncidentService } from './incident_service';
 
 (async () => {
     const logger = createLogger();
@@ -25,11 +26,13 @@ import { createLogger } from './logger';
     const resourceService = new ResourcesService(repository);
     const activityService = new ActivityService(repository);
     const timeTrackingService = new TimeTrackingService(repository);
+    const incidentService = new IncidentService(repository);
 
     const botFactory = new BotFactory(
         statsCollector,
         mappingCollector,
         timeTrackingService,
+        incidentService,
         logger,
     );
 
@@ -38,7 +41,8 @@ import { createLogger } from './logger';
     const apiServer = new ApiServer(
         resourceService,
         activityService,
-        timeTrackingService
+        timeTrackingService,
+        incidentService,
     );
 
     ProcessManager.create([

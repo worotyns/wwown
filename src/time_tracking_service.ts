@@ -89,22 +89,24 @@ export class TimeTrackingService {
     }
 
     /**
-     * Aggregate duration per channel, description in time range, ordered by channel_id, description,
-       - per channel moze miec sens 
+     * Aggregate duration of concrete channel, description in time range, ordered by channel_id, description,
      */
-    async durationPerChannelAndDescriptionInTimeRange(start: Date, end: Date) {
+    async durationOfChannelAndDescriptionInTimeRange(channelId: string, start: Date, end: Date) {
         return this.repository.all(`
             SELECT
                 mt.label AS channel_label,
                 tt.channel_id,
+                tt.user_id,
+                mu.label AS user_label,
                 tt.description,
                 SUM(tt.duration_seconds) AS total_duration
             FROM time_tracking tt
             JOIN mapping mt ON tt.channel_id = mt.resource_id
-            WHERE tt.start_time BETWEEN ? AND ?
-            GROUP BY channel_id, description
-            ORDER BY channel_id, description, total_duration;
-        `, [start, end])
+            JOIN mapping mu ON tt.user_id = mu.resource_id
+            WHERE tt.start_time BETWEEN ? AND ? AND tt.channel_id = ?
+            GROUP BY description, user_id
+            ORDER BY tt.end_time DESC, description, user_id;
+        `, [start, end, channelId])
     }
 
     /**
