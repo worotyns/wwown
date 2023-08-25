@@ -14,24 +14,22 @@ export class ApiServer {
     if (!range) {
       return null;
     }
-
+    
     const now = new Date();
     const periods = range.split(",");
-
-    const parsedDates = periods.map((period) => {
+  
+    const parsedDates = periods.map(period => {
       const regex = /(-?\d+)([dhmqy])/;
       const match = period.match(regex);
-
+  
       if (!match) {
         return null;
       }
-
+  
       const value = parseInt(match[1]);
-      const isNegative = value < 0;
       const unit = match[2];
-
       let durationInMilliseconds = 0;
-
+  
       switch (unit) {
         case "d":
           durationInMilliseconds = value * 24 * 60 * 60 * 1000;
@@ -49,16 +47,14 @@ export class ApiServer {
           durationInMilliseconds = value * 365 * 24 * 60 * 60 * 1000; // Approximating with 365 days per year
           break;
       }
-
-      return new Date(
-        now.getTime() - (isNegative ? -1 : 1) * durationInMilliseconds,
-      );
+  
+      return new Date(now.getTime() + durationInMilliseconds);
     });
-
-    if (parsedDates.some((date) => date === null)) {
+  
+    if (parsedDates.some(date => date === null)) {
       return null;
     }
-
+  
     return parsedDates as [Date, Date];
   }
 
@@ -89,6 +85,7 @@ export class ApiServer {
 
   private parseT(query: any) {
     const range = ApiServer.parseQueryTParam(query?.t);
+
     if (!range) {
       throw new Error("?t param is required");
     }
@@ -120,24 +117,12 @@ export class ApiServer {
     });
 
     /**
-     * Returns top 5 user of each channel ordered by points, activity date
-     */
-    this.fastify.get("/activity/dashboard/top", async (request) => {
-      const query: any = request.query;
-      return await this.activityService.getTopNUsersOfAllChannels(
-        this.parseLimit(request.query),
-      );
-    });
-
-    /**
-     * TimeTracking
-     */
-
-    /**
      * Returns last active users in all channels (who work on what now)
+     * dashboard.html
      */
     this.fastify.get("/timetracking/dashboard/last", async (request) => {
       const [startDate, endDate] = this.parseT(request.query);
+      console.log(startDate.getTime(), endDate.getTime())
       return await this.timeTrackingService
         .durationPerChannelAndUserAndDescriptionInTimeRange(
           startDate,
@@ -146,41 +131,8 @@ export class ApiServer {
     });
 
     /**
-     * Returns last n- time registrations for user
-     */
-    this.fastify.get(
-      "/timetracking/users/:userid/last",
-      async (request) => {
-        return await this.timeTrackingService
-          .getLastNChannelAndDescriptionOfUser(
-            this.getParam(request.params, "userid"),
-            this.parseLimit(request.query),
-          );
-      },
-    );
-
-    /**
-     * Return sum duration per user in time
-     */
-    this.fastify.get(
-      "/timetracking/users/sum",
-      async (request) => {
-        const [startDate, endDate] = this.parseT(request.query);
-
-        return await this.timeTrackingService
-          .durationPerUserInTimeRange(
-            startDate,
-            endDate,
-          );
-      },
-    );
-
-    /**
-     * Activity
-     */
-
-    /**
      * Returns last active users in all channels (who work on what now)
+     * dashboard.html
      */
     this.fastify.get("/activity/dashboard/last", async (request) => {
       const [startDate] = this.parseT(request.query);
@@ -190,19 +142,25 @@ export class ApiServer {
     });
 
     /**
-     * Returns channel today top users
+     * Returns channel time range top users
+     * channels.html
      */
     this.fastify.get(
-      "/activity/channels/:channelid/today",
+      "/activity/channels/:channelid/range",
       async (request) => {
-        return await this.activityService.getTodayChannelUsers(
+        const [startDate, endDate] = this.parseT(request.query);
+
+        return await this.activityService.getChannelUsersInTimeRange(
           this.getParam(request.params, "channelid"),
+          startDate,
+          endDate,
         );
       },
     );
 
     /**
      * Returns channel last users (last interest)
+     * channels.html
      */
     this.fastify.get(
       "/activity/channels/:channelid/last",
@@ -216,12 +174,11 @@ export class ApiServer {
 
     /**
      * Returns top users of channel (knowledge master)
+     * channels.html   
      */
     this.fastify.get(
       "/activity/channels/:channelid/top",
       async (request) => {
-        const query: any = request.query;
-
         return await this.activityService.getTopChannelUsers(
           this.getParam(request.params, "channelid"),
           this.parseLimit(request.query),
@@ -231,6 +188,7 @@ export class ApiServer {
 
     /**
      * Get top of user channel interests
+     * users.html
      */
     this.fastify.get("/activity/users/:userid/top", async (request) => {
       const query: any = request.query;
@@ -242,6 +200,7 @@ export class ApiServer {
 
     /**
      * Get last channels of user interest
+     * users.html
      */
     this.fastify.get("/activity/users/:userid/last", async (request) => {
       const query: any = request.query;
@@ -250,18 +209,22 @@ export class ApiServer {
         this.parseLimit(request.query),
       );
     });
-
+    
     /**
-     * Get list of channels what user was active today
+     * Returns last n- time registrations for user
+     * users.html
      */
     this.fastify.get(
-      "/activity/users/:userid/today",
+      "/timetracking/users/:userid/last",
       async (request) => {
-        return await this.activityService.getTodayChannelsForUser(
-          this.getParam(request.params, "userid"),
-        );
+        return await this.timeTrackingService
+          .getLastNChannelAndDescriptionOfUser(
+            this.getParam(request.params, "userid"),
+            this.parseLimit(request.query),
+          );
       },
     );
+
   }
 
   run() {

@@ -68,26 +68,6 @@ export class TimeTrackingService {
     }
 
     /**
-     * Aggregate duration per channel, user in time range ordered by channel_id, user, duration,
-     */
-    async durationPerChannelAndUserInTimeRange(start: Date, end: Date) {
-        return this.repository.all(`
-            SELECT
-                m_channel.label AS channel_label,
-                tt.channel_id,
-                tt.user_id,
-                m_user.label as user_label,
-                SUM(tt.duration_seconds) AS total_duration
-            FROM time_tracking tt
-            JOIN mapping m_channel ON tt.channel_id = m_channel.resource_id
-            JOIN mapping m_user ON tt.user_id = m_user.resource_id
-            WHERE tt.start_time BETWEEN ? AND ?
-            GROUP BY channel_id, user_id
-            ORDER BY channel_id, user_id, total_duration;
-        `, [start, end])
-    }
-
-    /**
      * Aggregate duration per channel, user, description in time range, ordered by channel_id, description,
      */
     async durationPerChannelAndUserAndDescriptionInTimeRange(start: Date, end: Date) {
@@ -110,6 +90,7 @@ export class TimeTrackingService {
 
     /**
      * Aggregate duration per channel, description in time range, ordered by channel_id, description,
+       - per channel moze miec sens 
      */
     async durationPerChannelAndDescriptionInTimeRange(start: Date, end: Date) {
         return this.repository.all(`
@@ -123,39 +104,6 @@ export class TimeTrackingService {
             WHERE tt.start_time BETWEEN ? AND ?
             GROUP BY channel_id, description
             ORDER BY channel_id, description, total_duration;
-        `, [start, end])
-    }
-    /**
-     * Aggregate duration per channel in time range,
-     */
-    async durationPerChannelInTimeRange(start: Date, end: Date) {
-        return this.repository.all(`
-            SELECT
-                mt.label AS channel_label,
-                tt.channel_id,
-                SUM(tt.duration_seconds) AS total_duration
-            FROM time_tracking tt
-            JOIN mapping mt ON tt.channel_id = mt.resource_id
-            WHERE tt.start_time BETWEEN ? AND ?
-            GROUP BY channel_id
-            ORDER BY channel_id;
-        `, [start, end])
-    }
-    
-    /**
-     * Aggregate duration per user in time range,
-     */
-    async durationPerUserInTimeRange(start: Date, end: Date) {
-        return this.repository.all(`
-            SELECT
-                tt.user_id,
-                mu.label as user_label,
-                SUM(tt.duration_seconds) AS total_duration
-            FROM time_tracking tt
-            JOIN mapping mu ON tt.user_id = mu.resource_id
-            WHERE tt.start_time BETWEEN ? AND ?
-            GROUP BY user_id
-            ORDER BY user_id;
         `, [start, end])
     }
 
@@ -180,29 +128,5 @@ export class TimeTrackingService {
             LIMIT ?;
         `, [userId, limit])
     }
-    
-    /**
-     * Aggregated TOP N channels of given user in given time, ordered by channel_id, user,
-     */
-    async topNChannelOfUserInTimeRange(start: Date, end: Date, limit: number) {
-        return this.repository.all(`
-        WITH UserChannelDurations AS (
-            SELECT
-                mu.label AS user_label,
-                mt.label AS channel_label,
-                tt.user_id,
-                tt.channel_id,
-                SUM(tt.duration_seconds) AS total_duration,
-                RANK() OVER(PARTITION BY mu.label, mt.label ORDER BY SUM(tt.duration_seconds) DESC) AS user_channel_rank
-            FROM time_tracking tt
-            JOIN mapping mt ON tt.channel_id = mt.resource_id
-            JOIN mapping mu ON tt.user_id = mu.resource_id
-            GROUP BY user_id, channel_id
-        )
-        SELECT user_id, channel_id, total_duration, user_channel_rank
-        FROM UserChannelDurations
-        WHERE user_channel_rank <= ?
-        ORDER BY user_id, user_channel_rank
-        `, [limit])
-    }
+
 }

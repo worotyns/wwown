@@ -1,6 +1,6 @@
 <section>
-    <div x-data="data()" x-init="load('/activity/dashboard/last?t=-1d')">
-        <h5>Check who is engaged on what channel</h5>
+    <div x-data="data()" x-init="load('/activity/dashboard/last?t=-4d')">
+        <h5>Check who is engaged on what channel (last 3 days)</h5>
         <table>
             <thead>
                 <tr>
@@ -31,40 +31,8 @@
         </table>
     </div>
 
-    <div x-data="data()" x-init="load('/activity/dashboard/top?l=5')">
-        <h5>Top 5 users from each channels order by points and last activity</h5>
-        <table>
-            <thead>
-                <tr>
-                    <th>channel</th>
-                    <th>user</th>
-                    <th>interactions</th>
-                    <th>last interaction</th>
-                </tr>
-            </thead>
-            <tbody>
-                <template x-for="(item, index) in items" :key="index">
-                    <tr>
-                        <td>
-                            <a x-link :href="'/channels/' + item.channel_id + ''">
-                                <span x-text="'#' + item.channel_label"></span>
-                            </a>
-                        </td>
-                        <td>
-                            <a x-link :href="'/users/' + item.user_id + ''">
-                                <span x-text="'@' + item.user_label"></span>
-                            </a>
-                        </td>
-                        <td><span x-text="item.total_value"></span></td>
-                        <td><span x-text="timeAgo(item.last_activity_at)"></span></td>
-                    </tr>                    
-                </template>
-            </tbody>
-        </table>
-    </div>
-
-    <div x-data="data()" x-init="load('/timetracking/dashboard/last?t=-7d')">
-        <h5>Last registered time (7 days)</h5>
+    <div x-data="data()" x-init="load('/timetracking/dashboard/last?t=-5d,0d')">
+        <h5>Last registered time (5 days)</h5>
         <table>
             <thead>
                 <tr>

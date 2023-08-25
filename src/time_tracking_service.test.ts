@@ -139,38 +139,6 @@ describe("time_tracking_service", function () {
     );
   });
 
-  it("durationPerChannelAndUserInTimeRange", async function () {
-    const results = await timeTrackingService
-      .durationPerChannelAndUserInTimeRange(
-        new Date("2023-01-01"),
-        new Date("2023-01-05"),
-      );
-
-    assert.deepEqual(results, [
-      {
-        channel_id: "channel_1",
-        channel_label: "channel1",
-        total_duration: 14400,
-        user_id: "user_1",
-        user_label: "user1",
-      },
-      {
-        channel_id: "channel_1",
-        channel_label: "channel1",
-        total_duration: 7200,
-        user_id: "user_2",
-        user_label: "user2",
-      },
-      {
-        channel_id: "channel_2",
-        channel_label: "channel2",
-        total_duration: 7200,
-        user_id: "user_2",
-        user_label: "user2",
-      },
-    ]);
-  });
-
   it("durationPerChannelAndDescriptionInTimeRange", async function () {
     const results = await timeTrackingService
       .durationPerChannelAndDescriptionInTimeRange(
@@ -221,46 +189,6 @@ describe("time_tracking_service", function () {
     ]);
   });
 
-  it("durationPerChannelInTimeRange", async function () {
-    const results = await timeTrackingService.durationPerChannelInTimeRange(
-      new Date("2023-01-01"),
-      new Date("2023-01-08"),
-    );
-
-    assert.deepEqual(results, [
-      {
-        channel_id: "channel_1",
-        channel_label: "channel1",
-        total_duration: 21600,
-      },
-      {
-        channel_id: "channel_2",
-        channel_label: "channel2",
-        total_duration: 28800,
-      },
-    ]);
-  });
-
-  it("durationPerUserInTimeRange", async function () {
-    const results = await timeTrackingService.durationPerUserInTimeRange(
-      new Date("2023-01-01"),
-      new Date("2023-01-08"),
-    );
-
-    assert.deepEqual(results, [
-      {
-        total_duration: 28800,
-        user_id: "user_1",
-        user_label: "user1",
-      },
-      {
-        total_duration: 21600,
-        user_id: "user_2",
-        user_label: "user2",
-      },
-    ]);
-  });
-
   it("getLastNChannelAndDescriptionOfUserInTimeRange", async function () {
     const results = await timeTrackingService
       .getLastNChannelAndDescriptionOfUser(
@@ -284,41 +212,6 @@ describe("time_tracking_service", function () {
         total_duration: 14400,
         user_id: "user_1",
         user_label: "user1",
-      },
-    ]);
-  });
-
-  it("topNChannelOfUserInTimeRange", async function () {
-    const results = await timeTrackingService.topNChannelOfUserInTimeRange(
-      new Date("2023-01-01"),
-      new Date("2023-01-08"),
-      100,
-    );
-
-    assert.deepEqual(results, [
-      {
-        channel_id: "channel_1",
-        total_duration: 14400,
-        user_channel_rank: 1,
-        user_id: "user_1",
-      },
-      {
-        channel_id: "channel_2",
-        total_duration: 14400,
-        user_channel_rank: 1,
-        user_id: "user_1",
-      },
-      {
-        channel_id: "channel_1",
-        total_duration: 7200,
-        user_channel_rank: 1,
-        user_id: "user_2",
-      },
-      {
-        channel_id: "channel_2",
-        total_duration: 21600,
-        user_channel_rank: 1,
-        user_id: "user_2",
       },
     ]);
   });

@@ -1,6 +1,6 @@
 <section>
-    <div x-data="data()" x-init="load('/activity/channels/' + $router.params.channel_id + '/today')">
-        <h5>Top 10 users of channel - today</h5>
+    <div x-data="data()" x-init="load('/activity/channels/' + $router.params.channel_id + '/range?t=-4d,0d')">
+        <h5>Top 10 users of channel - last 3 days</h5>
         <table>
             <thead>
                 <tr>
@@ -27,7 +27,7 @@
         </table>
     </div>
 
-    <div x-data="data()" x-init="load('/activity/channels/' + $router.params.channel_id + '/top?l=5')">
+    <div x-data="data()" x-init="load('/activity/channels/' + $router.params.channel_id + '/top?l=10')">
         <h5>Top 10 users of channel - all time</h5>
         <table>
             <thead>

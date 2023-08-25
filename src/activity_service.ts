@@ -43,7 +43,7 @@ export class ActivityService {
         `, [userId, limit]);
     }
 
-    async getTopChannelUsers(userId: string, limit: number) {
+    async getTopChannelUsers(channelId: string, limit: number) {
         return this.repository.all(`
             SELECT m_user.label AS user_label,
                 m_channel.label AS channel_label,
@@ -57,26 +57,8 @@ export class ActivityService {
             GROUP BY s.user_id
             ORDER BY total_value DESC
             LIMIT ?
-        `, [userId, limit]);
+        `, [channelId, limit]);
     }
-
-    async getLastActivityOfChannelAllTime(channel_id: string) {
-        return this.repository.all(`
-            SELECT m_channel.label AS channel_label,
-                m_user.label AS user_label,
-                s.channel_id,
-                s.user_id,
-                SUM(s.value) AS total_value,
-                MAX(s.last_activity_ts) AS last_activity_at
-            FROM stats s
-            JOIN mapping m_channel ON s.channel_id = m_channel.resource_id
-            JOIN mapping m_user ON s.user_id = m_user.resource_id
-            WHERE s.channel_id = ?
-            GROUP BY s.channel_id, s.user_id
-            ORDER BY last_activity_at DESC;
-        `, [channel_id])
-    }
-    
 
     async getLastActivityOfAllSinceDate(dateTime: Date) {
         return this.repository.all(`
@@ -95,7 +77,7 @@ export class ActivityService {
         `, [dateTime])
     }
     
-    async getTodayChannelUsers(channelId: string) {
+    async getChannelUsersInTimeRange(channelId: string, startDate: Date, endDate: Date) {
         return this.repository.all(`
             SELECT s.user_id,
                 s.channel_id,
@@ -106,57 +88,12 @@ export class ActivityService {
             FROM stats s
             JOIN mapping m_channel ON s.channel_id = m_channel.resource_id
             JOIN mapping m_user ON s.user_id = m_user.resource_id
-            WHERE DATE(datetime(s.day / 1000, 'unixepoch')) = DATE('now', 'localtime')
+            WHERE s.day BETWEEN ? AND ?
                 AND s.channel_id = ?
             GROUP BY s.user_id
             ORDER BY total_value DESC, last_activity_at DESC;
-            `, [channelId])
+            `, [startDate, endDate, channelId])
         }
-
-    async getTodayChannelsForUser(userId: string) {
-        return this.repository.all(`
-            SELECT m_channel.label AS channel_label,
-                m_user.label AS user_label,
-                s.user_id,
-                s.channel_id,
-                SUM(s.value) AS total_value,
-                MAX(s.last_activity_ts) AS last_activity_at
-            FROM stats s
-            JOIN mapping m_channel ON s.channel_id = m_channel.resource_id
-            JOIN mapping m_user ON s.user_id = m_user.resource_id
-            WHERE s.user_id = ?
-                AND DATE(datetime(s.day / 1000, 'unixepoch')) = DATE('now', 'localtime')
-            GROUP BY s.channel_id
-            ORDER BY total_value DESC, last_activity_at DESC;
-        `, [userId])
-    }
-
-    async getTopNUsersOfAllChannels(items: number = 5) {
-        return this.repository.all(`
-            WITH RankedUsers AS (
-                SELECT
-                    s.channel_id,
-                    s.user_id,
-                    SUM(s.value) AS total_value,
-                    MAX(s.last_activity_ts) AS last_activity_at,
-                    ROW_NUMBER() OVER(PARTITION BY s.channel_id ORDER BY SUM(s.value) DESC) AS user_rank
-                FROM stats s
-                GROUP BY s.channel_id, s.user_id
-            )
-            SELECT
-                m_channel.label AS channel_label,
-                m_user.label AS user_label,
-                ru.channel_id,
-                ru.user_id,
-                ru.total_value,
-                ru.last_activity_at
-            FROM RankedUsers ru
-            JOIN mapping m_channel ON ru.channel_id = m_channel.resource_id
-            JOIN mapping m_user ON ru.user_id = m_user.resource_id
-            WHERE ru.user_rank <= ?
-            ORDER BY ru.channel_id, user_rank, ru.last_activity_at DESC;
-        `, [items]);
-    }
 
     async getLastChannelsForUser(userId: string, items: number = 5) {
         return this.repository.all(`

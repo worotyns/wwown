@@ -2,7 +2,7 @@
     
     <h3>Activity</h3>
 
-    <div x-data="data()" x-init="load('/activity/users/' + $router.params.user_id + '/last?l=5')">
+    <div x-data="data()" x-init="load('/activity/users/' + $router.params.user_id + '/last?l=15')">
         <h5>Check what topics was user engaged and when</h5>
         <table>
             <thead>
@@ -30,8 +30,8 @@
         </table>
     </div>
 
-    <div x-data="data()" x-init="load('/activity/users/' + $router.params.user_id + '/today')">
-        <h5>Check what topics was user engaged and when</h5>
+    <div x-data="data()" x-init="load('/activity/users/' + $router.params.user_id + '/top?l=10')">
+        <h5>Top 10 channels engaged by user all time</h5>
         <table>
             <thead>
                 <tr>
@@ -58,37 +58,10 @@
         </table>
     </div>
 
-    <div x-data="data()" x-init="load('/activity/users/' + $router.params.user_id + '/top?l=5')">
-        <h5>Check top 5 topics in last time for user</h5>
-        <table>
-            <thead>
-                <tr>
-                    <th>channel</th>
-                    <th>user</th>
-                    <th>interactions</th>
-                    <th>last interaction</th>
-                </tr>
-            </thead>
-            <tbody>
-                <template x-for="(item, index) in items" :key="index">
-                    <tr>
-                        <td>
-                            <a x-link :href="'/channels/' + item.channel_id + ''">
-                                <span x-text="'#' + item.channel_label"></span>
-                            </a>
-                        </td>
-                        <td><span x-text="'@' + item.user_label"></span></td>
-                        <td><span x-text="item.total_value"></span></td>
-                        <td><span x-text="timeAgo(item.last_activity_at)"></span></td>
-                    </tr>                    
-                </template>
-            </tbody>
-        </table>
-    </div>
 
     <h3>Time tracking</h3>
 
-    <div x-data="data()" x-init="load('/timetracking/users/' + $router.params.user_id + '/last?l=10')">
+    <div x-data="data()" x-init="load('/timetracking/users/' + $router.params.user_id + '/last?l=15')">
         <h5>Last 10 time registrations</h5>
         <table>
             <thead>
@@ -115,5 +88,5 @@
             </tbody>
         </table>
     </div>
-    
+
 </section>
