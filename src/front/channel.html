@@ -27,7 +27,7 @@
         </table>
     </div>
 
-    <div x-data="data()" x-init="load('/activity/channels/' + $router.params.channel_id + '/top')">
+    <div x-data="data()" x-init="load('/activity/channels/' + $router.params.channel_id + '/top?l=5')">
         <h5>Top 10 users of channel - all time</h5>
         <table>
             <thead>
@@ -55,7 +55,7 @@
         </table>
     </div>
 
-    <div x-data="data()" x-init="load('/activity/channels/' + $router.params.channel_id + '/last')">
+    <div x-data="data()" x-init="load('/activity/channels/' + $router.params.channel_id + '/last?l=5')">
         <h5>Check who is engaged on what channel</h5>
         <table>
             <thead>

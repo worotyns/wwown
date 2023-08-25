@@ -1,5 +1,5 @@
 <section>
-    <div x-data="data()" x-init="load('/activity/dashboard/last')">
+    <div x-data="data()" x-init="load('/activity/dashboard/last?t=-1d')">
         <h5>Check who is engaged on what channel</h5>
         <table>
             <thead>
@@ -31,7 +31,7 @@
         </table>
     </div>
 
-    <div x-data="data()" x-init="load('/activity/dashboard/top')">
+    <div x-data="data()" x-init="load('/activity/dashboard/top?l=5')">
         <h5>Top 5 users from each channels order by points and last activity</h5>
         <table>
             <thead>
@@ -63,15 +63,15 @@
         </table>
     </div>
 
-    <div x-data="data()" x-init="load('/timetracking/dashboard/last')">
-        <h5>Last registered time</h5>
+    <div x-data="data()" x-init="load('/timetracking/dashboard/last?t=-7d')">
+        <h5>Last registered time (7 days)</h5>
         <table>
             <thead>
                 <tr>
                     <th>channel</th>
                     <th>user</th>
-                    <th>duration</th>
                     <th>description</th>
+                    <th>duration</th>
                 </tr>
             </thead>
             <tbody>
@@ -87,8 +87,8 @@
                                 <span x-text="'@' + item.user_label"></span>
                             </a>
                         </td>
-                        <td><span x-text="duration(item.total_duration)"></span></td>
                         <td><span x-text="item.description"></span></td>
+                        <td><span x-text="duration(item.total_duration)"></span></td>
                     </tr>
                 </template>
             </tbody>

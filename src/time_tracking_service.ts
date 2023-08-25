@@ -141,6 +141,7 @@ export class TimeTrackingService {
             ORDER BY channel_id;
         `, [start, end])
     }
+    
     /**
      * Aggregate duration per user in time range,
      */
@@ -157,6 +158,7 @@ export class TimeTrackingService {
             ORDER BY user_id;
         `, [start, end])
     }
+
     /**
      * Show last N channel, description of user, ordered by end_time
      */
@@ -178,6 +180,7 @@ export class TimeTrackingService {
             LIMIT ?;
         `, [userId, limit])
     }
+    
     /**
      * Aggregated TOP N channels of given user in given time, ordered by channel_id, user,
      */

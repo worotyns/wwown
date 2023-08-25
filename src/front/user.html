@@ -1,5 +1,8 @@
 <section>
-    <div x-data="data()" x-init="load('/activity/users/' + $router.params.user_id + '/last')">
+    
+    <h3>Activity</h3>
+
+    <div x-data="data()" x-init="load('/activity/users/' + $router.params.user_id + '/last?l=5')">
         <h5>Check what topics was user engaged and when</h5>
         <table>
             <thead>
@@ -55,7 +58,7 @@
         </table>
     </div>
 
-    <div x-data="data()" x-init="load('/activity/users/' + $router.params.user_id + '/top')">
+    <div x-data="data()" x-init="load('/activity/users/' + $router.params.user_id + '/top?l=5')">
         <h5>Check top 5 topics in last time for user</h5>
         <table>
             <thead>
@@ -83,4 +86,34 @@
         </table>
     </div>
 
+    <h3>Time tracking</h3>
+
+    <div x-data="data()" x-init="load('/timetracking/users/' + $router.params.user_id + '/last?l=10')">
+        <h5>Last 10 time registrations</h5>
+        <table>
+            <thead>
+                <tr>
+                    <th>channel</th>
+                    <th>user</th>
+                    <th>description</th>
+                    <th>duration</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in items" :key="index">
+                    <tr>
+                        <td>
+                            <a x-link :href="'/channels/' + item.channel_id + ''">
+                                <span x-text="'#' + item.channel_label"></span>
+                            </a>
+                        </td>
+                        <td><span x-text="'@' + item.user_label"></span></td>
+                        <td><span x-text="item.description"></span></td>
+                        <td><span x-text="duration(item.total_duration)"></span></td>
+                    </tr>                    
+                </template>
+            </tbody>
+        </table>
+    </div>
+    
 </section>
