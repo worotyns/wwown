@@ -1,3 +1,4 @@
+import { Logger } from "./logger";
 import { Repository } from "./repository";
 import { CollectorOptions, StatsCollector } from "./stats_collector";
 
@@ -15,7 +16,8 @@ export interface Mapping {
 
 export class StatsCollectorFactory {
     constructor(
-        private readonly repository: Repository
+        private readonly repository: Repository,
+        private readonly logger: Logger,
     ) {
     }
 
@@ -51,6 +53,7 @@ export class StatsCollectorFactory {
                     ]);
                 }
             },
+            this.logger,
             options,
         )
     }
@@ -111,6 +114,7 @@ export class StatsCollectorFactory {
                     ]);
                 }
             },
+            this.logger,
             options,
         )
     }

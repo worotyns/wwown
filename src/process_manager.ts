@@ -1,12 +1,15 @@
+import { Logger } from "./logger";
+
 export class ProcessManager {
 
-    static create(stepsToDoOnExit: Array<() => Promise<void>>) {
-        return new ProcessManager(process, stepsToDoOnExit);
+    static create(stepsToDoOnExit: Array<() => Promise<void>>, logger: Logger) {
+        return new ProcessManager(process, stepsToDoOnExit, logger);
     }
 
     constructor(
         private readonly process: NodeJS.Process,
         private stepsToDoOnExit: Array<() => Promise<void>>,
+        private readonly logger: Logger,
     ) {
         this.registerUncaughtExceptions();
         this.registerUnhandlerRejections();
@@ -17,7 +20,7 @@ export class ProcessManager {
 
         return (error?: Error) => {
             if (error) {
-                console.error(type, error);
+                this.logger.error(type, error);
             }
 
             return callback()
@@ -64,7 +67,7 @@ export class ProcessManager {
             try {
                 await task();
             } catch(error) {
-                console.error(error);
+                this.logger.error(error);
                 this.process.exit(1);
             }
         }

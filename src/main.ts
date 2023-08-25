@@ -8,13 +8,16 @@ import { ApiServer } from './api_server';
 import { MigrationManager } from './migration_manager';
 import { TimeTrackingService } from './time_tracking_service';
 import { ResourcesService } from './resources_service';
+import { createLogger } from './logger';
 
 (async () => {
+    const logger = createLogger();
+
     const repository = new Repository(process.env.SQLITE_DB_PATH || null);
     
-    await MigrationManager.initializeDb(repository);
+    await MigrationManager.initializeDb(repository, logger);
 
-    const collectorFactory = new StatsCollectorFactory(repository);
+    const collectorFactory = new StatsCollectorFactory(repository, logger);
 
     const statsCollector = collectorFactory.createChannelCollector({count: 25, milliseconds: 25_000});
     const mappingCollector = collectorFactory.createMappingCollector({count: 50, milliseconds: 35_000});
@@ -22,6 +25,7 @@ import { ResourcesService } from './resources_service';
     const botFactory = new BotFactory(
         statsCollector,
         mappingCollector,
+        logger,
     );
 
     const [app, slackHelper] = botFactory.create();
@@ -37,29 +41,29 @@ import { ResourcesService } from './resources_service';
 
     ProcessManager.create([
         async () => {
-            console.log('Stopping api')
+            logger.log('Stopping api')
             await apiServer.stop();
         },
         async () => { 
-            console.log('Stopping app')
+            logger.log('Stopping app')
             await app.stop() 
         },
         async () => { 
-            console.log('Stopping stats collector')
+            logger.log('Stopping stats collector')
             await statsCollector.stop() 
         },
         async () => { 
-            console.log('Stopping mapping collector')
+            logger.log('Stopping mapping collector')
             await mappingCollector.stop() 
         },
         async () => { 
-            console.log('Stopping repository')
+            logger.log('Stopping repository')
             await repository.stop() 
         }   
-    ]);
+    ], logger);
 
     await app.start();
-    console.log('Running! bot socket');
+    logger.log('Running! bot socket');
     apiServer.run();
     await slackHelper.joinToAllChannels();
     

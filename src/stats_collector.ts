@@ -1,3 +1,4 @@
+import { Logger } from "./logger";
 import { SelfFlush } from "./self_flush";
 
 type Serializer = (value: boolean | string | number | Date) => string;
@@ -17,9 +18,10 @@ export class StatsCollector<T extends Record<string, any>> {
     constructor(
         private readonly collectorMap: Map<keyof T, [Serializer, Deserializer]>,
         private readonly dump: (state: Array<WithValue<T>>) => Promise<void>,
+        private readonly logger: Logger,
         options: CollectorOptions = {count: 10, milliseconds: 60_000}
     ) {
-        this.sfl = new SelfFlush(options.count, options.milliseconds, () => this.dumpAndClean());
+        this.sfl = new SelfFlush(options.count, options.milliseconds, () => this.dumpAndClean(), logger);
     }
 
     createKeyFromItem(item: T): string {
@@ -80,12 +82,10 @@ export class StatsCollector<T extends Record<string, any>> {
 
     async dumpAndClean() {
         await this.dump(this.getState());
-        console.log(JSON.stringify(this.getState()));
         this.state.clear();
     }
 
     register(item: T) {
-        console.log(JSON.stringify(item))
         const key = this.createKeyFromItem(item);
         const existing = this.state.get(key) || 0;
         this.state.set(key, existing + 1);

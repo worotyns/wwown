@@ -2,11 +2,13 @@ import { App } from '@slack/bolt';
 import { StatsCollector } from './stats_collector';
 import { DayChannel, Mapping } from './stats_collector_factory';
 import { SlackHelper } from './slack_helper';
+import { Logger } from './logger';
 
 export class BotFactory {
   constructor(
     private readonly statsCollector: StatsCollector<DayChannel>,
     private readonly mappingCollector: StatsCollector<Mapping>,
+    private readonly logger: Logger,
   ) {
 
   }
@@ -20,7 +22,7 @@ export class BotFactory {
       port: ~~(process.env.PORT || 3000)
     });
 
-    const slackHelper = new SlackHelper(app, this.mappingCollector);
+    const slackHelper = new SlackHelper(app, this.mappingCollector, this.logger);
 
     app.event('reaction_added', async ({event, say}) => {
       this.statsCollector.register({

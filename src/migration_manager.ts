@@ -1,15 +1,17 @@
+import { Logger } from "./logger";
 import { Repository } from "./repository";
 import fs from "fs";
 
 export class MigrationManager {
 
-    static async initializeDb(repository: Repository) {
-        const mm = new MigrationManager(repository);
+    static async initializeDb(repository: Repository, logger: Logger) {
+        const mm = new MigrationManager(repository, logger);
         return mm.run();
     }
 
     constructor(
         private readonly repository: Repository,
+        private readonly logger: Logger,
         private readonly migrations: string = `${__dirname}/../migrations`
     ) {
 
@@ -24,7 +26,7 @@ export class MigrationManager {
 
         for (const migration of migrations) {
             if (await this.wasRunBefore(migration)) {
-                console.log(`Omit migration: ${migration}`)
+                this.logger.log(`Omit migration: ${migration}`)
                 continue;
             }
 
@@ -32,7 +34,7 @@ export class MigrationManager {
             await this.markAsRun(migration);
         }
 
-        console.log('InitializeDB Finished');
+        this.logger.log('InitializeDB Finished');
     }
 
     async wasRunBefore(file: string) {
@@ -60,10 +62,10 @@ export class MigrationManager {
     }
 
     async runMigration(file: string) {
-        console.log(`Try to run migration: ${file}`);
+        this.logger.log(`Try to run migration: ${file}`);
         const query = fs.readFileSync(`${this.migrations}/${file}`);
         await this.repository.exec(query.toString('utf8'));
-        console.log('Migration finished')
+        this.logger.log('Migration finished')
     }
 
     async isNotInitialized(): Promise<boolean> {
@@ -81,9 +83,9 @@ export class MigrationManager {
     }
 
     async firstInitializeDBIfNotInitializedBefore() {
-        console.log('Initialize DB');
+        this.logger.log('Initialize DB');
         await this.runMigration('000_migrations.sql');
-        console.log('DB Initialized');
+        this.logger.log('DB Initialized');
     } 
 
 }

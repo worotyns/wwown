@@ -1,3 +1,5 @@
+import { Logger } from "./logger";
+
 export class SelfFlush {
     private count: number = 0;
     private dumping = false;
@@ -6,7 +8,8 @@ export class SelfFlush {
     constructor(
         private countLimit: number, 
         private readonly milliseconds: number, 
-        private readonly dump: Function
+        private readonly dump: Function,
+        private readonly logger: Logger,
     ) {
         this.interval = setInterval(() => this.wrappedDump(), milliseconds);    
     }
@@ -21,7 +24,7 @@ export class SelfFlush {
     private async wrappedDump() {
      
         if (this.dumping) {
-            console.log('Omit dumping.. currently working');
+            this.logger.log('Omit dumping.. currently working');
             return;
         }
 
@@ -29,7 +32,7 @@ export class SelfFlush {
         try {
             await this.dump();
         } catch(error) {
-            console.error(error);
+            this.logger.error(error);
         } finally {
             this.dumping = false;
         }

@@ -1,6 +1,7 @@
 import { App } from "@slack/bolt";
 import { StatsCollector } from "./stats_collector";
 import { Mapping } from "./stats_collector_factory";
+import { Logger } from "./logger";
 
 export class SlackHelper {
 
@@ -8,7 +9,8 @@ export class SlackHelper {
 
     constructor(
         private readonly app: App,
-        private readonly mappingCollector: StatsCollector<Mapping>
+        private readonly mappingCollector: StatsCollector<Mapping>,
+        private readonly logger: Logger
     ) {
 
     }
@@ -29,7 +31,7 @@ export class SlackHelper {
                 await this.app.client.conversations.join({
                     channel: channel.id,
                 });
-                console.log(`Joined channel: ${channel.name}`);
+                this.logger.log(`Joined channel: ${channel.name}`);
             }
 
             if (channel.id && channel.name_normalized) {

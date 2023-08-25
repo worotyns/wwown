@@ -1,0 +1,286 @@
+import assert from "assert";
+import { Repository } from "./repository";
+import { createTestingRepository } from "./test_utils";
+import { TimeTrackingService } from "./time_tracking_service";
+
+describe("time_tracking_service", function () {
+  let repository!: Repository;
+  let timeTrackingService!: TimeTrackingService;
+
+  before(async () => {
+    repository = await createTestingRepository();
+    timeTrackingService = new TimeTrackingService(repository);
+
+    await repository.run(
+      `
+            INSERT OR IGNORE INTO 
+                mapping (resource_id, label) 
+            VALUES (?, ?), (?, ?), (?, ?), (?, ?)
+        `,
+      [
+        "channel_1",
+        "channel1",
+        "user_1",
+        "user1",
+        "channel_2",
+        "channel2",
+        "user_2",
+        "user2",
+      ],
+    );
+
+    const fakeData: Array<[string, string, Date, Date, string]> = [
+      [
+        "channel_1",
+        "user_1",
+        new Date("2023-01-01 10:00:00"),
+        new Date("2023-01-01 12:00:00"),
+        "ticket_xyz",
+      ],
+      [
+        "channel_1",
+        "user_2",
+        new Date("2023-01-02 10:00:00"),
+        new Date("2023-01-02 12:00:00"),
+        "ticket_xyz",
+      ],
+      [
+        "channel_1",
+        "user_1",
+        new Date("2023-01-03 10:00:00"),
+        new Date("2023-01-03 12:00:00"),
+        "ticket_xyz",
+      ],
+      [
+        "channel_2",
+        "user_2",
+        new Date("2023-01-04 10:00:00"),
+        new Date("2023-01-04 12:00:00"),
+        "feature_xyz",
+      ],
+      [
+        "channel_2",
+        "user_1",
+        new Date("2023-01-05 10:00:00"),
+        new Date("2023-01-05 12:00:00"),
+        "feature_xyz",
+      ],
+      [
+        "channel_2",
+        "user_2",
+        new Date("2023-01-06 10:00:00"),
+        new Date("2023-01-06 12:00:00"),
+        "feature_xyz",
+      ],
+      [
+        "channel_2",
+        "user_1",
+        new Date("2023-01-07 10:00:00"),
+        new Date("2023-01-07 12:00:00"),
+        "feature_xyz",
+      ],
+      [
+        "channel_2",
+        "user_2",
+        new Date("2023-01-08 10:00:00"),
+        new Date("2023-01-08 12:00:00"),
+        "feature_xyz",
+      ],
+    ];
+
+    for (const fake of fakeData) {
+      const [channel, user, start, end, desc] = fake;
+      await timeTrackingService.registerTimeTrackingItem(
+        channel,
+        user,
+        start,
+        end,
+        desc,
+      );
+    }
+  });
+
+  it("durationPerChannelAndUserInTimeRange", async function () {
+    const results = await timeTrackingService
+      .durationPerChannelAndUserInTimeRange(
+        new Date("2023-01-01"),
+        new Date("2023-01-05"),
+      );
+
+    assert.deepEqual(results, [
+      {
+        channel_id: "channel_1",
+        channel_label: "channel1",
+        total_duration: 14400,
+        user_id: "user_1",
+        user_label: "user1",
+      },
+      {
+        channel_id: "channel_1",
+        channel_label: "channel1",
+        total_duration: 7200,
+        user_id: "user_2",
+        user_label: "user2",
+      },
+      {
+        channel_id: "channel_2",
+        channel_label: "channel2",
+        total_duration: 7200,
+        user_id: "user_2",
+        user_label: "user2",
+      },
+    ]);
+  });
+
+  it("durationPerChannelAndDescriptionInTimeRange", async function () {
+    const results = await timeTrackingService
+      .durationPerChannelAndDescriptionInTimeRange(
+        new Date("2023-01-01"),
+        new Date("2023-01-05"),
+      );
+
+    assert.deepEqual(results, [
+      {
+        channel_id: "channel_1",
+        channel_label: "channel1",
+        description: "ticket_xyz",
+        total_duration: 21600,
+      },
+      {
+        channel_id: "channel_2",
+        channel_label: "channel2",
+        description: "feature_xyz",
+        total_duration: 7200,
+      },
+    ]);
+  });
+
+  it("durationPerChannelAndUserAndDescriptionInTimeRange", async function () {
+    const results = await timeTrackingService
+      .durationPerChannelAndUserAndDescriptionInTimeRange(
+        new Date("2023-01-01"),
+        new Date("2023-01-03"),
+      );
+
+    assert.deepEqual(results, [
+      {
+        channel_id: "channel_1",
+        channel_label: "channel1",
+        description: "ticket_xyz",
+        total_duration: 7200,
+        user_id: "user_1",
+        user_label: "user1",
+      },
+      {
+        channel_id: "channel_1",
+        channel_label: "channel1",
+        description: "ticket_xyz",
+        total_duration: 7200,
+        user_id: "user_2",
+        user_label: "user2",
+      },
+    ]);
+  });
+
+  it("durationPerChannelInTimeRange", async function () {
+    const results = await timeTrackingService.durationPerChannelInTimeRange(
+      new Date("2023-01-01"),
+      new Date("2023-01-08"),
+    );
+
+    assert.deepEqual(results, [
+      {
+        channel_id: "channel_1",
+        channel_label: "channel1",
+        total_duration: 21600,
+      },
+      {
+        channel_id: "channel_2",
+        channel_label: "channel2",
+        total_duration: 28800,
+      },
+    ]);
+  });
+
+  it("durationPerUserInTimeRange", async function () {
+    const results = await timeTrackingService.durationPerUserInTimeRange(
+        new Date("2023-01-01"),
+        new Date("2023-01-08"),
+    );
+
+    assert.deepEqual(results, [
+        {
+          total_duration: 28800,
+          user_id: 'user_1',
+          user_label: 'user1'
+        },
+        {
+          total_duration: 21600,
+          user_id: 'user_2',
+          user_label: 'user2'
+        }
+      ]);
+  });
+
+  it("getLastNChannelAndDescriptionOfUserInTimeRange", async function () {
+    const results = await timeTrackingService.getLastNChannelAndDescriptionOfUser(
+        'user_1',
+        2
+    );
+
+    assert.deepEqual(results, [
+        {
+          channel_id: 'channel_2',
+          channel_label: 'channel2',
+          description: 'feature_xyz',
+          total_duration: 14400,
+          user_id: 'user_1',
+          user_label: 'user1'
+        },
+        {
+          channel_id: 'channel_1',
+          channel_label: 'channel1',
+          description: 'ticket_xyz',
+          total_duration: 14400,
+          user_id: 'user_1',
+          user_label: 'user1'
+        }
+      ]);
+  });
+
+  it("topNChannelOfUserInTimeRange", async function () {
+    const results = await timeTrackingService.topNChannelOfUserInTimeRange(
+        new Date("2023-01-01"),
+        new Date("2023-01-08"),
+        100
+    );
+
+    assert.deepEqual(results, 
+        [
+          {
+            channel_id: 'channel_1',
+            total_duration: 14400,
+            user_channel_rank: 1,
+            user_id: 'user_1'
+          },
+          {
+            channel_id: 'channel_2',
+            total_duration: 14400,
+            user_channel_rank: 1,
+            user_id: 'user_1'
+          },
+          {
+            channel_id: 'channel_1',
+            total_duration: 7200,
+            user_channel_rank: 1,
+            user_id: 'user_2'
+          },
+          {
+            channel_id: 'channel_2',
+            total_duration: 21600,
+            user_channel_rank: 1,
+            user_id: 'user_2'
+          }
+        ]);
+  });
+});
