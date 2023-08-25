@@ -80,6 +80,7 @@ export class StatsCollectorFactory {
             ]), 
             async (state) => {
                 for (const update of state) {
+                    console.log(update);
                     await this.repository.run(`
                         INSERT OR IGNORE INTO 
                             stats (channel_id, user_id, day, type, value, last_activity_ts) 
@@ -105,7 +106,7 @@ export class StatsCollectorFactory {
                             last_activity_ts = ?
                         WHERE channel_id = ? AND user_id = ? AND day = ? AND type = ?
                     `, [
-                        existing.value,
+                        update.value,
                         Date.now(),
                         existing.channel_id,
                         existing.user_id,
