@@ -2,6 +2,7 @@ import { App } from "@slack/bolt";
 import { StatsCollector } from "./stats_collector";
 import { Mapping } from "./stats_collector_factory";
 import { Logger } from "./logger";
+import { WebClient } from "@slack/web-api";
 
 export class SlackHelper {
 
@@ -10,9 +11,27 @@ export class SlackHelper {
     constructor(
         private readonly app: App,
         private readonly mappingCollector: StatsCollector<Mapping>,
-        private readonly logger: Logger
+        private readonly logger: Logger,
+        private readonly webClient: WebClient
     ) {
 
+    }
+
+    public removeAngleBracketText(inputString: string) {
+        return inputString.replace(/<[^>]+>/g, '').trim();
+    }
+      
+    public async addReaction(channel: string, timestamp: string, emoji: string) {
+        try {
+            await this.webClient.reactions.add({
+                channel,
+                timestamp,
+                name: emoji
+            });
+            this.logger.log('Reaction added successfully!');
+        } catch (error) {
+            this.logger.error('Error adding reaction:', error);
+        }
     }
 
     private registerMappingAndCache(resourceId: string, label: string) {

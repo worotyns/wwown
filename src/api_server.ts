@@ -32,25 +32,50 @@ export class ApiServer {
             return { pong: 'pong' }
         })
 
+        this.fastify.get('/resources', async (request, reply) => {
+            return await this.resourcesService.getResources();
+        })
+
         /**
          * Returns top 5 user of each channel ordered by points, activity date
          */
-        this.fastify.get('/dashboard/top', async (request, reply) => {
+        this.fastify.get('/activity/dashboard/top', async (request, reply) => {
             const query: any = request.query;
             return await this.activityService.getTopNUsersOfAllChannels(query.limit || 5);
         })
 
         /**
+         * TimeTracking
+         */
+
+        /**
          * Returns last active users in all channels (who work on what now)
          */
-        this.fastify.get('/dashboard/last', async (request, reply) => {
+        this.fastify.get('/timetracking/dashboard/last', async (request, reply) => {
+            const query: any = request.query;
+            console.log(                new Date(query.start || TimeTrackingService.startOfDay(new Date())),
+            new Date(query.end || Date.now()))
+            return await this.timeTrackingService.durationPerChannelAndUserAndDescriptionInTimeRange(
+                new Date(query.start || TimeTrackingService.startOfDay(new Date())),
+                new Date(query.end || Date.now())
+            );
+        })
+
+        /**
+         * Activity
+         */
+
+        /**
+         * Returns last active users in all channels (who work on what now)
+         */
+        this.fastify.get('/activity/dashboard/last', async (request, reply) => {
             return await this.activityService.getLastActivityOfAllInLastNHours();
         })
 
         /**
          * Returns channel today top users
          */
-        this.fastify.get('/channels/:channelid/today', async (request, reply) => {
+        this.fastify.get('/activity/channels/:channelid/today', async (request, reply) => {
             const params: any = request.params;
             return await this.activityService.getTodayChannelUsers(params.channelid || "none");
         })
@@ -58,7 +83,7 @@ export class ApiServer {
         /**
          * Returns channel last users (last interest)
          */
-        this.fastify.get('/channels/:channelid/last', async (request, reply) => {
+        this.fastify.get('/activity/channels/:channelid/last', async (request, reply) => {
             const params: any = request.params;
             const query: any = request.query;
             return await this.activityService.getLastChannelUsers(params.channelid || "none", query.limit || 10);
@@ -67,7 +92,7 @@ export class ApiServer {
         /**
          * Returns top users of channel (knowledge master)
          */
-        this.fastify.get('/channels/:channelid/top', async (request, reply) => {
+        this.fastify.get('/activity/channels/:channelid/top', async (request, reply) => {
             const params: any = request.params;
             const query: any = request.query;
 
@@ -77,7 +102,7 @@ export class ApiServer {
         /**
          * Get top of user channel interests
          */
-        this.fastify.get('/users/:userid/top', async (request, reply) => {
+        this.fastify.get('/activity/users/:userid/top', async (request, reply) => {
             const query: any = request.query;
             const params: any = request.params;
             return await this.activityService.getTopChannelsForUser(params.userid || "none", query.limit || 5);
@@ -86,7 +111,7 @@ export class ApiServer {
         /**
          * Get last channels of user interest
          */
-        this.fastify.get('/users/:userid/last', async (request, reply) => {
+        this.fastify.get('/activity/users/:userid/last', async (request, reply) => {
             const query: any = request.query;
             const params: any = request.params;
             return await this.activityService.getLastChannelsForUser(params.userid || "none", query.limit || 5);
@@ -95,14 +120,11 @@ export class ApiServer {
         /**
          * Get list of channels what user was active today
          */
-        this.fastify.get('/users/:userid/today', async (request, reply) => {
+        this.fastify.get('/activity/users/:userid/today', async (request, reply) => {
             const params: any = request.params;
             return await this.activityService.getTodayChannelsForUser(params.userid || "none");
         })
 
-        this.fastify.get('/resources', async (request, reply) => {
-            return await this.resourcesService.getResources();
-        })
     }
 
     run() {

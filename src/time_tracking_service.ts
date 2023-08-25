@@ -1,6 +1,47 @@
 import { Repository } from "./repository";
 
+interface TimeTrackItem {
+    startTime: Date, endTime: Date, durationInSeconds: number, description: string
+}
+
 export class TimeTrackingService {
+
+    static startOfDay(date: Date) {
+        const startOfDay = new Date(date);
+
+        startOfDay.setHours(0);
+        startOfDay.setMinutes(0);
+        startOfDay.setSeconds(0);
+        startOfDay.setMilliseconds(0);
+
+        return startOfDay;
+    }
+
+    static extractTimeAndDescription(timeString: string): TimeTrackItem {
+        const timeRegex = /(\d+d)?(\d+h)?(\d+m)?\s*(.*)/;
+        const matches = timeString.match(timeRegex);
+    
+        if (!matches) {
+            throw new Error('Cannot parse time, write please in format eg. 3d20m sample task');
+        }
+    
+        const days = parseInt(matches[1] || '0', 10);
+        const hours = parseInt(matches[2] || '0', 10);
+        const minutes = parseInt(matches[3] || '0', 10);
+        const description = matches[4] || '';
+    
+        const totalMinutes = days * 24 * 60 + hours * 60 + minutes;
+        const durationInSeconds = totalMinutes * 60;
+    
+        const endTime = new Date();
+
+        return {
+            startTime: new Date(endTime.getTime() - (durationInSeconds * 1000)), 
+            endTime: endTime,
+            durationInSeconds,
+            description: description.trim()
+        };
+    }
 
     static calculateDurationInSeconds(startTime: Date, endTime: Date): number {
         const durationMilliseconds = endTime.getTime() - startTime.getTime();

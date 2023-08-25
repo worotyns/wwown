@@ -100,6 +100,23 @@ describe("time_tracking_service", function () {
     }
   });
 
+  it('extractTimeAndDescription', function() {
+    assert.deepEqual(
+        TimeTrackingService.extractTimeAndDescription('5m example description'),
+        {durationInSeconds: 300, description: "example description"}
+    )
+
+    assert.deepEqual(
+        TimeTrackingService.extractTimeAndDescription('3h5m example description of task'),
+        {durationInSeconds: 11100, description: "example description of task"}
+    )
+
+    assert.deepEqual(
+        TimeTrackingService.extractTimeAndDescription('5m'),
+        {durationInSeconds: 300, description: ""}
+    )
+  })
+
   it("durationPerChannelAndUserInTimeRange", async function () {
     const results = await timeTrackingService
       .durationPerChannelAndUserInTimeRange(

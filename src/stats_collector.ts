@@ -86,6 +86,7 @@ export class StatsCollector<T extends Record<string, any>> {
     }
 
     register(item: T) {
+        this.logger.log(item);
         const key = this.createKeyFromItem(item);
         const existing = this.state.get(key) || 0;
         this.state.set(key, existing + 1);

@@ -82,3 +82,30 @@ function progressApp() {
       }
   };
 }
+
+function duration(durationInSeconds) {
+  const days = Math.floor(durationInSeconds / (24 * 3600));
+  const hours = Math.floor((durationInSeconds % (24 * 3600)) / 3600);
+  const minutes = Math.floor((durationInSeconds % 3600) / 60);
+  const seconds = durationInSeconds % 60;
+
+  const parts = [];
+  if (days > 0) {
+      parts.push(`${days}d`);
+  }
+  if (hours > 0) {
+      parts.push(`${hours}h`);
+  }
+  if (minutes > 0) {
+      parts.push(`${minutes}m`);
+  }
+  if (seconds > 0) {
+      parts.push(`${seconds}s`);
+  }
+
+  if (parts.length === 0) {
+      return '0s';
+  }
+
+  return parts.join(' ');
+}

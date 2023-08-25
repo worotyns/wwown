@@ -36,6 +36,7 @@ features:
 oauth_config:
   scopes:
     bot:
+      - app_mentions:read
       - channels:history
       - channels:join
       - channels:read
@@ -46,9 +47,11 @@ oauth_config:
       - mpim:history
       - reactions:read
       - users:read
+      - reactions:write
 settings:
   event_subscriptions:
     bot_events:
+      - app_mention
       - channel_archive
       - channel_created
       - channel_id_changed

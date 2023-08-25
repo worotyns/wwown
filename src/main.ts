@@ -22,17 +22,19 @@ import { createLogger } from './logger';
     const statsCollector = collectorFactory.createChannelCollector({count: 25, milliseconds: 25_000});
     const mappingCollector = collectorFactory.createMappingCollector({count: 50, milliseconds: 35_000});
 
+    const resourceService = new ResourcesService(repository);
+    const activityService = new ActivityService(repository);
+    const timeTrackingService = new TimeTrackingService(repository);
+
     const botFactory = new BotFactory(
         statsCollector,
         mappingCollector,
+        timeTrackingService,
         logger,
     );
 
     const [app, slackHelper] = botFactory.create();
 
-    const resourceService = new ResourcesService(repository);
-    const activityService = new ActivityService(repository);
-    const timeTrackingService = new TimeTrackingService(repository);
     const apiServer = new ApiServer(
         resourceService,
         activityService,
