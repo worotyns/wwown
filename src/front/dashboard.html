@@ -1,6 +1,8 @@
 <section>
+    <h3>Activity</h3>
+
     <div x-data="data()" x-init="load('/activity/dashboard/last?t=-4d')">
-        <h5>Check who is engaged on what channel (last 3 days)</h5>
+        <h5>Last logged user interactions on channels (3 days)</h5>
         <table>
             <thead>
                 <tr>
@@ -31,8 +33,10 @@
         </table>
     </div>
 
+    <h3>Time tracking</h3>
+
     <div x-data="data()" x-init="load('/timetracking/dashboard/last?t=-5d,0d')">
-        <h5>Last registered time (5 days)</h5>
+        <h5>Last logged time on channels (5 days)</h5>
         <table>
             <thead>
                 <tr>
@@ -63,8 +67,10 @@
         </table>
     </div>
 
+    <h3>Incidents</h3>
+
     <div x-data="data()" x-init="load('/incidents/dashboard/last?l=10')">
-        <h5>Last 10 registered incidents</h5>
+        <h5>Last logged incidents (10 items)</h5>
         <table>
             <thead>
                 <tr>

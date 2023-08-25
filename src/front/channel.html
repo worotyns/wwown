@@ -3,7 +3,7 @@
     <h3>Activity</h3>
 
     <div x-data="data()" x-init="load('/activity/channels/' + $router.params.channel_id + '/last?l=5')">
-        <h5>Last interactions in this channel</h5>
+        <h5>Last logged user interactions (5 items)</h5>
         <table>
             <thead>
                 <tr>
@@ -28,7 +28,7 @@
     </div>
 
     <div x-data="data()" x-init="load('/activity/channels/' + $router.params.channel_id + '/range?t=-4d,0d')">
-        <h5>Top 10 users of channel - last 3 days</h5>
+        <h5>Most active users within last 3 days</h5>
         <table>
             <thead>
                 <tr>
@@ -56,7 +56,7 @@
     </div>
 
     <div x-data="data()" x-init="load('/activity/channels/' + $router.params.channel_id + '/top?l=10')">
-        <h5>Top 10 users of channel - all time</h5>
+        <h5>Top 10 active users - all time</h5>
         <table>
             <thead>
                 <tr>
@@ -86,7 +86,7 @@
     <h3>Time tracking</h3>
 
     <div x-data="data()" x-init="load('/timetracking/channels/' + $router.params.channel_id + '/sum?t=-30d,0d')">
-        <h5>Last 30 days time registrations on this channel, aggregated by description</h5>
+        <h5>Last time registrations on this channel, aggregated by description (30 days)</h5>
         <table>
             <thead>
                 <tr>

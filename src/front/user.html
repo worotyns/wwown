@@ -3,7 +3,7 @@
     <h3>Activity</h3>
 
     <div x-data="data()" x-init="load('/activity/users/' + $router.params.user_id + '/last?l=15')">
-        <h5>Check what topics was user engaged and when</h5>
+        <h5>Last channels where user was engaged (15 items)</h5>
         <table>
             <thead>
                 <tr>
@@ -62,7 +62,7 @@
     <h3>Time tracking</h3>
 
     <div x-data="data()" x-init="load('/timetracking/users/' + $router.params.user_id + '/last?l=15')">
-        <h5>Last 10 time registrations</h5>
+        <h5>Last time registrations (15 items)</h5>
         <table>
             <thead>
                 <tr>
