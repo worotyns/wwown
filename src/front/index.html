@@ -9,23 +9,15 @@
 
   <body x-cloak x-init="$router.config({ mode: 'hash' })">
       <h3 style="text-align: center;">who works on what now?</h3>
-      <a x-link href="/activity/dashboard">Activity</a><span> | </span>
-      <a x-link href="/activity/dashboard/top">Top5</a><span> | </span>
-      <a x-link href="/resources">Resources</a><span> | </span>
-      <a x-link href="/timetracking/dashboard">Time Tracking</a>
+      <nav style="text-align: center;">
+        <a x-link href="/resources">Resources</a><span> | </span>
+        <a x-link href="/">Dashboard</a>
+      </nav>
 
-      <template x-route="/" template="/activity_dashboard.html"></template>
-
+      <template x-route="/" template="/dashboard.html"></template>
       <template x-route="/resources" template="/resources.html"></template>
-      <template x-route="/timetracking/dashboard" template="/timetracking_dashboard.html"></template>
-      <template x-route="/activity/dashboard" template="/activity_dashboard.html"></template>
-      <template x-route="/activity/dashboard/top" template="/activity_dashboard_top.html"></template>
-      <template x-route="/activity/users/:user_id/today" template="/activity_users_today.html"></template>
-      <template x-route="/activity/users/:user_id/last" template="/activity_users_last.html"></template>
-      <template x-route="/activity/users/:user_id/top" template="/activity_users_top.html"></template>
-      <template x-route="/activity/channels/:channel_id/today" template="/activity_channels_today.html"></template>
-      <template x-route="/activity/channels/:channel_id/last" template="/activity_channels_last.html"></template>
-      <template x-route="/activity/channels/:channel_id/top" template="/cactivity_hannels_top.html"></template>
+      <template x-route="/channels/:channel_id" template="/channel.html"></template>
+      <template x-route="/users/:user_id" template="/user.html"></template>
 
       <section style="text-align: center" 
         x-data="{currentSeconds: 0, refreshSeconds: 300}" 

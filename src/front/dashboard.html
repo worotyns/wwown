@@ -1,0 +1,97 @@
+<section>
+    <div x-data="data()" x-init="load('/activity/dashboard/last')">
+        <h5>Check who is engaged on what channel</h5>
+        <table>
+            <thead>
+                <tr>
+                    <th>channel</th>
+                    <th>user</th>
+                    <th>interactions</th>
+                    <th>last interaction</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in items" :key="index">
+                    <tr>
+                        <td>
+                            <a x-link :href="'/channels/' + item.channel_id + ''">
+                                <span x-text="'#' + item.channel_label"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <a x-link :href="'/users/' + item.user_id + ''">
+                                <span x-text="'@' + item.user_label"></span>
+                            </a>
+                        </td>
+                        <td><span x-text="item.total_value"></span></td>
+                        <td><span x-text="timeAgo(item.last_activity_at)"></span></td>
+                    </tr>                    
+                </template>
+            </tbody>
+        </table>
+    </div>
+
+    <div x-data="data()" x-init="load('/activity/dashboard/top')">
+        <h5>Top 5 users from each channels order by points and last activity</h5>
+        <table>
+            <thead>
+                <tr>
+                    <th>channel</th>
+                    <th>user</th>
+                    <th>interactions</th>
+                    <th>last interaction</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in items" :key="index">
+                    <tr>
+                        <td>
+                            <a x-link :href="'/channels/' + item.channel_id + ''">
+                                <span x-text="'#' + item.channel_label"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <a x-link :href="'/users/' + item.user_id + ''">
+                                <span x-text="'@' + item.user_label"></span>
+                            </a>
+                        </td>
+                        <td><span x-text="item.total_value"></span></td>
+                        <td><span x-text="timeAgo(item.last_activity_at)"></span></td>
+                    </tr>                    
+                </template>
+            </tbody>
+        </table>
+    </div>
+
+    <div x-data="data()" x-init="load('/timetracking/dashboard/last')">
+        <h5>Last registered time</h5>
+        <table>
+            <thead>
+                <tr>
+                    <th>channel</th>
+                    <th>user</th>
+                    <th>duration</th>
+                    <th>description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in items" :key="index">
+                    <tr>
+                        <td>
+                            <a x-link :href="'/channels/' + item.channel_id + ''">
+                                <span x-text="'#' + item.channel_label"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <a x-link :href="'/users/' + item.user_id + ''">
+                                <span x-text="'@' + item.user_label"></span>
+                            </a>
+                        </td>
+                        <td><span x-text="duration(item.total_duration)"></span></td>
+                        <td><span x-text="item.description"></span></td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+</section>
