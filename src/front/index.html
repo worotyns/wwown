@@ -7,7 +7,7 @@
       <script src="main.js"></script>
   </head>
 
-  <body x-init="$router.config({ mode: 'hash' })">
+  <body x-cloak x-init="$router.config({ mode: 'hash' })">
       <h3 style="text-align: center;">who works on what now?</h3>
       <a x-link href="/activity/dashboard">Activity</a><span> | </span>
       <a x-link href="/activity/dashboard/top">Top5</a><span> | </span>
