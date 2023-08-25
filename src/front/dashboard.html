@@ -59,7 +59,7 @@
                                 <span x-text="'@' + item.user_label"></span>
                             </a>
                         </td>
-                        <td><span x-text="item.description"></span></td>
+                        <td><small x-text="item.description"></small></td>
                         <td><span x-text="duration(item.total_duration)"></span></td>
                     </tr>
                 </template>
@@ -76,9 +76,7 @@
                 <tr>
                     <th>channel</th>
                     <th>user</th>
-                    <th>start time</th>
-                    <th>end time</th>
-                    <th>duration</th>
+                    <th>when</th>
                     <th>description</th>
                 </tr>
             </thead>
@@ -95,10 +93,14 @@
                                 <span x-text="'@' + item.user_label"></span>
                             </a>
                         </td>
-                        <td><span x-text="date(item.start_time)"></span></td>
-                        <td><span x-text="date(item.end_time)"></span></td>
-                        <td><span x-text="duration(item.total_duration)"></span></td>
-                        <td><span x-text="item.description"></span></td>
+                        <td>
+                           <small>
+                                <span x-text="date(item.start_time)"></span><br/>
+                                <span x-text="date(item.end_time)"></span><br/>
+                                <span x-text="duration(item.total_duration)"></span>
+                           </small>
+                        </td>
+                        <td><small x-text="item.description"></small></td>
                     </tr>                    
                 </template>
             </tbody>

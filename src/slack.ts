@@ -65,7 +65,7 @@ export class BotFactory {
 
         switch(incidentType) {
           case IntentionType.NotRecognized:
-            await say(`<@${event.user}>! Not recognized command, use for example prompt: "incident: 5h30m outgage of rabbit" or "time: 5h ticket xyz" `);
+            await say(`<@${event.user}>! Not recognized command, use for example prompt: "5h30m incident: outgage of rabbit" or "5h time: ticket xyz" `);
             break;
           case IntentionType.TimeTracking:
             await this.timeTrackingService.registerTimeTrackingItem(event.channel, event.user!, startTime, endTime, description);
