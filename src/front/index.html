@@ -26,10 +26,14 @@
       <template x-route="/activity/channels/:channel_id/today" template="/activity_channels_today.html"></template>
       <template x-route="/activity/channels/:channel_id/last" template="/activity_channels_last.html"></template>
       <template x-route="/activity/channels/:channel_id/top" template="/cactivity_hannels_top.html"></template>
-      <span x-data="progressApp()">
-        <small style="text-align: center;">
-          <pre x-text="progressTemplate"></pre>
-        </small>
-      </span>
+
+      <section style="text-align: center" 
+        x-data="{currentSeconds: 0, refreshSeconds: 300}" 
+        x-init="setInterval(() => currentSeconds === refreshSeconds ? window.location.reload() : currentSeconds++, 1000)">
+        <template x-for="i in 100 - Math.ceil((currentSeconds / refreshSeconds) * 100)">
+          <small>.</small>
+        </template>
+      </section>
+
   </body>
 </html>

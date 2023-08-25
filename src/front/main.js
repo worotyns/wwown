@@ -45,45 +45,7 @@ function timeAgo(date) {
     }
   }
 
-function progressApp() {
-  return {
-      progress: 0,
-      progressTemplate: '',
-      refresh() {
-          this.progress = 0;
-          this.updateProgress();
-      },
-      updateProgress() {
-          const interval = 1000; // Update interval in milliseconds
-          const totalDuration = 5 * 60 * 1000; // 5 minutes in milliseconds
-          const steps = totalDuration / interval;
-          const stepSize = 100 / steps;
-          
-          let currentStep = 0;
-          const updateInterval = setInterval(() => {
-              if (currentStep >= steps) {
-                  clearInterval(updateInterval);
-                  this.progress = 100;
-                  window.location.reload()
-              } else {
-                  this.progress = Math.round(currentStep * stepSize);
-                  currentStep++;
-              }
-              
-              this.updateProgressTemplate();
-          }, interval);
-      },
-      updateProgressTemplate() {
-          const progressBarLength = Math.floor(this.progress / 2);
-          this.progressTemplate = 'refresh: [' + '▓'.repeat(progressBarLength) + '░'.repeat(50 - progressBarLength) + '] ' + this.progress + '%';
-      },
-      init() {
-          this.updateProgress();
-      }
-  };
-}
-
-function duration(durationInSeconds) {
+function formatDuration(durationInSeconds) {
   const days = Math.floor(durationInSeconds / (24 * 3600));
   const hours = Math.floor((durationInSeconds % (24 * 3600)) / 3600);
   const minutes = Math.floor((durationInSeconds % 3600) / 60);
