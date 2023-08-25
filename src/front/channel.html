@@ -100,12 +100,14 @@
                 <template x-for="(item, index) in items" :key="index">
                     <tr>
                         <td>
-                            <a x-link :href="'/channels/' + item.channel_id + ''">
-                                <span x-text="'#' + item.channel_label"></span>
+                            <span x-text="'#' + item.channel_label"></span>
+                        </td>
+                        <td>
+                            <a x-link :href="'/users/' + item.user_id + ''">
+                                <span x-text="'@' + item.user_label"></span>
                             </a>
                         </td>
-                        <td><span x-text="'@' + item.user_label"></span></td>
-                        <td><small x-text="item.description"></small></td>
+                        <td><span x-text="item.description"></span></td>
                         <td><span x-text="duration(item.total_duration)"></span></td>
                     </tr>                    
                 </template>

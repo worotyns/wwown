@@ -25,9 +25,9 @@ export class SlackHelper {
 
     public detectIntentionOnTextBased(input: string): [IntentionType, string] {
         if (input.includes('incident:')) {
-            return [IntentionType.Incident, input.replace('inciident:', '')]
+            return [IntentionType.Incident, input.replace('incident:', '').trim()]
         } else if (input.includes('time:')) {
-            return [IntentionType.TimeTracking, input.replace('inciident:', '')];
+            return [IntentionType.TimeTracking, input.replace('time:', '').trim()];
         } else {
             return [IntentionType.NotRecognized, input]
         }
