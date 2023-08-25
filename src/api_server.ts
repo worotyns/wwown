@@ -53,8 +53,6 @@ export class ApiServer {
          */
         this.fastify.get('/timetracking/dashboard/last', async (request, reply) => {
             const query: any = request.query;
-            console.log(                new Date(query.start || TimeTrackingService.startOfDay(new Date())),
-            new Date(query.end || Date.now()))
             return await this.timeTrackingService.durationPerChannelAndUserAndDescriptionInTimeRange(
                 new Date(query.start || TimeTrackingService.startOfDay(new Date())),
                 new Date(query.end || Date.now())
