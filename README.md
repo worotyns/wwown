@@ -93,3 +93,7 @@ settings:
 ```sh
   fly deploy
 ```
+
+## License
+
+Licensed under [MIT](LICENSE.md)

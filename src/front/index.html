@@ -5,27 +5,39 @@
       <script defer src="https://unpkg.com/@shaun/alpinejs-router@1.x.x/dist/es6.min.js"></script>
       <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
       <script src="main.js"></script>
+      <title>
+        who works on what?
+      </title>
   </head>
 
   <body x-cloak x-init="$router.config({ mode: 'hash' })">
-      <h3 style="text-align: center;">who works on what now?</h3>
-      <nav style="text-align: center;">
+    <header>
+      <nav>
+        <a x-link href="/">Dashboard</a><span> | </span>
         <a x-link href="/resources">Resources</a><span> | </span>
-        <a x-link href="/">Dashboard</a>
+        <a x-link href="/cheatsheet">Cheat sheet</a>
       </nav>
-
+    </header>
+    <section>
       <template x-route="/" template="/dashboard.html"></template>
       <template x-route="/resources" template="/resources.html"></template>
+      <template x-route="/cheatsheet" template="/cheatsheet.html"></template>
       <template x-route="/channels/:channel_id" template="/channel.html"></template>
       <template x-route="/users/:user_id" template="/user.html"></template>
-
-      <section style="text-align: center" 
-        x-data="{currentSeconds: 0, refreshSeconds: 300}" 
-        x-init="setInterval(() => currentSeconds === refreshSeconds ? window.location.reload() : currentSeconds++, 1000)">
-        <template x-for="i in 100 - Math.ceil((currentSeconds / refreshSeconds) * 100)">
-          <small>.</small>
-        </template>
-      </section>
-
+    </section>
+    <footer>
+      <nav>
+        <small>
+          <a href="https://github.com/worotyns/wwown/">wwown github</a><span> | </span>
+          <span
+            x-data="{currentSeconds: 300}" 
+            x-init="setInterval(() => currentSeconds === 0 ? window.location.reload() : currentSeconds--, 1000)">
+            <span>
+              <small>auto reload in <span x-text="currentSeconds"></span>s.</small>
+            </span>
+          </span>
+        </small>
+      </nav>
+    </footer>
   </body>
 </html>

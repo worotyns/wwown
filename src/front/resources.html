@@ -1,5 +1,5 @@
-<div x-data="data()" x-init="load('/resources')">
-    <h5>Channels</h5>
+<section x-data="data()" x-init="load('/resources')">
+    <h2>Channels</h2>
     <ul>
         <template x-for="(item, index) in items" :key="index">
             <li x-show="item.resource_id.startsWith('C')">
@@ -9,7 +9,7 @@
             </li>
         </template>
     </ul>
-    <h5>Users</h5>
+    <h2>Users</h2>
     <ul>
         <template x-for="(item, index) in items" :key="index">
             <li x-show="item.resource_id.startsWith('U')">
@@ -19,4 +19,4 @@
             </li>
         </template>
     </ul>
-</div>
+</section>
