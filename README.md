@@ -3,6 +3,12 @@
 Slackbot that enter to each channel and monitor engagement.
 It's experiment for monitor who work on what now.
 
+What's cover now?
+ - time tracking @mention,
+ - channel specific activity tracking,
+ - incidents log with @mention,
+ - reporting dashboard simple app,
+
 ## Demo
 
 Example: https://wwown-demo.fly.dev
@@ -24,6 +30,8 @@ Invitation link: https://join.slack.com/t/wwown-rocks/shared_invite/zt-21ktjx6on
 
 2. Run APP
 `yarn run start`
+
+## Info
 
 ## Slack manifest
 ```yaml
