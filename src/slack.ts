@@ -6,6 +6,7 @@ import { Logger } from './logger';
 import { WebClient } from '@slack/web-api';
 import { TimeTrackingService } from './time_tracking_service';
 import { IncidentService } from './incident_service';
+import { ResourcesService } from './resources_service';
 
 export class BotFactory {
   constructor(
@@ -13,6 +14,7 @@ export class BotFactory {
     private readonly mappingCollector: StatsCollector<Mapping>,
     private readonly timeTrackingService: TimeTrackingService,
     private readonly incidentService: IncidentService,
+    private readonly resourceService: ResourcesService,
     private readonly logger: Logger,
   ) {
 
@@ -41,7 +43,7 @@ export class BotFactory {
 
       await slackHelper.touchMappings(event.item.channel, event.user);
     })
-
+    
     app.event('channel_created', async ({event, say}) => {
       this.statsCollector.register({
         channel: event.channel.id,
@@ -57,7 +59,22 @@ export class BotFactory {
       });
     })
 
-    app.event('app_mention', async ({ event, context, client, say }) => {
+    app.event('channel_rename', async ({event}) => {
+      console.log({event})
+      await this.resourceService.renameResource(event.channel.id, event.channel.name_normalized);
+    });
+
+    app.event('channel_deleted', async ({event}) => {
+      console.log({event})
+      await this.resourceService.removeResourceById(event.channel);
+    })
+
+    app.event('channel_archive', async ({event}) => {
+      console.log({event})
+      await this.resourceService.removeResourceById(event.channel);
+    })
+
+    app.event('app_mention', async ({ event, say }) => {
       try {
         const withoutMention = slackHelper.removeAngleBracketText(event.text);
         const [incidentType, inputWithoutCommand] = slackHelper.detectIntentionOnTextBased(withoutMention);

@@ -33,6 +33,7 @@ import { IncidentService } from './incident_service';
         mappingCollector,
         timeTrackingService,
         incidentService,
+        resourceService,
         logger,
     );
 
