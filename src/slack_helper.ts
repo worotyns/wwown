@@ -62,7 +62,7 @@ export class SlackHelper {
         const resp = await this.app.client.conversations.list()
         
         for (const channel of resp?.channels || []) {
-            if (!channel.is_private && !channel.is_member && channel.id) {
+            if (!channel.is_private && !channel.is_archived && !channel.is_member && channel.id) {
                 await this.app.client.conversations.join({
                     channel: channel.id,
                 });

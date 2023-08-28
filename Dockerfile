@@ -46,5 +46,5 @@ RUN chmod 755 /app
 VOLUME /data
 
 # Start the server by default, this can be overwritten at runtime
-EXPOSE 3000
+EXPOSE 4000
 CMD [ "yarn", "run", "start" ]
