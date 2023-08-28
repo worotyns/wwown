@@ -3,6 +3,7 @@ import { StatsCollector } from "./stats_collector";
 import { Mapping } from "./stats_collector_factory";
 import { Logger } from "./logger";
 import { WebClient } from "@slack/web-api";
+import { Channel } from "@slack/web-api/dist/response/ConversationsInfoResponse";
 
 export enum IntentionType {
     NotRecognized,
@@ -58,10 +59,39 @@ export class SlackHelper {
         });
     }
 
-    async joinToAllChannels() {
-        const resp = await this.app.client.conversations.list()
+    async getAllPossibleChannelsToJoin(): Promise<Channel[]> {
+        let cursor: string | undefined = undefined;
+        const channelIds: Channel[] = [];
+
+        while (true) {
+            const result = await this.app.client.conversations.list({
+                limit: 1,
+                cursor,
+            });
         
-        for (const channel of resp?.channels || []) {
+            if (result.ok) {
+                for (const channel of result.channels || []) {
+                    channelIds.push(channel);
+                }
+        
+                if (result.response_metadata?.next_cursor) {
+                    cursor = result.response_metadata.next_cursor;
+                } else {
+                    break; 
+                }
+            } else {
+                console.error('Error fetching conversations:', result.error);
+                break;
+            }
+        }
+    
+        return channelIds;
+    }
+
+    async joinToAllChannels() {
+        const allChannels = await this.getAllPossibleChannelsToJoin();
+        
+        for (const channel of allChannels) {
             if (!channel.is_private && !channel.is_archived && !channel.is_member && channel.id) {
                 await this.app.client.conversations.join({
                     channel: channel.id,
