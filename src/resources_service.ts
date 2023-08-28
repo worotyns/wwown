@@ -9,7 +9,7 @@ export class ResourcesService {
 
     async getResources() {
         return this.repository.all(`
-            SELECT resource_id, label FROM mapping;
+            SELECT resource_id, label FROM mapping ORDER BY label;
         `)
     }
 
