@@ -65,7 +65,7 @@ export class SlackHelper {
 
         while (true) {
             const result = await this.app.client.conversations.list({
-                limit: 1,
+                limit: 50,
                 cursor,
             });
         
