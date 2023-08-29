@@ -207,7 +207,6 @@ describe("time_tracking_service", function () {
         start_time: 1672650000000,
         user_id: 'user_2',
         user_label: 'user2',
-        description: 'ticket_xyz',
         total_duration: 7200
       },
       {
@@ -215,7 +214,6 @@ describe("time_tracking_service", function () {
         start_time: 1672563600000,
         user_id: 'user_1',
         user_label: 'user1',
-        description: 'ticket_xyz',
         total_duration: 14400
       }
     ]);
