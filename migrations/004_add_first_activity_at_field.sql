@@ -1,0 +1,1 @@
+ALTER TABLE stats ADD COLUMN first_activity_ts TIMESTAMP;
