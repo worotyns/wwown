@@ -3,6 +3,7 @@ import { StatsCollector } from "./stats_collector";
 import { createFakeLogger } from "./logger";
 
 describe("stats_collector", function () {
+
   it("collects and aggregate", async function () {
     let collectedState: any;
 

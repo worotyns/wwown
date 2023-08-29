@@ -131,6 +131,19 @@ export class ApiServer {
         );
     });
 
+     /**
+     * Returns lastactivity data for chart
+     * dashboard.html
+     */
+        this.fastify.get("/activity/dashboard/activity", async (request) => {
+          const [startDate, endDate] = this.parseT(request.query);
+          return await this.activityService.getActivityChartData(
+            startDate,
+            endDate,
+          );
+        });
+
+        
     /**
      * Returns last active users in all channels (who work on what now)
      * dashboard.html
