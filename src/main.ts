@@ -10,6 +10,7 @@ import { TimeTrackingService } from './time_tracking_service';
 import { ResourcesService } from './resources_service';
 import { createLogger } from './logger';
 import { IncidentService } from './incident_service';
+import { KarmaService } from './karma_service';
 
 (async () => {
     const logger = createLogger();
@@ -23,6 +24,7 @@ import { IncidentService } from './incident_service';
     const statsCollector = collectorFactory.createChannelCollector({count: 25, milliseconds: 25_000});
     const mappingCollector = collectorFactory.createMappingCollector({count: 50, milliseconds: 35_000});
 
+    const karmaService = new KarmaService(repository);
     const resourceService = new ResourcesService(repository);
     const activityService = new ActivityService(repository);
     const timeTrackingService = new TimeTrackingService(repository);
@@ -34,6 +36,7 @@ import { IncidentService } from './incident_service';
         timeTrackingService,
         incidentService,
         resourceService,
+        karmaService,
         logger,
     );
 

@@ -7,6 +7,7 @@ import { WebClient } from '@slack/web-api';
 import { TimeTrackingService } from './time_tracking_service';
 import { IncidentService } from './incident_service';
 import { ResourcesService } from './resources_service';
+import { KarmaService } from './karma_service';
 
 export class BotFactory {
   constructor(
@@ -15,6 +16,7 @@ export class BotFactory {
     private readonly timeTrackingService: TimeTrackingService,
     private readonly incidentService: IncidentService,
     private readonly resourceService: ResourcesService,
+    private readonly karmaService: KarmaService,
     private readonly logger: Logger,
   ) {
 
@@ -33,13 +35,23 @@ export class BotFactory {
 
     const slackHelper = new SlackHelper(app, this.mappingCollector, this.logger, webClient);
 
-    app.event('reaction_added', async ({event, say}) => {
+    app.event('reaction_added', async ({event, client, say}) => {
       this.statsCollector.register({
         channel: event.item.channel,
         user: event.user,
         day: slackHelper.resolveDateFromTS(event.event_ts),
         type: 'reaction_added'
       });
+
+      const channel = event.item.channel;
+      const userReacted = event.user;
+      const reaction = event.reaction;
+      const whoGetReaction = event.item_user;
+
+      if (whoGetReaction) {
+        await this.karmaService.registerReaction(channel, userReacted, whoGetReaction, reaction)
+        await slackHelper.touchMappings(event.item.channel, whoGetReaction);
+      }
 
       await slackHelper.touchMappings(event.item.channel, event.user);
     })
