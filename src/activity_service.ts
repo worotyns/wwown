@@ -56,9 +56,9 @@ export class ActivityService {
             const currentDay = ActivityService.getKeyFromDay(currentDate.getTime());
             if (dataMap.has(currentDay)) {
                 const item = dataMap.get(currentDay);
-                const normalizedValue = Math.floor(ActivityService.normalizeValue(item.val, min, max, 100, 255));
+                const normalizedValue = Math.floor(ActivityService.normalizeValue(item.val, min, max, 100, 155));
 
-                const color = `rgb(0, ${normalizedValue}, 0)`;
+                const color = `rgb(0, ${255 - normalizedValue}, 0)`;
 
                 filledAndNormalizedData.push({
                     day: currentDay,
