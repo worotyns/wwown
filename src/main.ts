@@ -47,6 +47,7 @@ import { KarmaService } from './karma_service';
         activityService,
         timeTrackingService,
         incidentService,
+        karmaService,
     );
 
     ProcessManager.create([

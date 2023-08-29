@@ -43,6 +43,73 @@
         </table>
     </div>
 
+    <h2>Karma</h2>
+
+    <div x-data="data()" x-init="load('/karma/dashboard/receivers?t=-30d,0d&l=10')">
+        <h3>Aggregated reactions received by users (30days, 10 items)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>channel</th>
+                    <th>user</th>
+                    <th>emoji</th>
+                    <th>reactions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in items" :key="index">
+                    <tr>
+                        <td>
+                            <a x-link :href="'/channels/' + item.channel_id + ''">
+                                <span x-text="'#' + item.channel_label"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <a x-link :href="'/users/' + item.user_id + ''">
+                                <span x-text="'@' + item.user_label"></span>
+                            </a>
+                        </td>
+                        <td x-text="item.reaction"></td>
+                        <td x-text="item.total"></td>
+                    </tr>                    
+                </template>
+            </tbody>
+        </table>
+    </div>
+
+
+    <div x-data="data()" x-init="load('/karma/dashboard/givers?t=-30d,0d&l=10')">
+        <h3>Aggregated reactions given by users (30days, 10 items)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>channel</th>
+                    <th>user</th>
+                    <th>emoji</th>
+                    <th>reactions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in items" :key="index">
+                    <tr>
+                        <td>
+                            <a x-link :href="'/channels/' + item.channel_id + ''">
+                                <span x-text="'#' + item.channel_label"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <a x-link :href="'/users/' + item.reacting_user_id + ''">
+                                <span x-text="'@' + item.reacting_user_label"></span>
+                            </a>
+                        </td>
+                        <td x-text="item.reaction"></td>
+                        <td x-text="item.total"></td>
+                    </tr>                    
+                </template>
+            </tbody>
+        </table>
+    </div>
+
     <h2>Time tracking</h2>
 
     <div x-data="data()" x-init="load('/timetracking/dashboard/last?t=-5d,0d')">

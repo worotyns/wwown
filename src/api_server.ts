@@ -4,6 +4,7 @@ import { TimeTrackingService } from "./time_tracking_service";
 import { ResourcesService } from "./resources_service";
 import path from "path";
 import { IncidentService } from "./incident_service";
+import { KarmaService } from "./karma_service";
 
 interface ApiOptions {
   port: string;
@@ -66,6 +67,7 @@ export class ApiServer {
     private readonly activityService: ActivityService,
     private readonly timeTrackingService: TimeTrackingService,
     private readonly incidentService: IncidentService,
+    private readonly karmaService: KarmaService,
     private readonly opts: ApiOptions = {
       port: process.env.API_SERVER_PORT || "4000",
       bindAddres: process.env.API_SERVER_BIND_ADDR || "0.0.0.0",
@@ -115,8 +117,94 @@ export class ApiServer {
     });
 
     this.fastify.get("/resources", async (request) => {
-      return await this.resourcesService.getResources();
+      return this.resourcesService.getResources();
     });
+
+    /**
+     * Get karma reactions top
+     * users.html
+     */
+    this.fastify.get("/karma/dashboard/receivers", async (request) => {
+      const [startDate, endDate] = this.parseT(request.query);
+      return this.karmaService.getGlobalReceiversInRangeAndLimit(
+        startDate,
+        endDate,
+        this.parseLimit(request.query),
+      );
+    });
+
+    /**
+     * Get given karma reactions top
+     * users.html
+     */
+    this.fastify.get("/karma/dashboard/givers", async (request) => {
+      const [startDate, endDate] = this.parseT(request.query);
+      return this.karmaService.getGlobalGiversInRangeAndLimit(
+        startDate,
+        endDate,
+        this.parseLimit(request.query),
+      );
+    });
+
+    /**
+     * Get karma reactions for user
+     * users.html
+     */
+    this.fastify.get("/karma/users/:userid/received", async (request) => {
+      const [startDate, endDate] = this.parseT(request.query);
+      return this.karmaService.getForUserInRangeAndLimit(
+        this.getParam(request.params, "userid"),
+        startDate,
+        endDate,
+        this.parseLimit(request.query),
+      );
+    });
+
+    /**
+     * Get given karma reactions for user
+     * users.html
+     */
+    this.fastify.get("/karma/users/:userid/given", async (request) => {
+      const [startDate, endDate] = this.parseT(request.query);
+      return this.karmaService.getForGivingUserInRangeAndLimit(
+        this.getParam(request.params, "userid"),
+        startDate,
+        endDate,
+        this.parseLimit(request.query),
+      );
+    });
+
+    /**
+     * Get karma reactions for user
+     * channel.html
+     */
+    this.fastify.get(
+      "/karma/channels/:channelid/receivers",
+      async (request) => {
+        const [startDate, endDate] = this.parseT(request.query);
+        return this.karmaService.getForChannelReceiversInRangeAndLimit(
+          this.getParam(request.params, "channelid"),
+          startDate,
+          endDate,
+          this.parseLimit(request.query),
+        );
+      },
+    );
+
+    /**
+     * Get given karma reactions for user
+     * channel.html
+     */
+    this.fastify.get("/karma/channels/:channelid/givers", async (request) => {
+      const [startDate, endDate] = this.parseT(request.query);
+      return this.karmaService.getForChannelGiversInRangeAndLimit(
+        this.getParam(request.params, "channelid"),
+        startDate,
+        endDate,
+        this.parseLimit(request.query),
+      );
+    });
+
     /**
      * Returns all time channel, user duration
      * timematrix.html
@@ -125,64 +213,62 @@ export class ApiServer {
       "/timetracking/dashboard/matrix",
       async (request) => {
         const [startDate, endDate] = this.parseT(request.query);
-        return await this.timeTrackingService
+        return this.timeTrackingService
           .getTimeMatrixData(
             startDate,
             endDate,
           );
       },
     );
-    
+
     /**
      * Returns last active users in all channels (who work on what now)
      * dashboard.html
      */
     this.fastify.get("/timetracking/dashboard/last", async (request) => {
       const [startDate, endDate] = this.parseT(request.query);
-      return await this.timeTrackingService
+      return this.timeTrackingService
         .durationPerChannelAndUserAndDescriptionInTimeRange(
           startDate,
           endDate,
         );
     });
 
-     /**
+    /**
      * Returns lastactivity data for chart
      * dashboard.html
      */
-     this.fastify.get("/activity/dashboard/activity", async (request) => {
+    this.fastify.get("/activity/dashboard/activity", async (request) => {
       const [startDate, endDate] = this.parseT(request.query);
-      return await this.activityService.getActivityChartData(
+      return this.activityService.getActivityChartData(
         startDate,
         endDate,
       );
     });
-
 
     /**
      * Returns avg daily activity
      * dashboard.html
      */
-     this.fastify.get("/activity/dashboard/daily", async (request) => {
+    this.fastify.get("/activity/dashboard/daily", async (request) => {
       const [startDate, endDate] = this.parseT(request.query);
-      return await this.activityService.getDailyActivityForUsersInTime(
+      return this.activityService.getDailyActivityForUsersInTime(
         startDate,
         endDate,
       );
     });
 
-        
     /**
      * Returns last active users in all channels (who work on what now)
      * dashboard.html
      */
     this.fastify.get("/activity/dashboard/last", async (request) => {
       const [startDate] = this.parseT(request.query);
-      return await this.activityService.getLastActivityOfAllSinceDate(
+      return this.activityService.getLastActivityOfAllSinceDate(
         startDate,
       );
     });
-    
+
     /**
      * Returns monthly sum of date, user duration for channel time tracking
      * channels.html
@@ -191,7 +277,7 @@ export class ApiServer {
       "/timetracking/channels/:channelid/monthly",
       async (request) => {
         const [startDate, endDate] = this.parseT(request.query);
-        return await this.timeTrackingService
+        return this.timeTrackingService
           .durationOfChannelInTimeByMonthAndUser(
             this.getParam(request.params, "channelid"),
             startDate,
@@ -208,7 +294,7 @@ export class ApiServer {
       "/timetracking/channels/:channelid/sum",
       async (request) => {
         const [startDate, endDate] = this.parseT(request.query);
-        return await this.timeTrackingService
+        return this.timeTrackingService
           .durationOfChannelAndDescriptionInTimeRange(
             this.getParam(request.params, "channelid"),
             startDate,
@@ -226,7 +312,7 @@ export class ApiServer {
       async (request) => {
         const [startDate, endDate] = this.parseT(request.query);
 
-        return await this.activityService.getChannelUsersInTimeRange(
+        return this.activityService.getChannelUsersInTimeRange(
           this.getParam(request.params, "channelid"),
           startDate,
           endDate,
@@ -241,7 +327,7 @@ export class ApiServer {
     this.fastify.get(
       "/activity/channels/:channelid/last",
       async (request) => {
-        return await this.activityService.getLastChannelUsers(
+        return this.activityService.getLastChannelUsers(
           this.getParam(request.params, "channelid"),
           this.parseLimit(request.query),
         );
@@ -255,7 +341,7 @@ export class ApiServer {
     this.fastify.get(
       "/activity/channels/:channelid/top",
       async (request) => {
-        return await this.activityService.getTopChannelUsers(
+        return this.activityService.getTopChannelUsers(
           this.getParam(request.params, "channelid"),
           this.parseLimit(request.query),
         );
@@ -268,8 +354,8 @@ export class ApiServer {
      */
     this.fastify.get("/activity/users/:userid/daily", async (request) => {
       const [startDate, endDate] = this.parseT(request.query);
-      return await this.activityService.getDailyActivityForUserInTime(
-        this.getParam(request.params, 'userid'),
+      return this.activityService.getDailyActivityForUserInTime(
+        this.getParam(request.params, "userid"),
         startDate,
         endDate,
       );
@@ -283,7 +369,7 @@ export class ApiServer {
       "/timetracking/users/:userid/monthly",
       async (request) => {
         const [startDate, endDate] = this.parseT(request.query);
-        return await this.timeTrackingService
+        return this.timeTrackingService
           .durationOfUserInTimeByMonthAndUser(
             this.getParam(request.params, "userid"),
             startDate,
@@ -298,7 +384,7 @@ export class ApiServer {
      */
     this.fastify.get("/activity/users/:userid/top", async (request) => {
       const query: any = request.query;
-      return await this.activityService.getTopChannelsForUser(
+      return this.activityService.getTopChannelsForUser(
         this.getParam(request.params, "userid"),
         this.parseLimit(request.query),
       );
@@ -310,7 +396,7 @@ export class ApiServer {
      */
     this.fastify.get("/activity/users/:userid/last", async (request) => {
       const query: any = request.query;
-      return await this.activityService.getLastChannelsForUser(
+      return this.activityService.getLastChannelsForUser(
         this.getParam(request.params, "userid"),
         this.parseLimit(request.query),
       );
@@ -323,7 +409,7 @@ export class ApiServer {
     this.fastify.get(
       "/timetracking/users/:userid/last",
       async (request) => {
-        return await this.timeTrackingService
+        return this.timeTrackingService
           .getLastNChannelAndDescriptionOfUser(
             this.getParam(request.params, "userid"),
             this.parseLimit(request.query),
@@ -338,7 +424,7 @@ export class ApiServer {
     this.fastify.get(
       "/incidents/dashboard/last",
       async (request) => {
-        return await this.incidentService
+        return this.incidentService
           .getLastIncidents(
             this.parseLimit(request.query),
           );
