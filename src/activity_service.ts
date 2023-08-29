@@ -28,6 +28,8 @@ export class ActivityService {
                 strftime('%Y-%m-%d', DATE(day / 1000, 'unixepoch')) as date,
                 user_id,
                 mu.label as user_label,
+                AVG(CASE WHEN type = 'message' THEN value ELSE 0 END) AS avg_messages,
+                AVG(CASE WHEN type = 'reaction_added' THEN value ELSE 0 END) AS avg_reactions,
                 ROUND(AVG((last_activity_ts - first_activity_ts)) / 3600.0) as avg_hours
             FROM stats s
             JOIN mapping mu ON mu.resource_id = s.user_id    
@@ -35,6 +37,24 @@ export class ActivityService {
             GROUP BY date, user_id
             ORDER BY date DESC, user_label;
         `, [start, end]
+        )
+    }
+
+    async getDailyActivityForUserInTime(userId: string, start: Date, end: Date) {
+        return this.repository.all(`
+            SELECT
+                strftime('%Y-%m-%d', DATE(day / 1000, 'unixepoch')) as date,
+                user_id,
+                mu.label as user_label,
+                AVG(CASE WHEN type = 'message' THEN value ELSE 0 END) AS avg_messages,
+                AVG(CASE WHEN type = 'reaction_added' THEN value ELSE 0 END) AS avg_reactions,
+                ROUND(AVG((last_activity_ts - first_activity_ts)) / 3600.0) as avg_hours
+            FROM stats s
+            JOIN mapping mu ON mu.resource_id = s.user_id    
+            WHERE day BETWEEN ? AND ? AND user_id = ?
+            GROUP BY date, user_id
+            ORDER BY date DESC;
+        `, [start, end, userId]
         )
     }
 

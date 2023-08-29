@@ -263,6 +263,19 @@ export class ApiServer {
     );
 
     /**
+     * Returns user avg daily activity
+     * dashboard.html
+     */
+    this.fastify.get("/activity/users/:userid/daily", async (request) => {
+      const [startDate, endDate] = this.parseT(request.query);
+      return await this.activityService.getDailyActivityForUserInTime(
+        this.getParam(request.params, 'userid'),
+        startDate,
+        endDate,
+      );
+    });
+
+    /**
      * Returns monthly sum of date, user duration for channel time tracking
      * users.html
      */

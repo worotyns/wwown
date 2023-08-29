@@ -1,0 +1,34 @@
+<section>
+    <h2>Daily Activity</h2>
+
+    <div x-data="data()" x-init="load('/activity/dashboard/daily?t=-7d,0d')">
+        <h3>Average daily user activity on slack with interactions (last 7 days)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>day</th>
+                    <th>user</th>
+                    <th>avg messages</th>
+                    <th>avg reactions</th>
+                    <th>avg hours</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in items" :key="index">
+                    <tr>
+                        <td x-text="item.date">
+                        </td>
+                        <td>
+                            <a x-link :href="'/users/' + item.user_id + ''">
+                                <span x-text="'@' + item.user_label"></span>
+                            </a>
+                        </td>
+                        <td x-text="item.avg_messages"></td>
+                        <td x-text="item.avg_reactions"></td>
+                        <td x-text="item.avg_hours"></td>
+                    </tr>                    
+                </template>
+            </tbody>
+        </table>
+    </div>
+</section>
