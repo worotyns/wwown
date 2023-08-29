@@ -117,7 +117,22 @@ export class ApiServer {
     this.fastify.get("/resources", async (request) => {
       return await this.resourcesService.getResources();
     });
-
+    /**
+     * Returns all time channel, user duration
+     * timematrix.html
+     */
+    this.fastify.get(
+      "/timetracking/dashboard/matrix",
+      async (request) => {
+        const [startDate, endDate] = this.parseT(request.query);
+        return await this.timeTrackingService
+          .getTimeMatrixData(
+            startDate,
+            endDate,
+          );
+      },
+    );
+    
     /**
      * Returns last active users in all channels (who work on what now)
      * dashboard.html
@@ -234,7 +249,6 @@ export class ApiServer {
       },
     );
 
-        
     /**
      * Returns monthly sum of date, user duration for channel time tracking
      * users.html

@@ -172,4 +172,45 @@ export class TimeTrackingService {
         `, [userId, limit])
     }
 
+    /**
+     * Global sum of registered time
+     * timematrix.html
+     */
+    async getTimeMatrixData(start: Date, end: Date) {
+        const data = await this.repository.all(`
+            SELECT 
+                tt.channel_id,
+                mc.label AS channel_label,
+                tt.user_id,
+                mu.label AS user_label,
+                SUM(tt.duration_seconds) AS total_duration
+            FROM time_tracking tt
+            JOIN mapping mu ON tt.user_id = mu.resource_id
+            JOIN mapping mc ON tt.channel_id = mc.resource_id
+            WHERE tt.start_time BETWEEN ? AND ?
+            GROUP BY channel_id, user_id
+            ORDER BY total_duration DESC, user_id, channel_id;
+        `, [start, end]);
+
+        let users: Set<string> = new Set();
+        let channels: Set<string> = new Set();
+        let items: Record<string, any> = {};
+        let labels: Record<string, string> = {};
+
+        for (let item of data) {
+            users.add(item.user_id);
+            channels.add(item.channel_id);
+            items[item.user_id + item.channel_id] = item.total_duration;
+            labels[item.user_id] = item.user_label;
+            labels[item.channel_id] = item.channel_label;
+        }
+
+        return {
+            users: [...users], 
+            channels: [...channels], 
+            items,
+            labels
+        }
+    }
+
 }

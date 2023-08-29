@@ -1,16 +1,27 @@
 function data() {
   return {
     items: [],
+    item: {},
     async load(url) {
       this.items = [];
+      this.item = {};
       try {
         const response = await fetch(url);
-        this.items = await response.json();
+        const body = await response.json();
+        Array.isArray(body) ? this.items = body : this.item = body;
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     }
   };
+}
+
+function map(objectArray, fieldName) {
+  return objectArray.map(item => item[fieldName]);
+}
+
+function get(object, fieldName, defaultValue) {
+  return object && object[fieldName] || defaultValue;
 }
 
 function timeAgo(date) {

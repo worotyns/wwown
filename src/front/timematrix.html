@@ -1,0 +1,23 @@
+<div x-data="data()" x-init="load('/timetracking/dashboard/matrix?t=-365d,0d')">
+    <h3>Last year itemds summed up per channel, user</h3>
+    <table>
+        <thead class="rotate">
+            <tr>
+                <th><div>#channel</div></th>
+                <template x-for="(user_id, index) in item.users" :key="index">
+                    <th><div x-text="'@' + item.labels[user_id]"></div></th>
+                </template>
+            </tr>
+        </thead>
+        <tbody>
+            <template x-for="(channel_id, index) in item.channels" :key="index">
+                <tr>
+                    <th><div x-text="'#' + item.labels[channel_id]"></div></th>
+                    <template x-for="(user_id, index) in item.users" :key="index">
+                        <td><div x-text="duration(item.items[user_id+channel_id])"></div></td>
+                    </template>
+                </tr>
+            </template>
+        </tbody>
+    </table>
+</div>

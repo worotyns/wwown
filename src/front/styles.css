@@ -10,3 +10,17 @@
   height: 15px;
   background-color: lightgray;
 }
+
+thead.rotate th {
+  border: 0px solid;
+  /* Something you can count on */
+  height: 140px;
+  white-space: break-spaces;
+}
+
+thead.rotate th > div {
+  transform: 
+    translate(25px, 80px)
+    rotate(-85deg);
+  width: 30px;
+}
