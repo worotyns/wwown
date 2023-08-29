@@ -83,10 +83,10 @@ export class StatsCollectorFactory {
                     console.log(update);
                     await this.repository.run(`
                         INSERT OR IGNORE INTO 
-                            stats (channel_id, user_id, day, type, value, last_activity_ts) 
-                            VALUES (?, ?, ?, ?, ?, ?)
+                            stats (channel_id, user_id, day, type, value, last_activity_ts, first_activity_ts) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?)
                         `, [
-                        update.channel, update.user, update.day, update.type, 0, Date.now()
+                        update.channel, update.user, update.day, update.type, 0, Date.now(), Date.now()
                     ]);
 
                     const existing = await this.repository.get(`
