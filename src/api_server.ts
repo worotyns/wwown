@@ -150,13 +150,26 @@ export class ApiServer {
      * Returns lastactivity data for chart
      * dashboard.html
      */
-        this.fastify.get("/activity/dashboard/activity", async (request) => {
-          const [startDate, endDate] = this.parseT(request.query);
-          return await this.activityService.getActivityChartData(
-            startDate,
-            endDate,
-          );
-        });
+     this.fastify.get("/activity/dashboard/activity", async (request) => {
+      const [startDate, endDate] = this.parseT(request.query);
+      return await this.activityService.getActivityChartData(
+        startDate,
+        endDate,
+      );
+    });
+
+
+    /**
+     * Returns avg daily activity
+     * dashboard.html
+     */
+     this.fastify.get("/activity/dashboard/daily", async (request) => {
+      const [startDate, endDate] = this.parseT(request.query);
+      return await this.activityService.getDailyActivityForUsersInTime(
+        startDate,
+        endDate,
+      );
+    });
 
         
     /**

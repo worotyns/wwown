@@ -22,6 +22,22 @@ export class ActivityService {
 
     }
 
+    async getDailyActivityForUsersInTime(start: Date, end: Date) {
+        return this.repository.all(`
+            SELECT
+                strftime('%Y-%m-%d', DATE(day / 1000, 'unixepoch')) as date,
+                user_id,
+                mu.label as user_label,
+                ROUND(AVG((last_activity_ts - first_activity_ts)) / 3600.0) as avg_hours
+            FROM stats s
+            JOIN mapping mu ON mu.resource_id = s.user_id    
+            WHERE day BETWEEN ? AND ? 
+            GROUP BY date, user_id
+            ORDER BY date DESC, user_label;
+        `, [start, end]
+        )
+    }
+
     async getActivityChartData(start: Date, end: Date) {
         const [{min, max}] = await this.repository.all(`
             SELECT MIN(value) as min, MAX(value) as max
