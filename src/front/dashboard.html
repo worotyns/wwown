@@ -2,7 +2,7 @@
     <div class="cal" x-data="data()" x-init="load('/activity/dashboard/activity?t=-365d,0d')">
         <template x-for="(day, index) in items" :key="index">
           <div
-            class="day"
+            :class="{day: true, incident: day.incident}"
             :style="`font-size: 10px; cursor: pointer; background-color: ${day.color}`"  
             :title="day.title"
           ></div>

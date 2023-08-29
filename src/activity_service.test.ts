@@ -13,6 +13,26 @@ describe("activity_service", function () {
 
       await repo.run(`
         INSERT INTO 
+            time_tracking (channel_id, user_id, start_time, end_time, duration_seconds, description) 
+        VALUES 
+            (?, ?, ?, ?, ?, ?),
+            (?, ?, ?, ?, ?, ?)
+      `, [
+        'ch1', 'u1', new Date('2023-07-01 10:00:00'), new Date('2023-07-01 11:00:00'), 3600, "a",
+        'ch1', 'u1', new Date('2023-07-02 10:00:00'), new Date('2023-07-02 11:00:00'), 3600, "a",
+      ])
+
+      await repo.run(`
+        INSERT INTO 
+            incidents (channel_id, user_id, start_time, end_time, duration_seconds, description) 
+        VALUES 
+            (?, ?, ?, ?, ?, ?)
+      `, [
+        'ch1', 'u1', new Date('2023-07-01 10:00:00'), new Date('2023-07-01 11:00:00'), 3600, "a",
+      ])
+
+      await repo.run(`
+        INSERT INTO 
             stats (channel_id, user_id, day, type, value, last_activity_ts) 
         VALUES 
             (?, ?, ?, ?, ?, ?),
@@ -38,51 +58,60 @@ describe("activity_service", function () {
               {
                 "color": "rgb(0, 155, 0)",
                 "day": "2023-07-01",
-                "title": "2023-07-01: 22 interactions by 1 users on 1 channels"
-              },
+                "incident": true,
+                "title": "2023-07-01: 22 interactions by 1 users on 1 channels, incidents duration 60min, and 60min time records"              },
               {
                 "color": "rgb(0, 125, 0)",
                 "day": "2023-07-02",
-                "title": "2023-07-02: 62 interactions by 1 users on 1 channels"
+                "incident": false,
+                "title": "2023-07-02: 62 interactions by 1 users on 1 channels, and 60min time records"             
               },
               {
                 "color": "rgb(0, 155, 0)",
                 "day": "2023-07-03",
+                "incident": false,
                 "title": "2023-07-03: 22 interactions by 1 users on 1 channels"
               },
               {
                 "color": "lightgrey",
                 "day": "2023-07-04",
+                "incident": false,
                 "title": "2023-07-04"
               },
               {
                 "color": "lightgrey",
                 "day": "2023-07-05",
+                "incident": false,
                 "title": "2023-07-05"
               },
               {
                 "color": "lightgrey",
                 "day": "2023-07-06",
+                "incident": false,
                 "title": "2023-07-06"
               },
               {
                 "color": "rgb(0, 100, 0)",
                 "day": "2023-07-07",
+                "incident": false,
                 "title": "2023-07-07: 94 interactions by 2 users on 2 channels"
               },
               {
                 "color": "rgb(0, 148, 0)",
                 "day": "2023-07-08",
+                "incident": false,
                 "title": "2023-07-08: 32 interactions by 1 users on 1 channels"
               },
               {
                 "color": "lightgrey",
                 "day": "2023-07-09",
+                "incident": false,
                 "title": "2023-07-09"
               },
               {
                 "color": "lightgrey",
                 "day": "2023-07-10",
+                "incident": false,
                 "title": "2023-07-10"
               }
             ]

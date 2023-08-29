@@ -11,6 +11,13 @@
   background-color: lightgray;
 }
 
+.day.incident {
+  width: 15px;
+  height: 15px;
+  border: 0.5px red solid;
+  background-color: lightgray;
+}
+
 thead.rotate th {
   border: 0px solid;
   /* Something you can count on */

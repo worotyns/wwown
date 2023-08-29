@@ -35,19 +35,24 @@ export class ActivityService {
 
         const data = await this.repository.all(`
             SELECT 
-                day, 
-                SUM(value) as val,
-                COUNT(user_id) as uu,
-                COUNT(channel_id) as uc,
+                s.day, 
+                SUM(s.value) as val,
+                COUNT(s.user_id) as uu,
+                COUNT(s.channel_id) as uc,
+                SUM(i.duration_seconds) / 60 as it,
+                SUM(tt.duration_seconds) / 60 as tt,
                 ? as min,
                 ? as max
-            FROM stats 
+            FROM stats s
+            LEFT JOIN time_tracking tt ON s.channel_id = tt.channel_id AND DATE(s.day / 1000, 'unixepoch') = DATE(tt.start_time / 1000, 'unixepoch')
+            LEFT JOIN incidents i ON s.channel_id = i.channel_id AND DATE(s.day / 1000, 'unixepoch') = DATE(i.start_time / 1000, 'unixepoch')
             WHERE day BETWEEN ? AND ?
             GROUP BY day
             ORDER BY day DESC
             LIMIT ?
         `, [min, max, start, end, ActivityService.dateDiffInDays(start, end)]);
-
+            
+    
         const dataMap = new Map(data.map(item => [ActivityService.getKeyFromDay(item.day), item]));
         const filledAndNormalizedData = [];
         const currentDate = new Date(start)
@@ -63,12 +68,18 @@ export class ActivityService {
                 filledAndNormalizedData.push({
                     day: currentDay,
                     color: color,
-                    title: `${currentDate.toISOString().slice(0, 10)}: ${item.val} interactions by ${item.uu} users on ${item.uc} channels`
+                    incident: item.it > 0,
+                    title: [
+                        `${currentDate.toISOString().slice(0, 10)}: ${item.val} interactions by ${item.uu} users on ${item.uc} channels`,
+                        item.it ? `incidents duration ${item.it}min` : null,
+                        item.tt ? `and ${item.tt}min time records` : null,
+                    ].filter(i => i).join(', ')
                 });
             } else {
                 filledAndNormalizedData.push({
                     day: currentDay,
                     color: 'lightgrey',
+                    incident: false,
                     title: `${currentDate.toISOString().slice(0, 10)}`
                 });
             }
