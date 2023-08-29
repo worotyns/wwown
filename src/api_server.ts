@@ -154,6 +154,23 @@ export class ApiServer {
         startDate,
       );
     });
+    
+    /**
+     * Returns monthly sum of date, user duration for channel time tracking
+     * channels.html
+     */
+    this.fastify.get(
+      "/timetracking/channels/:channelid/monthly",
+      async (request) => {
+        const [startDate, endDate] = this.parseT(request.query);
+        return await this.timeTrackingService
+          .durationOfChannelInTimeByMonthAndUser(
+            this.getParam(request.params, "channelid"),
+            startDate,
+            endDate,
+          );
+      },
+    );
 
     /**
      * Returns sum of channel, duration for channel time tracking
@@ -214,6 +231,24 @@ export class ApiServer {
           this.getParam(request.params, "channelid"),
           this.parseLimit(request.query),
         );
+      },
+    );
+
+        
+    /**
+     * Returns monthly sum of date, user duration for channel time tracking
+     * users.html
+     */
+    this.fastify.get(
+      "/timetracking/users/:userid/monthly",
+      async (request) => {
+        const [startDate, endDate] = this.parseT(request.query);
+        return await this.timeTrackingService
+          .durationOfUserInTimeByMonthAndUser(
+            this.getParam(request.params, "userid"),
+            startDate,
+            endDate,
+          );
       },
     );
 

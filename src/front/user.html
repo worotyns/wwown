@@ -89,4 +89,32 @@
         </table>
     </div>
 
+    <div x-data="data()" x-init="load('/timetracking/users/' + $router.params.user_id + '/monthly?t=-365d,0d')">
+        <h3>Aggregated by date, channel for (12 months)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>date</th>
+                    <th>channel</th>
+                    <th>duration</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in items" :key="index">
+                    <tr>
+                        <td>
+                            <span x-text="item.date"></span>
+                        </td>
+                        <td>
+                            <a x-link :href="'/channels/' + item.channel_id + ''">
+                                <span x-text="'#' + item.channel_label"></span>
+                            </a>
+                        </td>
+                        <td><span x-text="duration(item.total_duration)"></span></td>
+                    </tr>                    
+                </template>
+            </tbody>
+        </table>
+    </div>
+
 </section>

@@ -89,6 +89,47 @@ export class TimeTrackingService {
     }
 
     /**
+     * Channel settlement of timetracking
+     * channel.html
+     */
+    async durationOfChannelInTimeByMonthAndUser(channelId: string, start: Date, end: Date) {
+        return this.repository.all(`
+            SELECT 
+                strftime('%Y-%m', DATETIME(tt.start_time / 1000, 'unixepoch')) AS date,
+                tt.start_time,
+                tt.user_id,
+                mu.label AS user_label,
+                SUM(tt.duration_seconds) AS total_duration
+            FROM time_tracking tt
+            JOIN mapping mu ON tt.user_id = mu.resource_id
+            WHERE tt.start_time BETWEEN ? AND ? AND tt.channel_id = ?
+            GROUP BY date, user_id
+            ORDER BY tt.start_time DESC, user_id;
+        `, [start, end, channelId])
+    }
+
+
+    /**
+     * Channel settlement of timetracking
+     * user.html
+     */
+    async durationOfUserInTimeByMonthAndUser(userId: string, start: Date, end: Date) {
+        return this.repository.all(`
+            SELECT 
+                strftime('%Y-%m', DATETIME(tt.start_time / 1000, 'unixepoch')) AS date,
+                tt.start_time,
+                tt.channel_id,
+                mu.label AS channel_label,
+                SUM(tt.duration_seconds) AS total_duration
+            FROM time_tracking tt
+            JOIN mapping mu ON tt.channel_id = mu.resource_id
+            WHERE tt.start_time BETWEEN ? AND ? AND tt.user_id = ?
+            GROUP BY date, channel_id
+            ORDER BY tt.start_time DESC, channel_id;
+        `, [start, end, userId])
+    }
+
+    /**
      * Aggregate duration of concrete channel, description in time range, ordered by channel_id, description,
      */
     async durationOfChannelAndDescriptionInTimeRange(channelId: string, start: Date, end: Date) {

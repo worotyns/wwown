@@ -194,6 +194,33 @@ describe("time_tracking_service", function () {
     ]);
   });
 
+  it('durationOfChannelInTimeByMonthAndUser', async function() {
+    const results = await timeTrackingService.durationOfChannelInTimeByMonthAndUser(
+      "channel_1",
+      new Date('2020'),
+      new Date('2025')
+    )
+
+    assert.deepEqual(results, [
+      {
+        date: '2023-01',
+        start_time: 1672650000000,
+        user_id: 'user_2',
+        user_label: 'user2',
+        description: 'ticket_xyz',
+        total_duration: 7200
+      },
+      {
+        date: '2023-01',
+        start_time: 1672563600000,
+        user_id: 'user_1',
+        user_label: 'user1',
+        description: 'ticket_xyz',
+        total_duration: 14400
+      }
+    ]);
+  })
+
   it("getLastNChannelAndDescriptionOfUserInTimeRange", async function () {
     const results = await timeTrackingService
       .getLastNChannelAndDescriptionOfUser(
