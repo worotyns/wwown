@@ -121,7 +121,7 @@ export class ActivityService {
                     color: color,
                     incident: item.it > 0,
                     title: [
-                        `${currentDate.toISOString().slice(0, 10)} ${currentDate.getDay()}: ${item.val} interactions by ${item.uu} users on ${item.uc} channels`,
+                        `${currentDate.toISOString().slice(0, 10)}: ${item.val} interactions by ${item.uu} users on ${item.uc} channels`,
                         item.it ? `incidents duration ${item.it}min` : null,
                         item.tt ? `and ${item.tt}min time records` : null,
                     ].filter(i => i).join(', ')

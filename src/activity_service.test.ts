@@ -56,18 +56,18 @@ describe("activity_service", function () {
             await as.getActivityChartData(new Date('2023-07-01'), new Date('2023-07-10')),
             [
               {
-                "color": "rgb(0, 155, 0)",
+                "color": "rgb(0, 143, 0)",
                 "day": "2023-07-01",
                 "incident": true,
                 "title": "2023-07-01: 22 interactions by 1 users on 1 channels, incidents duration 60min, and 60min time records"              },
               {
-                "color": "rgb(0, 125, 0)",
+                "color": "rgb(0, 119, 0)",
                 "day": "2023-07-02",
                 "incident": false,
                 "title": "2023-07-02: 62 interactions by 1 users on 1 channels, and 60min time records"             
               },
               {
-                "color": "rgb(0, 155, 0)",
+                "color": "rgb(0, 143, 0)",
                 "day": "2023-07-03",
                 "incident": false,
                 "title": "2023-07-03: 22 interactions by 1 users on 1 channels"
@@ -97,7 +97,7 @@ describe("activity_service", function () {
                 "title": "2023-07-07: 94 interactions by 2 users on 2 channels"
               },
               {
-                "color": "rgb(0, 148, 0)",
+                "color": "rgb(0, 137, 0)",
                 "day": "2023-07-08",
                 "incident": false,
                 "title": "2023-07-08: 32 interactions by 1 users on 1 channels"
