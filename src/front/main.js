@@ -83,17 +83,6 @@ function data(query) {
     },
     items: [],
     item: {},
-    async load(url) {
-      this.items = [];
-      this.item = {};
-      try {
-        const response = await fetch(url);
-        const body = await response.json();
-        Array.isArray(body) ? this.items = body : this.item = body;
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    },
     async query(url) {
       this.items = [];
       this.item = {};
