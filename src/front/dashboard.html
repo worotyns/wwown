@@ -1,5 +1,5 @@
 <section>
-    <div class="cal" x-data="data({start: -365, end: 0})" x-init="query('/activity/dashboard/activity')">
+    <div class="cal" x-data="data({start: -((52*7)+(new Date().getDay())), end: 0})" x-init="query('/activity/dashboard/activity')">
         <template x-for="(day, index) in items" :key="index">
           <div
             :class="{day: true, incident: day.incident}"
