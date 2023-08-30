@@ -54,17 +54,16 @@ export class KarmaService {
         return this.repository.all(`
             SELECT 
                 channel_id,
-                user_id,
-                mc.label as channel_label,
-                mu.label as user_label,
+                GROUP_CONCAT(DISTINCT mc.label || '|' || channel_id) AS channels,
+                GROUP_CONCAT(DISTINCT mu.label || '|' || user_id) AS users,
                 reaction,
                 COUNT(reaction) as total
             FROM karma
             JOIN mapping mu ON mu.resource_id = user_id
             JOIN mapping mc ON mc.resource_id = channel_id
             WHERE timestamp BETWEEN ? AND ?
-            GROUP BY channel_id, user_id, channel_label, user_label, reaction
-            ORDER BY total, reaction, channel_id, user_id
+            GROUP BY channel_id, reaction
+            ORDER BY total DESC, timestamp DESC 
             LIMIT ?;
         `,
         [start, end, limit])
@@ -76,19 +75,17 @@ export class KarmaService {
      */
     async getGlobalGiversInRangeAndLimit(start: Date, end: Date, limit: number) {
         return this.repository.all(`
-            SELECT 
-                channel_id,
-                reacting_user_id,
-                mc.label as channel_label,
-                mru.label as reacting_user_label,
+            SELECT
+                GROUP_CONCAT(DISTINCT mc.label || '|' || channel_id) AS channels,
+                GROUP_CONCAT(DISTINCT mru.label || '|' || reacting_user_id) AS users,
                 reaction,
                 COUNT(reaction) as total
             FROM karma
             JOIN mapping mru ON mru.resource_id = reacting_user_id
             JOIN mapping mc ON mc.resource_id = channel_id
             WHERE timestamp BETWEEN ? AND ?
-            GROUP BY channel_id, reacting_user_id, reaction
-            ORDER BY channel_id, reacting_user_id
+            GROUP BY channel_id, reaction
+            ORDER BY total DESC, timestamp DESC
             LIMIT ?;
         `,
         [start, end, limit])

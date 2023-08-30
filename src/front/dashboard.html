@@ -75,23 +75,31 @@
                 </tr>
             </thead>
             <tbody>
-                <template x-for="(item, index) in items" :key="index">
+                <template x-for="(row, index) in items" :key="index">
                     <tr>
                         <td>
-                            <a x-link :href="'/channels/' + item.channel_id + ''">
-                                <span x-text="'#' + item.channel_label"></span>
-                            </a>
+                            <template x-for="channel of row.channels.split(',')">
+                                <span x-data="{channelData: channel.split('|')}">
+                                    <a x-link :href="'/channels/' + channelData[1] + ''">
+                                        <span x-text="'#' + channelData[0]"></span>
+                                    </a>
+                                </span>
+                            </template>
                         </td>
                         <td>
-                            <a x-link :href="'/users/' + item.user_id + ''">
-                                <span x-text="'@' + item.user_label"></span>
-                            </a>
+                            <template x-for="user of row.users.split(',')">
+                                <span x-data="{userData: user.split('|')}">
+                                    <a x-link :href="'/users/' + userData[1] + ''">
+                                        <span x-text="'@' + userData[0]"></span>
+                                    </a>
+                                </span>
+                            </template>
                         </td>
-                        <td x-data="emojis()" x-init="init(item.reaction)">
+                        <td x-data="emojis()" x-init="init(row.reaction)">
                             <span x-show="isCustomEmoji && emoji" x-text="emoji"></span>
                             <img x-show="!isCustomEmoji && emoji" width="20px" height="20px" :src="`https://emojicdn.elk.sh/${emoji}`" />
                         </td>
-                        <td x-text="item.total"></td>
+                        <td x-text="row.total"></td>
                     </tr>                    
                 </template>
             </tbody>
@@ -113,23 +121,31 @@
                 </tr>
             </thead>
             <tbody>
-                <template x-for="(item, index) in items" :key="index">
+                <template x-for="(row, index) in items" :key="index">
                     <tr>
                         <td>
-                            <a x-link :href="'/channels/' + item.channel_id + ''">
-                                <span x-text="'#' + item.channel_label"></span>
-                            </a>
+                            <template x-for="channel of row.channels.split(',')">
+                                <span x-data="{channelData: channel.split('|')}">
+                                    <a x-link :href="'/channels/' + channelData[1] + ''">
+                                        <span x-text="'#' + channelData[0]"></span>
+                                    </a>
+                                </span>
+                            </template>
                         </td>
                         <td>
-                            <a x-link :href="'/users/' + item.reacting_user_id + ''">
-                                <span x-text="'@' + item.reacting_user_label"></span>
-                            </a>
+                            <template x-for="user of row.users.split(',')">
+                                <span x-data="{userData: user.split('|')}">
+                                    <a x-link :href="'/users/' + userData[1] + ''">
+                                        <span x-text="'@' + userData[0]"></span>
+                                    </a>
+                                </span>
+                            </template>
                         </td>
-                        <td x-data="emojis()" x-init="init(item.reaction)">
+                        <td x-data="emojis()" x-init="init(row.reaction)">
                             <span x-show="isCustomEmoji && emoji" x-text="emoji"></span>
                             <img x-show="!isCustomEmoji && emoji" width="20px" height="20px" :src="`https://emojicdn.elk.sh/${emoji}`" />
                         </td>
-                        <td x-text="item.total"></td>
+                        <td x-text="row.total"></td>
                     </tr>                    
                 </template>
             </tbody>
