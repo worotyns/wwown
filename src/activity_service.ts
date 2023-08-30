@@ -93,7 +93,7 @@ export class ActivityService {
                 COUNT(s.user_id) as uu,
                 COUNT(s.channel_id) as uc,
                 SUM(i.duration_seconds) / 60 as it,
-                SUM(tt.duration_seconds) / 60 as tt,
+                SUM(tt.duration_seconds) / 60 as tt
             FROM stats s
             LEFT JOIN time_tracking tt ON s.channel_id = tt.channel_id AND DATE(s.day / 1000, 'unixepoch') = DATE(tt.start_time / 1000, 'unixepoch')
             LEFT JOIN incidents i ON s.channel_id = i.channel_id AND DATE(s.day / 1000, 'unixepoch') = DATE(i.start_time / 1000, 'unixepoch')
