@@ -1,3 +1,27 @@
+function emojis() {
+  return {
+    fetchPromise: null,
+    emojiMap: {},
+    wrap(emojiCode) {
+      const skinToneRegex = /:skin-tone-[2-6]:|:skin-tone-:d:[2-6]:/g;
+      const rawEmojiCode = emojiCode.replace(skinToneRegex, '');
+      return this.emojiMap[rawEmojiCode] || ':'+emojiCode+':';
+    },
+    async init() {
+      if (this.fetchPromise) {
+        return this.fetchPromise;
+      }
+
+      this.fetchPromise = fetch('./sctuc.json')
+        .then(() => response.json().then(data => this.emojiMap = data))
+        .catch((error) => {
+          this.fetchPromise = null;
+          console.error('Error fetching emoji data:', error)
+        })
+    }
+  };
+}
+
 function data() {
   return {
     items: [],

@@ -69,14 +69,15 @@
                                 <span x-text="'@' + item.user_label"></span>
                             </a>
                         </td>
-                        <td x-text="item.reaction"></td>
+                        <td x-data="emojis()" x-init="init()">
+                            <span x-text="wrap(item.reaction)"></span>
+                        </td>
                         <td x-text="item.total"></td>
                     </tr>                    
                 </template>
             </tbody>
         </table>
     </div>
-
 
     <div x-data="data()" x-init="load('/karma/dashboard/givers?t=-30d,0d&l=10')">
         <h3>Aggregated reactions given by users (30days, 10 items)</h3>
@@ -102,7 +103,9 @@
                                 <span x-text="'@' + item.reacting_user_label"></span>
                             </a>
                         </td>
-                        <td x-text="item.reaction"></td>
+                        <td x-data="emojis()" x-init="init()">
+                            <span x-text="wrap(item.reaction)"></span>
+                        </td>
                         <td x-text="item.total"></td>
                     </tr>                    
                 </template>
