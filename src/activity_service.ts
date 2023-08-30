@@ -76,7 +76,7 @@ export class ActivityService {
     }
 
     async getActivityChartData(start: Date, end: Date) {
-        const [{min, max}] = await this.repository.all(`
+        const [{max}] = await this.repository.all(`
             SELECT MIN(value) as min, MAX(value) as max
             FROM (
                 SELECT day, SUM(value) as value
@@ -94,8 +94,6 @@ export class ActivityService {
                 COUNT(s.channel_id) as uc,
                 SUM(i.duration_seconds) / 60 as it,
                 SUM(tt.duration_seconds) / 60 as tt,
-                ? as min,
-                ? as max
             FROM stats s
             LEFT JOIN time_tracking tt ON s.channel_id = tt.channel_id AND DATE(s.day / 1000, 'unixepoch') = DATE(tt.start_time / 1000, 'unixepoch')
             LEFT JOIN incidents i ON s.channel_id = i.channel_id AND DATE(s.day / 1000, 'unixepoch') = DATE(i.start_time / 1000, 'unixepoch')
@@ -103,7 +101,7 @@ export class ActivityService {
             GROUP BY day
             ORDER BY day DESC
             LIMIT ?
-        `, [min, max, start, end, ActivityService.dateDiffInDays(start, end)]);
+        `, [start, end, ActivityService.dateDiffInDays(start, end)]);
             
     
         const dataMap = new Map(data.map(item => [ActivityService.getKeyFromDay(item.day), item]));
@@ -114,7 +112,7 @@ export class ActivityService {
             const currentDay = ActivityService.getKeyFromDay(currentDate.getTime());
             if (dataMap.has(currentDay)) {
                 const item = dataMap.get(currentDay);
-                const normalizedValue = Math.floor(ActivityService.normalizeValue(item.val, min, max, 100, 155));
+                const normalizedValue = Math.floor(ActivityService.normalizeValue(item.val, 0, max, 100, 155));
 
                 const color = `rgb(0, ${255 - normalizedValue}, 0)`;
 

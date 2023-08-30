@@ -7,7 +7,7 @@ export class HourlyActivityService {
   ) {
   }
 
-  private aggregateToHours(data: any[], min: number, max: number) {
+  private aggregateToHours(data: any[], min: number = 0, max: number = 100) {
     const hourlyMap = new Map(
       new Array(24)
         .fill(null)
@@ -39,7 +39,7 @@ export class HourlyActivityService {
   }
 
   async getGlobalActivityForTimeRange(start: Date, end: Date) {
-    const [{ min, max }] = await this.repository.all(
+    const [{ max }] = await this.repository.all(
       `
             SELECT MIN(count) as min, MAX(count) as max
             FROM (
@@ -49,25 +49,25 @@ export class HourlyActivityService {
                 GROUP by day
             )
         `,
-      [start.toISOString(), end.toISOString()],
+      [start, end],
     );
 
     const data = await this.repository.all(
       `
             SELECT
                 s.day,
-                strftime('%Y-%m-%d', s.day) as date,
-                strftime('%H', s.day) hour,
+                strftime('%Y-%m-%d', DATETIME(s.day / 1000, 'unixepoch')) as date,
+                strftime('%H', DATETIME(s.day / 1000, 'unixepoch')) hour,
                 SUM(s.count) AS count
             FROM hourly_activity s
             WHERE day BETWEEN ? AND ?
             GROUP BY date, hour
             ORDER BY date DESC, hour DESC;
         `,
-      [start.toISOString(), end.toISOString()],
+      [start, end],
     );
 
-    return this.aggregateToHours(data, min, max);
+    return this.aggregateToHours(data, 0, max);
   }
 
   async getHourlyActivityForUserInTimeRange(
@@ -75,7 +75,7 @@ export class HourlyActivityService {
     start: Date,
     end: Date,
   ) {
-    const [{ min, max }] = await this.repository.all(
+    const [{ max }] = await this.repository.all(
       `
             SELECT MIN(count) as min, MAX(count) as max
             FROM (
@@ -85,25 +85,25 @@ export class HourlyActivityService {
                 GROUP by day
             )
         `,
-      [start.toISOString(), end.toISOString(), userId],
+      [start, end, userId],
     );
 
     const data = await this.repository.all(
       `
               SELECT
                   s.day,
-                  strftime('%Y-%m-%d', s.day) as date,
-                  strftime('%H', s.day) hour,
+                  strftime('%Y-%m-%d', DATETIME(s.day / 1000, 'unixepoch')) as date,
+                  strftime('%H', DATETIME(s.day / 1000, 'unixepoch')) hour,
                   SUM(s.count) AS count
               FROM hourly_activity s
               WHERE day BETWEEN ? AND ? AND user_id = ?
               GROUP BY date, hour
               ORDER BY date DESC, hour DESC;
           `,
-      [start.toISOString(), end.toISOString(), userId],
+      [start, end, userId],
     );
 
-    return this.aggregateToHours(data, min, max);
+    return this.aggregateToHours(data, 0, max);
   }
 
   async getHourlyActivityForChannelInTimeRange(
@@ -111,7 +111,7 @@ export class HourlyActivityService {
     start: Date,
     end: Date,
   ) {
-    const [{ min, max }] = await this.repository.all(
+    const [{ max }] = await this.repository.all(
       `
               SELECT MIN(count) as min, MAX(count) as max
               FROM (
@@ -121,24 +121,24 @@ export class HourlyActivityService {
                   GROUP by day
               )
           `,
-      [start.toISOString(), end.toISOString(), channelId],
+      [start, end, channelId],
     );
 
     const data = await this.repository.all(
       `
                 SELECT
                     s.day,
-                    strftime('%Y-%m-%d', s.day) as date,
-                    strftime('%H', s.day) hour,
+                    strftime('%Y-%m-%d', DATETIME(s.day / 1000, 'unixepoch')) as date,
+                    strftime('%H', DATETIME(s.day / 1000, 'unixepoch')) hour,
                     SUM(s.count) AS count
                 FROM hourly_activity s
                 WHERE day BETWEEN ? AND ? AND channel_id = ?
                 GROUP BY date, hour
                 ORDER BY date DESC, hour DESC;
             `,
-      [start.toISOString(), end.toISOString(), channelId],
+      [start, end, channelId],
     );
 
-    return this.aggregateToHours(data, min, max);
+    return this.aggregateToHours(data, 0, max);
   }
 }
