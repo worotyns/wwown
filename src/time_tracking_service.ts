@@ -47,7 +47,7 @@ export class TimeTrackingService {
         // midnight problem
         if (referenceDate > new Date()) {
             referenceDate.setDate(referenceDate.getDate() - 1)
-          }
+        }
       }
 
       return {
