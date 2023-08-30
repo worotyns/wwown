@@ -1,6 +1,8 @@
+const emojiRequest = fetch('./sctuc.json').then((response) => response.json());
+
 function emojis() {
   return {
-    fetchPromise: null,
+    emojiPromise: null,
     emojiMap: {},
     wrap(emojiCode) {
       const skinToneRegex = /::skin-tone-[2-6]|::skin-tone-:d:[2-6]/g;
@@ -8,12 +10,12 @@ function emojis() {
       return this.emojiMap[rawEmojiCode] || ':'+emojiCode+':';
     },
     async init() {
-      if (this.fetchPromise) {
-        return this.fetchPromise;
+      if (this.emojiPromise) {
+        return this.emojiPromise;
       }
 
-      this.fetchPromise = fetch('./sctuc.json')
-        .then((response) => response.json().then(data => this.emojiMap = data))
+      this.emojiPromise = emojiRequest
+        .then(data => this.emojiMap = data)
         .catch((error) => {
           this.fetchPromise = null;
           console.error('Error fetching emoji data:', error)
