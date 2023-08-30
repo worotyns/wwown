@@ -31,3 +31,7 @@ thead.rotate th > div {
     rotate(-85deg);
   width: 30px;
 }
+
+table tr td, table tr th {
+  max-width: 350px;
+}
