@@ -24,8 +24,63 @@ function emojis() {
   };
 }
 
-function data() {
+function createDateFromPeriod(period) {
+  const now = new Date();
+
+  const regex = /(-?\d+)([dmy])/;
+  const match = period.match(regex);
+
+  if (!match) {
+    return null;
+  }
+
+  const value = parseInt(match[1]);
+  const unit = match[2];
+  let durationInMilliseconds = 0;
+
+  switch (unit) {
+    case "d":
+      durationInMilliseconds = value * 24 * 60 * 60 * 1000;
+      break;
+    case "m":
+      durationInMilliseconds = value * 31 * 24 * 60 * 60 * 1000;
+      break;
+    case "y":
+      durationInMilliseconds = value * 365 * 24 * 60 * 60 * 1000;
+      break;
+  }
+
+  return new Date(now.getTime() + durationInMilliseconds);
+}
+
+function queryParamsFromQueryState(state) {
+  const query = new URLSearchParams()
+  
+  if (!state.period) {
+    state.period = 'd'
+  }
+
+  if (typeof state.limit !== 'undefined') {
+    query.append('l', state.limit.toString())
+  }
+
+  if (typeof state.start !== 'undefined' && typeof state.end !== 'undefined') {
+    query.append('t', `${state.start}${state.period},${state.end}${state.period}`)
+  } else if (typeof state.end !== 'undefined') {
+    query.append('t', `0${state.period},${state.end}`)
+  } else if (typeof state.start !== 'undefined') {
+    query.append('t', `${state.start}${state.period}`)
+  }
+
+  return "?" + decodeURI(query.toString())
+}
+
+function data(query) {
   return {
+    queryParams: {
+      period: 'd',
+      ...query,
+    },
     items: [],
     item: {},
     async load(url) {
@@ -38,16 +93,19 @@ function data() {
       } catch (error) {
         console.error('Error fetching data:', error);
       }
+    },
+    async query(url) {
+      this.items = [];
+      this.item = {};
+      try {
+        const response = await fetch(url + queryParamsFromQueryState(this.queryParams));
+        const body = await response.json();
+        Array.isArray(body) ? this.items = body : this.item = body;
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     }
   };
-}
-
-function map(objectArray, fieldName) {
-  return objectArray.map(item => item[fieldName]);
-}
-
-function get(object, fieldName, defaultValue) {
-  return object && object[fieldName] || defaultValue;
 }
 
 function timeAgo(date) {

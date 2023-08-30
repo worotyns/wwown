@@ -1,7 +1,10 @@
 <section>
     <h2>Activity</h2>
-    <h3>Messages distribution in time (last 7 days)</h3>
-    <div x-data="data()" x-init="load('/activity/users/' + $router.params.user_id + '/hourly?t=-7d,0d')" style="padding-top: 35px">
+
+    <div x-data="data({start: -7, end: 0})"  x-init="query('/activity/users/' + $router.params.user_id + '/hourly')">
+        <h3>Messages distribution in time (
+            <input x-model="queryParams.start" @change="query('/activity/users/' + $router.params.user_id + '/hourly')" type="number" min="-365" max="0" step="7"/> days)
+        </h3>
         <div class="bar-chart" style="margin: auto; height: 80px; width: 520px;">
             <template x-for="item of items">
                 <div class="bar-container" :title="'Hour: ' + item.hour">
@@ -11,8 +14,11 @@
             </template>
         </div>
     </div>
-    <div x-data="data()" x-init="load('/activity/users/' + $router.params.user_id + '/last?l=15')">
-        <h3>Last channels where user was engaged (15 items)</h3>
+
+    <div x-data="data({limit: 15})"  x-init="query('/activity/users/' + $router.params.user_id + '/last')">
+        <h3>Last channels where user was engaged (
+            <input x-model="queryParams.limit" @change="query('/activity/users/' + $router.params.user_id + '/last')" type="number" min="1" max="100" step="5"/> items)
+        </h3>
         <table>
             <thead>
                 <tr>
@@ -39,8 +45,10 @@
         </table>
     </div>
 
-    <div x-data="data()" x-init="load('/activity/users/' + $router.params.user_id + '/top?l=10')">
-        <h3>Top 10 channels engaged by user all time</h3>
+    <div x-data="data({limit: 10})"  x-init="query('/activity/users/' + $router.params.user_id + '/top')">
+        <h3>Top channels engaged by user all time (
+            <input x-model="queryParams.limit" @change="query('/activity/users/' + $router.params.user_id + '/top')" type="number" min="1" max="100" step="5"/> items)
+        </h3>
         <table>
             <thead>
                 <tr>
@@ -67,8 +75,10 @@
         </table>
     </div>
 
-    <div x-data="data()" x-init="load('/activity/users/' + $router.params.user_id + '/daily?t=-7d,0d')">
-        <h3>Average daily user activity on slack with interactions (last 7 days)</h3>
+    <div x-data="data({start: -7, end: 0})" x-init="query('/activity/users/' + $router.params.user_id + '/daily')">
+        <h3>Average daily user activity on slack with interactions (
+            <input x-model="queryParams.start" @change="query('/activity/users/' + $router.params.user_id + '/daily')" type="number" min="-365" max="-1" step="7"/> days)
+        </h3>
         <table>
             <thead>
                 <tr>
@@ -83,7 +93,7 @@
                 <template x-for="(item, index) in items" :key="index">
                     <tr>
                         <td x-text="item.date"></td>
-                        <td x-text="item.user_label"></td>
+                        <td x-text="'@'+item.user_label"></td>
                         <td x-text="item.avg_messages"></td>
                         <td x-text="item.avg_reactions"></td>
                         <td x-text="item.avg_hours"></td>
@@ -95,8 +105,12 @@
 
     <h2>Karma</h2>
 
-    <div x-data="data()" x-init="load('/karma/users/' + $router.params.user_id + '/received?t=-30d,0d&l=15')">
-        <h3>Aggregated reactions received by users (30days, 10 items)</h3>
+
+    <div x-data="data({start: -30, end: 0, limit: 10})"  x-init="query('/karma/users/' + $router.params.user_id + '/received')">
+        <h3>Aggregated reactions received by users (
+            <input x-model="queryParams.start" @change="query('/karma/users/' + $router.params.user_id + '/received')" type="number" min="-365" max="0" step="7"/> days, 
+            <input x-model="queryParams.limit" @change="query('/karma/users/' + $router.params.user_id + '/received')" type="number" min="1" max="100" step="5"/> items)
+        </h3>
         <table>
             <thead>
                 <tr>
@@ -129,9 +143,11 @@
         </table>
     </div>
 
-
-    <div x-data="data()" x-init="load('/karma/users/' + $router.params.user_id + '/given?t=-30d,0d&l=15')">
-        <h3>Aggregated reactions given to each others (30days, 15 items)</h3>
+    <div x-data="data({start: -30, end: 0, limit: 10})"  x-init="query('/karma/users/' + $router.params.user_id + '/given')">
+        <h3>Aggregated reactions given to each others (
+            <input x-model="queryParams.start" @change="query('/karma/users/' + $router.params.user_id + '/given')" type="number" min="-365" max="0" step="7"/> days, 
+            <input x-model="queryParams.limit" @change="query('/karma/users/' + $router.params.user_id + '/given')" type="number" min="1" max="100" step="5"/> items)
+        </h3>
         <table>
             <thead>
                 <tr>
@@ -166,8 +182,10 @@
 
     <h2>Time tracking</h2>
 
-    <div x-data="data()" x-init="load('/timetracking/users/' + $router.params.user_id + '/last?l=15')">
-        <h3>Last time registrations (15 items)</h3>
+    <div x-data="data({limit: 10})"  x-init="query('/timetracking/users/' + $router.params.user_id + '/last')">
+        <h3>Last time registrations ( 
+            <input x-model="queryParams.limit" @change="query('/timetracking/users/' + $router.params.user_id + '/last')" type="number" min="1" max="100" step="5"/> items)
+        </h3>
         <table>
             <thead>
                 <tr>
@@ -194,8 +212,11 @@
         </table>
     </div>
 
-    <div x-data="data()" x-init="load('/timetracking/users/' + $router.params.user_id + '/monthly?t=-365d,0d')">
-        <h3>Aggregated by date, channel for (12 months)</h3>
+    <div x-data="data({start: -365, end: 0, limit: 10})"  x-init="query('/timetracking/users/' + $router.params.user_id + '/monthly')">
+        <h3>Aggregated by date, channel for ( 
+            <input x-model="queryParams.start" @change="query('/timetracking/users/' + $router.params.user_id + '/monthly')" type="number" min="-365" max="0" step="7"/> days, 
+            <input x-model="queryParams.limit" @change="query('/timetracking/users/' + $router.params.user_id + '/monthly')" type="number" min="1" max="100" step="5"/> items)
+        </h3>
         <table>
             <thead>
                 <tr>

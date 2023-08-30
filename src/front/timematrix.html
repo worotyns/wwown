@@ -1,5 +1,8 @@
-<div x-data="data()" x-init="load('/timetracking/dashboard/matrix?t=-365d,0d')">
-    <h3>Total registered time per channel, user (last year)</h3>
+
+<div x-data="data({start: -365, end: 0, limit: 10})"  x-init="query('/timetracking/dashboard/matrix')">
+    <h3>Total registered time per channel, user  (
+        <input x-model="queryParams.start" @change="query('/timetracking/dashboard/matrix')" type="number" min="-365" max="0" step="30"/> days)
+    </h3>
     <table>
         <thead class="rotate">
             <tr>

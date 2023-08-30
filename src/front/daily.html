@@ -1,8 +1,11 @@
 <section>
     <h2>Daily Activity</h2>
 
-    <div x-data="data()" x-init="load('/activity/dashboard/daily?t=-7d,0d')">
-        <h3>Average daily user activity on slack with interactions (last 7 days)</h3>
+    <div x-data="data({start: -7, end: 0, limit: 10})"  x-init="query('/activity/dashboard/daily')">
+        <h3>Average daily user activity on slack with interactions (
+            <input x-model="queryParams.start" @change="query('/activity/dashboard/daily')" type="number" min="-365" max="0" step="7"/> days, 
+            <input x-model="queryParams.limit" @change="query('/activity/dashboard/daily')" type="number" min="1" max="100" step="5"/> items)
+        </h3>
         <table>
             <thead>
                 <tr>
