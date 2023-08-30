@@ -8,13 +8,16 @@
 .day {
   width: 15px;
   height: 15px;
+  border-radius: 3px;
+  padding: 1px;
   background-color: lightgray;
 }
 
 .day.incident {
   width: 15px;
   height: 15px;
-  border: 0.5px rgb(211, 78, 78) solid;
+  border-radius: 3px;
+  border: 1.25px rgb(211, 78, 78) solid;
   background-color: lightgray;
 }
 
