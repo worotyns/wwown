@@ -123,6 +123,22 @@ export class ApiServer {
     });
 
     /**
+     * Returns all time channel, user duration
+     * timematrix.html
+     */
+    this.fastify.get(
+      "/timetracking/dashboard/matrix",
+      async (request) => {
+        const [startDate, endDate] = this.parseT(request.query);
+        return this.timeTrackingService
+          .getTimeMatrixData(
+            startDate,
+            endDate,
+          );
+      },
+    );
+
+    /**
      * Get karma reactions top
      * users.html
      */
