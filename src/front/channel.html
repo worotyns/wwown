@@ -83,6 +83,31 @@
         </table>
     </div>
 
+    <div x-data="data()" x-init="load('/activity/channels/' + $router.params.channel_id + '/daily?t=-7d,0d')">
+        <h3>Average daily channel activity on slack with interactions (last 7 days)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>day</th>
+                    <th>channel</th>
+                    <th>avg messages</th>
+                    <th>avg reactions</th>
+                    <th>avg hours</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in items" :key="index">
+                    <tr>
+                        <td x-text="item.date"></td>
+                        <td x-text="'#' + item.channel_label"></td>
+                        <td x-text="item.avg_messages"></td>
+                        <td x-text="item.avg_reactions"></td>
+                        <td x-text="item.avg_hours"></td>
+                    </tr>                    
+                </template>
+            </tbody>
+        </table>
+    </div>
 
     <h2>Karma</h2>
 

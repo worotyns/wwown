@@ -28,9 +28,9 @@ export class ActivityService {
                 strftime('%Y-%m-%d', DATE(day / 1000, 'unixepoch')) as date,
                 user_id,
                 mu.label as user_label,
-                AVG(CASE WHEN type = 'message' THEN value ELSE 0 END) AS avg_messages,
-                AVG(CASE WHEN type = 'reaction_added' THEN value ELSE 0 END) AS avg_reactions,
-                ROUND(AVG((last_activity_ts - first_activity_ts)) / 3600.0) as avg_hours
+                ROUND(AVG(CASE WHEN type = 'message' THEN value ELSE 0 END), 1) AS avg_messages,
+                ROUND(AVG(CASE WHEN type = 'reaction_added' THEN value ELSE 0 END), 1) AS avg_reactions,
+                ROUND(AVG(last_activity_ts - first_activity_ts) / 1000 / 3600, 1) as avg_hours
             FROM stats s
             JOIN mapping mu ON mu.resource_id = s.user_id    
             WHERE day BETWEEN ? AND ? 
@@ -40,15 +40,32 @@ export class ActivityService {
         )
     }
 
+    async getDailyActivityForChannelInTime(channelId: string, start: Date, end: Date) {
+        return this.repository.all(`
+            SELECT
+                strftime('%Y-%m-%d', DATE(day / 1000, 'unixepoch')) as date,
+                channel_id,
+                mc.label as channel_label,
+                ROUND(AVG(CASE WHEN type = 'message' THEN value ELSE 0 END), 1) AS avg_messages,
+                ROUND(AVG(CASE WHEN type = 'reaction_added' THEN value ELSE 0 END), 1) AS avg_reactions,
+                ROUND(AVG(last_activity_ts - first_activity_ts) / 1000 / 3600, 1) as avg_hours
+            FROM stats s
+            JOIN mapping mc ON mc.resource_id = s.channel_id    
+            WHERE day BETWEEN ? AND ? AND channel_id = ?
+            GROUP BY date, channel_id
+            ORDER BY date DESC;
+        `, [start, end, channelId]);
+    }
+
     async getDailyActivityForUserInTime(userId: string, start: Date, end: Date) {
         return this.repository.all(`
             SELECT
                 strftime('%Y-%m-%d', DATE(day / 1000, 'unixepoch')) as date,
                 user_id,
                 mu.label as user_label,
-                AVG(CASE WHEN type = 'message' THEN value ELSE 0 END) AS avg_messages,
-                AVG(CASE WHEN type = 'reaction_added' THEN value ELSE 0 END) AS avg_reactions,
-                ROUND(AVG((last_activity_ts - first_activity_ts)) / 3600.0) as avg_hours
+                ROUND(AVG(CASE WHEN type = 'message' THEN value ELSE 0 END), 1) AS avg_messages,
+                ROUND(AVG(CASE WHEN type = 'reaction_added' THEN value ELSE 0 END), 1) AS avg_reactions,
+                ROUND(AVG(last_activity_ts - first_activity_ts) / 1000 / 3600, 1) as avg_hours
             FROM stats s
             JOIN mapping mu ON mu.resource_id = s.user_id    
             WHERE day BETWEEN ? AND ? AND user_id = ?

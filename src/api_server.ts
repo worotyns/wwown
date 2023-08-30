@@ -362,6 +362,19 @@ export class ApiServer {
     });
 
     /**
+     * Returns user avg daily activity
+     * channels.html
+     */
+    this.fastify.get("/activity/channels/:channelid/daily", async (request) => {
+      const [startDate, endDate] = this.parseT(request.query);
+      return this.activityService.getDailyActivityForChannelInTime(
+        this.getParam(request.params, "channelid"),
+        startDate,
+        endDate,
+      );
+    });
+
+    /**
      * Returns monthly sum of date, user duration for channel time tracking
      * users.html
      */
