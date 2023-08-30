@@ -17,30 +17,69 @@ export class TimeTrackingService {
         return startOfDay;
     }
 
-    static extractTimeAndDescription(timeString: string, date = new Date()): TimeTrackItem {
+    static extractDuration(timeString: string) {
         const timeRegex = /(\d+d)?(\d+h)?(\d+m)?\s*(.*)/;
         const matches = timeString.match(timeRegex);
     
         if (!matches) {
             throw new Error('Cannot parse time, write please in format eg. 3d20m sample task');
         }
-    
+
         const days = parseInt(matches[1] || '0', 10);
         const hours = parseInt(matches[2] || '0', 10);
         const minutes = parseInt(matches[3] || '0', 10);
-        const description = matches[4] || '';
-    
-        const totalMinutes = days * 24 * 60 + hours * 60 + minutes;
-        const durationInSeconds = totalMinutes * 60;
-    
-        const endTime = date;
+        const rest = matches[4] || '';
 
         return {
-            startTime: new Date(endTime.getTime() - (durationInSeconds * 1000)), 
-            endTime: endTime,
-            durationInSeconds,
-            description: description.trim()
-        };
+          days, hours, minutes, rest
+        }    
+    }
+
+    static extractReferenceDateOrNow(text: string) {
+      const startAtRegex = /@(\d{2}):(\d{2})/;
+      const matches = text.match(startAtRegex);
+
+      let referenceDate: null | Date = null;
+
+      if (matches) {
+        referenceDate = new Date()
+        referenceDate.setHours(~~matches[1], ~~matches[2], 0, 0);
+        // midnight problem
+        if (referenceDate > new Date()) {
+            referenceDate.setDate(referenceDate.getDate() - 1)
+          }
+      }
+
+      return {
+        referenceDate, description: text.replace(startAtRegex, '')
+      }
+    }
+
+    static extractTimeAndDescription(timeString: string): TimeTrackItem {
+        const {days, hours, minutes, rest} = this.extractDuration(timeString);
+    
+        const {referenceDate, description} = this.extractReferenceDateOrNow(rest)
+
+        const totalMinutes = days * 24 * 60 + hours * 60 + minutes;
+        const durationInSeconds = totalMinutes * 60;
+
+        if (referenceDate) {
+          const startTime = referenceDate;
+          return {
+              startTime: startTime, 
+              endTime: new Date(startTime.getTime() + (durationInSeconds * 1000)),
+              durationInSeconds,
+              description: description.trim()
+          };
+        } else {
+          const endTime = new Date();
+          return {
+              startTime: new Date(endTime.getTime() - (durationInSeconds * 1000)), 
+              endTime: endTime,
+              durationInSeconds,
+              description: description.trim()
+          };
+        }
     }
 
     static calculateDurationInSeconds(startTime: Date, endTime: Date): number {
