@@ -9,6 +9,12 @@ export interface DayChannel {
     day: Date,
 }
 
+export interface HourlyChannel {
+    channel: string,
+    user: string,
+    day: Date,
+}
+
 export interface Mapping {
     resource: string,
     label: string;
@@ -112,6 +118,60 @@ export class StatsCollectorFactory {
                         existing.user_id,
                         existing.day,
                         existing.type
+                    ]);
+                }
+            },
+            this.logger,
+            options,
+        )
+    }
+
+    createHourlyCollector(options: CollectorOptions) {
+        return new StatsCollector<HourlyChannel>(
+            new Map([
+                ['channel', [
+                    (val) => val.toString(), 
+                    (val) => val
+                ]],
+                ['user', [
+                    (val) => val.toString(), 
+                    (val) => val
+                ]],
+                ['day', [
+                    (val) => new Date().toISOString().split(':')[0] + ":00:00.000Z",
+                    (val) => new Date(val),
+                ]],
+            ]), 
+            async (state) => {
+                for (const update of state) {
+                    await this.repository.run(`
+                        INSERT OR IGNORE INTO 
+                            hourly_activity (channel_id, user_id, day, count) 
+                        VALUES (?, ?, ?, ?)
+                        `, [
+                        update.channel, update.user, update.day, 0
+                    ]);
+
+                    const existing = await this.repository.get(`
+                        SELECT rowid as id, channel_id, user_id, day, count
+                        FROM hourly_activity
+                        WHERE channel_id = ? AND user_id = ? AND day = ? AND type = ?
+                    `, [
+                        update.channel, 
+                        update.user, 
+                        update.day
+                    ]);
+                    
+                    await this.repository.run(`
+                        UPDATE hourly_activity
+                        SET count = count + ?
+                        WHERE channel_id = ? AND user_id = ? AND day = ?
+                    `, [
+                        update.value,
+                        Date.now(),
+                        existing.channel_id,
+                        existing.user_id,
+                        existing.day
                     ]);
                 }
             },

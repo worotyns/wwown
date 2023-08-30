@@ -14,18 +14,18 @@
                 </tr>
             </thead>
             <tbody>
-                <template x-for="(item, index) in items" :key="index">
+                <template x-for="(row, index) in items" :key="index">
                     <tr>
-                        <td x-text="item.date">
+                        <td x-text="row.date">
                         </td>
                         <td>
-                            <a x-link :href="'/users/' + item.user_id + ''">
-                                <span x-text="'@' + item.user_label"></span>
+                            <a x-link :href="'/users/' + row.user_id + ''">
+                                <span x-text="'@' + row.user_label"></span>
                             </a>
                         </td>
-                        <td x-text="item.avg_messages"></td>
-                        <td x-text="item.avg_reactions"></td>
-                        <td x-text="item.avg_hours"></td>
+                        <td x-text="row.avg_messages"></td>
+                        <td x-text="row.avg_reactions"></td>
+                        <td x-text="row.avg_hours"></td>
                     </tr>                    
                 </template>
             </tbody>

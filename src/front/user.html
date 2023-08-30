@@ -1,7 +1,16 @@
 <section>
-    
     <h2>Activity</h2>
-
+    <h3>Messages distribution in time (last 7 days)</h3>
+    <div x-data="data()" x-init="load('/activity/users/' + $router.params.user_id + '/hourly?t=-7d,0d')" style="padding-top: 35px">
+        <div class="bar-chart" style="margin: auto; height: 80px; width: 520px;">
+            <template x-for="item of items">
+                <div class="bar-container" :title="'Hour: ' + item.hour">
+                    <div class="bar-fill" :style="{'height': item.value+'%'}"></div>
+                    <span class="label" x-text="item.hour"></span>
+                </div>
+            </template>
+        </div>
+    </div>
     <div x-data="data()" x-init="load('/activity/users/' + $router.params.user_id + '/last?l=15')">
         <h3>Last channels where user was engaged (15 items)</h3>
         <table>

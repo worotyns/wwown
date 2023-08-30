@@ -11,6 +11,7 @@ import { ResourcesService } from './resources_service';
 import { createLogger } from './logger';
 import { IncidentService } from './incident_service';
 import { KarmaService } from './karma_service';
+import { HourlyActivityService } from './hourly_service';
 
 (async () => {
     const logger = createLogger();
@@ -23,16 +24,19 @@ import { KarmaService } from './karma_service';
 
     const statsCollector = collectorFactory.createChannelCollector({count: 25, milliseconds: 25_000});
     const mappingCollector = collectorFactory.createMappingCollector({count: 50, milliseconds: 35_000});
+    const hourlyCollector = collectorFactory.createHourlyCollector({count: 25, milliseconds: 15_000});
 
     const karmaService = new KarmaService(repository);
     const resourceService = new ResourcesService(repository);
     const activityService = new ActivityService(repository);
     const timeTrackingService = new TimeTrackingService(repository);
     const incidentService = new IncidentService(repository);
+    const hourlyActivityService = new HourlyActivityService(repository);
 
     const botFactory = new BotFactory(
         statsCollector,
         mappingCollector,
+        hourlyCollector,
         timeTrackingService,
         incidentService,
         resourceService,
@@ -48,6 +52,7 @@ import { KarmaService } from './karma_service';
         timeTrackingService,
         incidentService,
         karmaService,
+        hourlyActivityService,
     );
 
     ProcessManager.create([
@@ -66,6 +71,10 @@ import { KarmaService } from './karma_service';
         async () => { 
             logger.log('Stopping mapping collector')
             await mappingCollector.stop() 
+        },
+        async () => { 
+            logger.log('Stopping hourly collector')
+            await hourlyCollector.stop() 
         },
         async () => { 
             logger.log('Stopping repository')

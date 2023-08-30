@@ -20,18 +20,19 @@
                     <th>users</th>
                     <th>interactions</th>
                     <th>last interaction</th>
+                    <th>distribution</th>
                 </tr>
             </thead>
             <tbody>
-                <template x-for="(item, index) in items" :key="index">
+                <template x-for="(row, index) in items" :key="index">
                     <tr>
                         <td>
-                            <a x-link :href="'/channels/' + item.channel_id + ''">
-                                <span x-text="'#' + item.channel_label"></span>
+                            <a x-link :href="'/channels/' + row.channel_id + ''">
+                                <span x-text="'#' + row.channel_label"></span>
                             </a>
                         </td>
                         <td>
-                            <template x-for="user of item.users.split(',')">
+                            <template x-for="user of row.users.split(',')">
                                 <span x-data="{userData: user.split('|')}">
                                     <a x-link :href="'/users/' + userData[1] + ''">
                                         <span x-text="'@' + userData[0]"></span>
@@ -39,8 +40,17 @@
                                 </span>
                             </template>
                         </td>
-                        <td><span x-text="item.total_value"></span></td>
-                        <td><span x-text="timeAgo(item.last_activity_at)"></span></td>
+                        <td><span x-text="row.total_value"></span></td>
+                        <td><span x-text="timeAgo(row.last_activity_at)"></span></td>
+                        <td>
+                            <div x-data="data()" x-init="load('/activity/channels/' + row.channel_id + '/hourly?t=-3d,0d')">
+                                <div class="bar-chart" style="height: 20px; width: 120px;">
+                                    <template x-for="item of items">
+                                        <div :title="'Hour: ' + item.hour" class="bar" :style="{'height': item.value+'%'}"></div>
+                                    </template>
+                                </div>
+                            </div>
+                        </td>
                     </tr>                    
                 </template>
             </tbody>

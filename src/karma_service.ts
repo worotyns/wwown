@@ -127,7 +127,7 @@ export class KarmaService {
                 channel_id,
                 reacting_user_id,
                 mc.label as channel_label,
-                mu.label as reacting_user_label,
+                mru.label as reacting_user_label,
                 reaction,
                 COUNT(reaction) as total
             FROM karma

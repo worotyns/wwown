@@ -5,6 +5,7 @@ import { ResourcesService } from "./resources_service";
 import path from "path";
 import { IncidentService } from "./incident_service";
 import { KarmaService } from "./karma_service";
+import { HourlyActivityService } from "./hourly_service";
 
 interface ApiOptions {
   port: string;
@@ -68,6 +69,7 @@ export class ApiServer {
     private readonly timeTrackingService: TimeTrackingService,
     private readonly incidentService: IncidentService,
     private readonly karmaService: KarmaService,
+    private readonly hourlyActivityService: HourlyActivityService,
     private readonly opts: ApiOptions = {
       port: process.env.API_SERVER_PORT || "4000",
       bindAddres: process.env.API_SERVER_BIND_ADDR || "0.0.0.0",
@@ -206,15 +208,49 @@ export class ApiServer {
     });
 
     /**
-     * Returns all time channel, user duration
-     * timematrix.html
+     * Returns distribution time of date range
+     * dashboard.html
      */
     this.fastify.get(
-      "/timetracking/dashboard/matrix",
+      "/activity/dashboard/hourly",
       async (request) => {
         const [startDate, endDate] = this.parseT(request.query);
-        return this.timeTrackingService
-          .getTimeMatrixData(
+        return this.hourlyActivityService
+          .getGlobalActivityForTimeRange(
+            startDate,
+            endDate,
+          );
+      },
+    );
+
+    /**
+     * Returns distribution time of channel
+     * channel.html
+     */
+    this.fastify.get(
+      "/activity/channels/:channelid/hourly",
+      async (request) => {
+        const [startDate, endDate] = this.parseT(request.query);
+        return this.hourlyActivityService
+          .getHourlyActivityForChannelInTimeRange(
+            this.getParam(request.params, "channelid"),
+            startDate,
+            endDate,
+          );
+      },
+    );
+
+    /**
+     * Returns distribution time of user
+     * user.html
+     */
+    this.fastify.get(
+      "/activity/users/:userid/hourly",
+      async (request) => {
+        const [startDate, endDate] = this.parseT(request.query);
+        return this.hourlyActivityService
+          .getHourlyActivityForUserInTimeRange(
+            this.getParam(request.params, "userid"),
             startDate,
             endDate,
           );

@@ -1,6 +1,6 @@
 import { App } from '@slack/bolt';
 import { StatsCollector } from './stats_collector';
-import { DayChannel, Mapping } from './stats_collector_factory';
+import { DayChannel, HourlyChannel, Mapping } from './stats_collector_factory';
 import { IntentionType, SlackHelper } from './slack_helper';
 import { Logger } from './logger';
 import { WebClient } from '@slack/web-api';
@@ -13,6 +13,7 @@ export class BotFactory {
   constructor(
     private readonly statsCollector: StatsCollector<DayChannel>,
     private readonly mappingCollector: StatsCollector<Mapping>,
+    private readonly hourlyCollector: StatsCollector<HourlyChannel>,
     private readonly timeTrackingService: TimeTrackingService,
     private readonly incidentService: IncidentService,
     private readonly resourceService: ResourcesService,
@@ -43,6 +44,12 @@ export class BotFactory {
         type: 'reaction_added'
       });
 
+      this.hourlyCollector.register({
+        channel: event.item.channel,
+        user: event.user,
+        day: slackHelper.resolveDateFromTS(event.event_ts),
+      });
+
       const channel = event.item.channel;
       const userReacted = event.user;
       const reaction = event.reaction;
@@ -64,6 +71,12 @@ export class BotFactory {
         type: 'channel_created'
       });
 
+      this.hourlyCollector.register({
+        channel: event.channel.id,
+        user: event.channel.creator,
+        day: slackHelper.resolveDateFromTS(event.channel.created.toString()),
+      })
+
       await slackHelper.touchMappings(event.channel.id, event.channel.creator);
 
       await app.client.conversations.join({
@@ -72,17 +85,14 @@ export class BotFactory {
     })
 
     app.event('channel_rename', async ({event}) => {
-      console.log({event})
       await this.resourceService.renameResource(event.channel.id, event.channel.name_normalized);
     });
 
     app.event('channel_deleted', async ({event}) => {
-      console.log({event})
       await this.resourceService.removeResourceById(event.channel);
     })
 
     app.event('channel_archive', async ({event}) => {
-      console.log({event})
       await this.resourceService.removeResourceById(event.channel);
     })
 
@@ -120,6 +130,12 @@ export class BotFactory {
         type: 'message'
       });
 
+      this.hourlyCollector.register({
+        channel: message.channel,
+        user: user,
+        day: slackHelper.resolveDateFromTS(message.event_ts),
+      });
+    
       await slackHelper.touchMappings(message.channel, user);
     });
 
