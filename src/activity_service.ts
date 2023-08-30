@@ -200,7 +200,7 @@ export class ActivityService {
             SELECT
                 s.channel_id,
                 m_channel.label AS channel_label,
-                GROUP_CONCAT(m_user.label || '|' || s.user_id) AS users,
+                GROUP_CONCAT(DISTINCT m_user.label || '|' || s.user_id) AS users,
                 SUM(s.value) AS total_value,
                 MAX(s.last_activity_ts) AS last_activity_at
             FROM stats s
