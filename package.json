@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "start": "node dist/main.js",
-    "build": "tsc && yarn run generate:emoji && cp -r src/front dist/front",
+    "build": "tsc && cp -r src/front dist/front",
     "generate:emoji": "sh emojis/generate.sh",
     "dev": "ts-node src/main.ts",
     "test:ci": "mocha dist/**/*.test.js",
