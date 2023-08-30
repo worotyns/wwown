@@ -55,7 +55,7 @@ export class TimeTrackingService {
       }
     }
 
-    static extractTimeAndDescription(timeString: string): TimeTrackItem {
+    static extractTimeAndDescription(timeString: string, testEndDate: Date = new Date()): TimeTrackItem {
         const {days, hours, minutes, rest} = this.extractDuration(timeString);
     
         const {referenceDate, description} = this.extractReferenceDateOrNow(rest)
@@ -72,7 +72,7 @@ export class TimeTrackingService {
               description: description.trim()
           };
         } else {
-          const endTime = new Date();
+          const endTime = testEndDate;
           return {
               startTime: new Date(endTime.getTime() - (durationInSeconds * 1000)), 
               endTime: endTime,
