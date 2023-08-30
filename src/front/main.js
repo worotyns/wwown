@@ -22,13 +22,6 @@ function emojis() {
   };
 }
 
-function daysRange(dateValue) {
-  const date = new Date(dateValue);
-  
-  
-  // -7d,0d
-} 
-
 function data() {
   return {
     items: [],
