@@ -159,7 +159,7 @@
                             </a>
                         </td>
                         <td x-data="emojis()" x-init="init()">
-                            <span x-text="wrap(item.reaction)"></span>
+                            <img width="20px" height="20px" :title="item.reaction" :src="`https://emojicdn.elk.sh/${wrap(item.reaction)}`" />
                         </td>
                         <td x-text="item.total"></td>
                     </tr>                    
@@ -196,7 +196,7 @@
                             </a>
                         </td>
                         <td x-data="emojis()" x-init="init()">
-                            <span x-text="wrap(item.reaction)"></span>
+                            <img width="20px" height="20px" :title="item.reaction" :src="`https://emojicdn.elk.sh/${wrap(item.reaction)}`" />
                         </td>
                         <td x-text="item.total"></td>
                     </tr>                    

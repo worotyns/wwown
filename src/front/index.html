@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="/styles.css"/>
     <script defer src="https://unpkg.com/@shaun/alpinejs-router@1.x.x/dist/es6.min.js"></script>
       <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-      <script src="main.js?v=20230830_1"></script>
+      <script src="main.js?v=20230831"></script>
       <title>
         who works on what?
       </title>
@@ -32,7 +32,7 @@
         <small>
           <a href="https://github.com/worotyns/wwown/">wwown github</a><span> | </span>
           <span
-            x-data="{currentSeconds: 300}" 
+            x-data="{currentSeconds: 180}" 
             x-init="setInterval(() => currentSeconds === 0 ? window.location.reload() : currentSeconds--, 1000)">
             <span>
               <small>auto reload in <span x-text="currentSeconds"></span>s.</small>
