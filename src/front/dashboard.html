@@ -1,5 +1,5 @@
 <section>
-    <div class="cal" x-data="data({start: -((52*7)+(new Date().getDay())), end: 0})" x-init="query('/activity/dashboard/activity')">
+    <div class="cal" x-data="data({start: -((52*7)+(new Date().getUTCDay())), end: 0})" x-init="query('/activity/dashboard/activity')">
         <template x-for="(day, index) in items" :key="index">
           <div
             :class="{day: true, incident: day.incident}"
@@ -87,8 +87,9 @@
                                 <span x-text="'@' + item.user_label"></span>
                             </a>
                         </td>
-                        <td x-data="emojis()" x-init="init()">
-                            <img width="20px" height="20px" :title="item.reaction" :src="`https://emojicdn.elk.sh/${wrap(item.reaction)}`" />
+                        <td x-data="emojis()" x-init="init(item.reaction)">
+                            <span x-show="isCustomEmoji && emoji" x-text="emoji"></span>
+                            <img x-show="!isCustomEmoji && emoji" width="20px" height="20px" :src="`https://emojicdn.elk.sh/${emoji}`" />
                         </td>
                         <td x-text="item.total"></td>
                     </tr>                    
@@ -124,8 +125,9 @@
                                 <span x-text="'@' + item.reacting_user_label"></span>
                             </a>
                         </td>
-                        <td x-data="emojis()" x-init="init()">
-                            <img width="20px" height="20px" :title="item.reaction" :src="`https://emojicdn.elk.sh/${wrap(item.reaction)}`" />
+                        <td x-data="emojis()" x-init="init(item.reaction)">
+                            <span x-show="isCustomEmoji && emoji" x-text="emoji"></span>
+                            <img x-show="!isCustomEmoji && emoji" width="20px" height="20px" :src="`https://emojicdn.elk.sh/${emoji}`" />
                         </td>
                         <td x-text="item.total"></td>
                     </tr>                    

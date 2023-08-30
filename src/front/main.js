@@ -2,6 +2,8 @@ const emojiRequest = fetch('./sctuc.json').then((response) => response.json());
 
 function emojis() {
   return {
+    emoji: null,
+    isCustomEmoji: false,
     emojiPromise: null,
     emojiMap: {},
     wrap(emojiCode) {
@@ -9,13 +11,22 @@ function emojis() {
       const rawEmojiCode = emojiCode.replace(skinToneRegex, '');
       return this.emojiMap[rawEmojiCode] || ':'+emojiCode+':';
     },
-    async init() {
+    async init(emojiCode) {
       if (this.emojiPromise) {
         return this.emojiPromise;
       }
 
+      if (!emojiCode) {
+        return;
+      }
+
       this.emojiPromise = emojiRequest
         .then(data => this.emojiMap = data)
+        .then(() => {
+          const emoji = this.wrap(emojiCode);
+          this.isCustomEmoji = emoji.startsWith(':');
+          this.emoji = emoji;
+        })
         .catch((error) => {
           this.fetchPromise = null;
           console.error('Error fetching emoji data:', error)
