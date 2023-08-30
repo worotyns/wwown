@@ -13,7 +13,7 @@ function emojis() {
       }
 
       this.fetchPromise = fetch('./sctuc.json')
-        .then(() => response.json().then(data => this.emojiMap = data))
+        .then((response) => response.json().then(data => this.emojiMap = data))
         .catch((error) => {
           this.fetchPromise = null;
           console.error('Error fetching emoji data:', error)
