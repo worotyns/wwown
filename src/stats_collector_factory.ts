@@ -155,7 +155,7 @@ export class StatsCollectorFactory {
                     const existing = await this.repository.get(`
                         SELECT rowid as id, channel_id, user_id, day, count
                         FROM hourly_activity
-                        WHERE channel_id = ? AND user_id = ? AND day = ? AND type = ?
+                        WHERE channel_id = ? AND user_id = ? AND day = ?
                     `, [
                         update.channel, 
                         update.user, 
