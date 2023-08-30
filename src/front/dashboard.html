@@ -8,16 +8,16 @@
           ></div>
         </template>
     </div>
-    
+
     <h2>Activity</h2>
 
-    <div x-data="data()" x-init="load('/activity/dashboard/last?t=-4d')">
+    <div x-data="data()" x-init="load('/activity/dashboard/last?t=-3d')">
         <h3>Last logged user interactions on channels (3 days)</h3>
         <table>
             <thead>
                 <tr>
                     <th>channel</th>
-                    <th>user</th>
+                    <th>users</th>
                     <th>interactions</th>
                     <th>last interaction</th>
                 </tr>
@@ -31,9 +31,13 @@
                             </a>
                         </td>
                         <td>
-                            <a x-link :href="'/users/' + item.user_id + ''">
-                                <span x-text="'@' + item.user_label"></span>
-                            </a>
+                            <template x-for="user of item.users.split(',')">
+                                <span x-data="{userData: user.split('|')}">
+                                    <a x-link :href="'/users/' + userData[1] + ''">
+                                        <span x-text="'@' + userData[0]"></span>
+                                    </a>
+                                </span>
+                            </template>
                         </td>
                         <td><span x-text="item.total_value"></span></td>
                         <td><span x-text="timeAgo(item.last_activity_at)"></span></td>

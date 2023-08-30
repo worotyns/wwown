@@ -197,18 +197,18 @@ export class ActivityService {
 
     async getLastActivityOfAllSinceDate(dateTime: Date) {
         return this.repository.all(`
-            SELECT m_channel.label AS channel_label,
-                m_user.label AS user_label,
+            SELECT
                 s.channel_id,
-                s.user_id,
+                m_channel.label AS channel_label,
+                GROUP_CONCAT(m_user.label || '|' || s.user_id) AS users,
                 SUM(s.value) AS total_value,
                 MAX(s.last_activity_ts) AS last_activity_at
             FROM stats s
             JOIN mapping m_channel ON s.channel_id = m_channel.resource_id
             JOIN mapping m_user ON s.user_id = m_user.resource_id
             WHERE s.last_activity_ts >= ?
-            GROUP BY s.channel_id, s.user_id
-            ORDER BY last_activity_at DESC;
+            GROUP BY s.channel_id, m_channel.label
+            ORDER BY last_activity_at DESC
         `, [dateTime])
     }
     
