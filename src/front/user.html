@@ -4,6 +4,7 @@
     <div x-data="data({start: -7, end: 0, tzOffset: new Date().getTimezoneOffset() * -1 })"  x-init="query('/activity/users/' + $router.params.user_id + '/hourly')">
         <h3>Messages distribution in time (
             <input x-model="queryParams.start" @change="query('/activity/users/' + $router.params.user_id + '/hourly')" type="number" min="-365" max="0" step="7"/> days)
+            <input x-model="queryParams.tzOffset" @change="query('/activity/users/' + $router.params.user_id + '/hourly')" type="number" min="-720" max="720" step="60"/>min timezone offset)
             <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <div class="bar-chart" style="margin: auto; height: 80px; width: 520px;">
