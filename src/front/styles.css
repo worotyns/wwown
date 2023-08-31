@@ -70,3 +70,8 @@ table tr td, table tr th {
   margin: 0;
   bottom: 0;
 }
+
+sub, sub > span {
+  font-size: 10px;
+  font-weight: 200;
+}

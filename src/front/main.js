@@ -92,6 +92,7 @@ function queryParamsFromQueryState(state) {
 
 function data(query) {
   return {
+    fetchTimeMs: 0,
     queryParams: {
       period: 'd',
       ...query,
@@ -99,6 +100,7 @@ function data(query) {
     items: [],
     item: {},
     async query(url) {
+      const start = Date.now();
       this.items = [];
       this.item = {};
       try {
@@ -107,6 +109,8 @@ function data(query) {
         Array.isArray(body) ? this.items = body : this.item = body;
       } catch (error) {
         console.error('Error fetching data:', error);
+      } finally {
+        this.fetchTimeMs = Date.now() - start;
       }
     }
   };

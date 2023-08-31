@@ -13,6 +13,7 @@
     <div x-data="data({start: -7})" x-init="query('/activity/dashboard/last')">
         <h3>Last logged user interactions on channels (
             <input x-model="queryParams.start" @change="query('/activity/dashboard/last')" type="number" min="-365" max="0" step="7"/> days)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
             <thead>
@@ -64,6 +65,7 @@
         <h3>Aggregated reactions received by users (
             <input x-model="queryParams.start" @change="query('/karma/dashboard/receivers')" type="number" min="-365" max="0" step="7"/> days, 
             <input x-model="queryParams.limit" @change="query('/karma/dashboard/receivers')" type="number" min="1" max="100" step="5"/> items)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
             <thead>
@@ -110,6 +112,7 @@
         <h3>Aggregated reactions given by users (
             <input x-model="queryParams.start" @change="query('/karma/dashboard/givers')" type="number" min="-365" max="0" step="7"/> days, 
             <input x-model="queryParams.limit" @change="query('/karma/dashboard/givers')" type="number" min="1" max="100" step="5"/> items)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
             <thead>
@@ -157,6 +160,7 @@
     <div x-data="data({start: -30, end: 0})"  x-init="query('/timetracking/dashboard/last')">
         <h3>Last logged time on channels (
             <input x-model="queryParams.start" @change="query('/timetracking/dashboard/last')" type="number" min="-365" max="0" step="7"/> days)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
             <thead>
@@ -194,6 +198,7 @@
     <div x-data="data({limit: 10})"  x-init="query('/incidents/dashboard/last')">
         <h3>Last logged incidents (
             <input x-model="queryParams.limit" @change="query('/incidents/dashboard/last')" type="number" min="1" max="100" step="5"/> items)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
             <thead>

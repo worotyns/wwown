@@ -5,6 +5,7 @@
         <h3>Messages distribution in time (
             <input x-model="queryParams.start" @change="query('/activity/channels/' + $router.params.channel_id + '/hourly')" type="number" min="-365" max="0" step="7"/> days, 
             <input x-model="queryParams.tzOffset" @change="query('/activity/channels/' + $router.params.channel_id + '/hourly')" type="number" min="-720" max="720" step="60"/>min timezone offset)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <div class="bar-chart" style="margin: auto; height: 80px; width: 520px;">
             <template x-for="item of items">
@@ -18,6 +19,7 @@
     <div x-data="data({limit: 5})"  x-init="query('/activity/channels/' + $router.params.channel_id + '/last')">
         <h3>Last logged user interactions (
             <input x-model="queryParams.limit" @change="query('/activity/channels/' + $router.params.channel_id + '/last')" type="number" min="1" max="100" step="5"/> items)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
             <thead>
@@ -45,6 +47,7 @@
     <div x-data="data({start: -7, end: 0})"  x-init="query('/activity/channels/' + $router.params.channel_id + '/range')">
         <h3>Most active users within last (
             <input x-model="queryParams.start" @change="query('/activity/channels/' + $router.params.channel_id + '/range')" type="number" min="-365" max="0" step="7"/> days)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
             <thead>
@@ -75,6 +78,7 @@
     <div x-data="data({limit: 10})"  x-init="query('/activity/channels/' + $router.params.channel_id + '/top')">
         <h3>Top active users - all time (
             <input x-model="queryParams.limit" @change="query('/activity/channels/' + $router.params.channel_id + '/top')" type="number" min="1" max="100" step="5"/> items)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
             <thead>
@@ -105,6 +109,7 @@
     <div x-data="data({start: -7, end: 0})"  x-init="query('/activity/channels/' + $router.params.channel_id + '/daily')">
         <h3>Average daily channel activity on slack with interactions (
             <input x-model="queryParams.start" @change="query('/activity/channels/' + $router.params.channel_id + '/daily')" type="number" min="-365" max="0" step="7"/> days)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
             <thead>
@@ -136,6 +141,7 @@
         <h3>Aggregated reactions received by users (
             <input x-model="queryParams.start" @change="query('/karma/channels/' + $router.params.channel_id + '/receivers')" type="number" min="-365" max="0" step="7"/> days, 
             <input x-model="queryParams.limit" @change="query('/karma/channels/' + $router.params.channel_id + '/receivers')" type="number" min="1" max="100" step="5"/> items)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
             <thead>
@@ -174,6 +180,7 @@
         <h3>Aggregated reactions given by users (
             <input x-model="queryParams.start" @change="query('/karma/channels/' + $router.params.channel_id + '/givers')" type="number" min="-365" max="0" step="7"/> days, 
             <input x-model="queryParams.limit" @change="query('/karma/channels/' + $router.params.channel_id + '/givers')" type="number" min="1" max="100" step="5"/> items)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
             <thead>
@@ -213,6 +220,7 @@
     <div x-data="data({start: -30, end: 0})"  x-init="query('/timetracking/channels/' + $router.params.channel_id + '/sum')">
         <h3>Last time registrations on this channel, aggregated by description ( 
             <input x-model="queryParams.start" @change="query('/timetracking/channels/' + $router.params.channel_id + '/sum')" type="number" min="-365" max="0" step="7"/> days)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
             <thead>
@@ -246,6 +254,7 @@
         <h3>Aggregated by date, user for ( 
             <input x-model="queryParams.start" @change="query('/timetracking/channels/' + $router.params.channel_id + '/monthly')" type="number" min="-365" max="0" step="7"/> days, 
             <input x-model="queryParams.limit" @change="query('/timetracking/channels/' + $router.params.channel_id + '/monthly')" type="number" min="1" max="100" step="5"/> items)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
             <thead>
