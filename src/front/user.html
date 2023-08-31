@@ -1,7 +1,7 @@
 <section>
     <h2>Activity</h2>
 
-    <div x-data="data({start: -7, end: 0})"  x-init="query('/activity/users/' + $router.params.user_id + '/hourly')">
+    <div x-data="data({start: -7, end: 0, tzOffset: new Date().getTimezoneOffset() * -1 })"  x-init="query('/activity/users/' + $router.params.user_id + '/hourly')">
         <h3>Messages distribution in time (
             <input x-model="queryParams.start" @change="query('/activity/users/' + $router.params.user_id + '/hourly')" type="number" min="-365" max="0" step="7"/> days)
         </h3>

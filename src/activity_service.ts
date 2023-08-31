@@ -114,7 +114,7 @@ export class ActivityService {
 
         const data = await this.repository.all(`
             WITH RECURSIVE date_ranges AS (
-                SELECT DATE('now') AS date, 0 AS days_passed
+                SELECT DATE(?) AS date, 0 AS days_passed
                 UNION ALL
                 SELECT DATE(date, '-1 day'), days_passed + 1
                 FROM date_ranges
@@ -148,11 +148,16 @@ export class ActivityService {
                 ON d.date = s.day
             GROUP BY d.date
             ORDER BY d.date ASC
-        `, [ActivityService.dateDiffInDays(start, end), start, end]);
+        `, [
+            end.toISOString().split('T')[0], 
+            ActivityService.dateDiffInDays(start, end), 
+            start, 
+            end
+        ]);
         
         return data.map(dayItem => ({
             day: dayItem.day,
-            color: (dayItem.val > 0 ? `rgb(0, ${Math.floor(ActivityService.normalizeValue(dayItem.val, 0, max, 0, 155)) + 100}, 0)` : 'lightgray'),
+            color: (dayItem.val > 0 ? `rgb(0, ${Math.floor(ActivityService.normalizeValue(dayItem.val, 0, max, 0, 155)) + 100}, 0)` : 'rgb(211, 211, 211)'),
             incident: dayItem.it > 0,
             title: [
                 `${dayItem.day}: ${dayItem.val} interactions by ${dayItem.uu} users on ${dayItem.uc} channels`,

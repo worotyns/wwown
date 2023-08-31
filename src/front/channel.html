@@ -1,9 +1,10 @@
 <section>
 
     <h2>Activity</h2>
-    <div x-data="data({start: -7, end: 0})"  x-init="query('/activity/channels/' + $router.params.channel_id + '/hourly')">
+    <div x-data="data({start: -7, end: 0, tzOffset: new Date().getTimezoneOffset() * -1 })"  x-init="query('/activity/channels/' + $router.params.channel_id + '/hourly')">
         <h3>Messages distribution in time (
-            <input x-model="queryParams.start" @change="query('/activity/channels/' + $router.params.channel_id + '/hourly')" type="number" min="-365" max="0" step="7"/> days)
+            <input x-model="queryParams.start" @change="query('/activity/channels/' + $router.params.channel_id + '/hourly')" type="number" min="-365" max="0" step="7"/> days, 
+            <input x-model="queryParams.tzOffset" @change="query('/activity/channels/' + $router.params.channel_id + '/hourly')" type="number" min="-720" max="720" step="60"/>min timezone offset)
         </h3>
         <div class="bar-chart" style="margin: auto; height: 80px; width: 520px;">
             <template x-for="item of items">

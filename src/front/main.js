@@ -83,6 +83,10 @@ function queryParamsFromQueryState(state) {
     query.append('t', `${state.start}${state.period}`)
   }
 
+  if (typeof state.tzOffset !== 'undefined') {
+    query.append('tz', `${state.tzOffset}`)
+  }
+
   return "?" + decodeURI(query.toString())
 }
 

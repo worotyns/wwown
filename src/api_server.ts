@@ -109,6 +109,16 @@ export class ApiServer {
     return limit;
   }
 
+  private parseTzOffset(query: any) {
+    const offset = query?.tz;
+
+    if (!offset) {
+      return 0;
+    }
+
+    return offset;
+  }
+
   bindRouter() {
     this.fastify.register(require("@fastify/static"), {
       root: path.join(__dirname, "front"),
@@ -235,6 +245,7 @@ export class ApiServer {
           .getGlobalActivityForTimeRange(
             startDate,
             endDate,
+            this.parseTzOffset(request.query)
           );
       },
     );
@@ -252,6 +263,7 @@ export class ApiServer {
             this.getParam(request.params, "channelid"),
             startDate,
             endDate,
+            this.parseTzOffset(request.query)
           );
       },
     );
@@ -269,6 +281,7 @@ export class ApiServer {
             this.getParam(request.params, "userid"),
             startDate,
             endDate,
+            this.parseTzOffset(request.query)
           );
       },
     );

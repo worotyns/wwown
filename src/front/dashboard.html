@@ -44,7 +44,7 @@
                         <td><span x-text="row.total_value"></span></td>
                         <td><span x-text="timeAgo(row.last_activity_at)"></span></td>
                         <td>
-                            <div x-data="data({start: queryParams.start, end: '0'})" x-init="query('/activity/channels/' + row.channel_id + '/hourly')">
+                            <div x-data="data({start: queryParams.start, end: '0', tzOffset: new Date().getTimezoneOffset() * -1 })" x-init="query('/activity/channels/' + row.channel_id + '/hourly')">
                                 <div class="bar-chart" style="height: 20px; width: 120px;">
                                     <template x-for="item of items">
                                         <div :title="'Hour: ' + item.hour" class="bar" :style="{'height': item.value+'%'}"></div>

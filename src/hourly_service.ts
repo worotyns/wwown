@@ -38,7 +38,7 @@ export class HourlyActivityService {
     });
   }
 
-  async getGlobalActivityForTimeRange(start: Date, end: Date) {
+  async getGlobalActivityForTimeRange(start: Date, end: Date, offset: number) {
     const [{ max }] = await this.repository.all(
       `
             SELECT MIN(count) as min, MAX(count) as max
@@ -57,14 +57,14 @@ export class HourlyActivityService {
             SELECT
                 s.day,
                 strftime('%Y-%m-%d', DATETIME(s.day / 1000, 'unixepoch')) as date,
-                strftime('%H', DATETIME(s.day / 1000, 'unixepoch')) hour,
+                strftime('%H', DATETIME((s.day + ? * 60 * 1000) / 1000, 'unixepoch')) AS hour,
                 SUM(s.count) AS count
             FROM hourly_activity s
             WHERE day BETWEEN ? AND ?
             GROUP BY date, hour
             ORDER BY date DESC, hour DESC;
         `,
-      [start, end],
+      [offset, start, end],
     );
 
     return this.aggregateToHours(data, 0, max);
@@ -74,6 +74,7 @@ export class HourlyActivityService {
     userId: string,
     start: Date,
     end: Date,
+    offset: number,
   ) {
     const [{ max }] = await this.repository.all(
       `
@@ -93,14 +94,14 @@ export class HourlyActivityService {
               SELECT
                   s.day,
                   strftime('%Y-%m-%d', DATETIME(s.day / 1000, 'unixepoch')) as date,
-                  strftime('%H', DATETIME(s.day / 1000, 'unixepoch')) hour,
+                  strftime('%H', DATETIME((s.day + ? * 60 * 1000) / 1000, 'unixepoch')) AS hour,
                   SUM(s.count) AS count
               FROM hourly_activity s
               WHERE day BETWEEN ? AND ? AND user_id = ?
               GROUP BY date, hour
               ORDER BY date DESC, hour DESC;
           `,
-      [start, end, userId],
+      [offset, start, end, userId],
     );
 
     return this.aggregateToHours(data, 0, max);
@@ -110,6 +111,7 @@ export class HourlyActivityService {
     channelId: string,
     start: Date,
     end: Date,
+    offset: number,
   ) {
     const [{ max }] = await this.repository.all(
       `
@@ -129,14 +131,14 @@ export class HourlyActivityService {
                 SELECT
                     s.day,
                     strftime('%Y-%m-%d', DATETIME(s.day / 1000, 'unixepoch')) as date,
-                    strftime('%H', DATETIME(s.day / 1000, 'unixepoch')) hour,
+                    strftime('%H', DATETIME((s.day + ? * 60 * 1000) / 1000, 'unixepoch')) AS hour,
                     SUM(s.count) AS count
                 FROM hourly_activity s
                 WHERE day BETWEEN ? AND ? AND channel_id = ?
                 GROUP BY date, hour
                 ORDER BY date DESC, hour DESC;
             `,
-      [start, end, channelId],
+      [offset, start, end, channelId],
     );
 
     return this.aggregateToHours(data, 0, max);
