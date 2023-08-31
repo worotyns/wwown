@@ -1,16 +1,28 @@
-<section>
+<section x-data="globalPicker()">
     <div class="cal" x-data="data({start: -((52*7)+(new Date().getUTCDay())), end: 0}, '/activity/dashboard/activity')" x-init="calculate()">
         <template x-for="(day, index) in items" :key="index">
           <div
-            :class="{day: true, incident: day.incident}"
+            :class="{day: true, incident: day.incident, active: isActive(day.day)}"
             :style="`font-size: 10px; cursor: pointer; background-color: ${day.color}`"  
             :title="day.title"
+            @click="setPickerForDay(day.day)"
           ></div>
         </template>
     </div>
 
+    <span x-show="pickerIsActive">
+        <nav>
+            window size <input type="number" min="1" max="30" x-model="windowSize" @change="recalculateWindow()"/> days from
+            <input type="number" min="-720" max="0" x-model="daysAgo" @change="recalculateWindow()"/>days ago<br/>
+    
+            relative <span x-text="globalStart"> </span>days ago to <span x-text="globalEnd"> </span>days ago <br/>
+            absolute <span x-text="onlyDate(absoluteStart)"> </span> to <span x-text="onlyDate(absoluteEnd)"> </span><br/>
+            <button @click="$dispatch('picker', $data)">go for it</button>
+        </nav>
+    </span>
+
     <h2>Activity</h2>
-    <div x-data="data({start: -7}, '/activity/dashboard/last')" x-init="calculate()">
+    <div @picker.window="recalculate($data, $event.detail)" x-data="data({start: -7}, '/activity/dashboard/last')" x-init="calculate()">
         <h3>Last logged user interactions on channels (
             <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days)
             <sub><span x-text="fetchTimeMs"></span>ms.</sub>

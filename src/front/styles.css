@@ -21,6 +21,14 @@
   background-color: lightgray;
 }
 
+.day.active {
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  border: 1.75px rgb(0, 0, 167) solid;
+  background-color: lightgray;
+}
+
 thead.rotate th {
   border: 0px solid;
   /* Something you can count on */

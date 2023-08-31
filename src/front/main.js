@@ -90,6 +90,65 @@ function queryParamsFromQueryState(state) {
   return "?" + decodeURI(query.toString())
 }
 
+function globalPicker() {
+  return {
+
+    absoluteStart: new Date(),
+    absoluteEnd: new Date(),
+
+    windowSize: 0,
+    daysAgo: 0,
+
+    globalStart: 0,
+    globalEnd: 0,
+
+    toAbsolute(days) {
+      const date = new Date(Date.now() + days * 24 * 3600 * 1000);
+      return date
+    },
+
+    isActive(day) {
+      return this.absoluteStart < new Date(day) && new Date(day) < this.absoluteEnd;
+    },
+
+    recalculateWindow() {
+      this.globalEnd = this.daysAgo;
+      this.globalStart = this.daysAgo - this.windowSize;
+      this.absoluteStart = this.toAbsolute(this.globalStart);
+      this.absoluteEnd = this.toAbsolute(this.globalEnd);
+    },
+
+    get pickerIsActive() {
+      return !!(this.windowSize || this.daysAgo)
+    },
+
+    toDayAgo(date1, date2 = new Date()) {
+      const timeDiff = Math.abs(date2.getTime() - date1.getTime());
+      const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
+      return -daysDiff;
+    },
+
+    setPickerForDay(day) {
+      const end = this.toDayAgo(new Date(day));
+      const start = end - 1;
+
+      this.globalEnd = end;
+      this.globalStart = start;
+
+      this.absoluteStart = this.toAbsolute(start);
+      this.absoluteEnd = this.toAbsolute(end);
+
+      this.window = Math.abs(this.globalStart - this.globalEnd);
+      this.daysAgo = this.globalEnd;
+
+      return {
+        globalStart: this.globalStart,
+        globalEnd: this.globalEnd
+      }
+    }
+  }
+}
+
 function data(query, uri) {
   return {
     uri,
@@ -100,6 +159,11 @@ function data(query, uri) {
     },
     items: [],
     item: {},
+    async recalculate($this, $event) {
+      $this.queryParams.start = $event.globalStart;
+      $this.queryParams.end = $event.globalEnd;
+      return this.calculate();
+    },
     async calculate() {
       const start = Date.now();
       this.items = [];
@@ -178,4 +242,8 @@ function duration(durationInSeconds) {
 
 function date(ts) {
   return new Date(ts).toLocaleString()
+}
+
+function onlyDate(ts) {
+  return date(ts).split(',')[0];
 }
