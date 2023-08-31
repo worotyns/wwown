@@ -102,6 +102,27 @@ function globalPicker() {
     globalStart: 0,
     globalEnd: 0,
 
+    preset(name) {
+      const getStartOfMonth = (n) => {
+        const d = new Date();
+        d.setMonth(d.getMonth() - n, 1)
+        d.setHours(0, 0, 0, 0);
+        const daysInMonth = new Date(d.getFullYear(), d.getMonth(), 0).getDate();
+        const day = d;
+        day.setDate(daysInMonth);
+        return [day, daysInMonth + 1];
+      }
+
+      switch(name) {
+        case 'last_month':
+          this.setPickerForDay(...getStartOfMonth(1));
+          break;
+        case 'this_month':
+          this.setPickerForDay(...getStartOfMonth(0));
+          break;
+      }
+    },
+
     toAbsolute(days) {
       const date = new Date(Date.now() + days * 24 * 3600 * 1000);
       return date
@@ -128,9 +149,9 @@ function globalPicker() {
       return -daysDiff;
     },
 
-    setPickerForDay(day) {
+    setPickerForDay(day, ago = 1) {
       const end = this.toDayAgo(new Date(day));
-      const start = end - 1;
+      const start = end - ago;
 
       this.globalEnd = end;
       this.globalStart = start;

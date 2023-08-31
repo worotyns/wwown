@@ -18,7 +18,11 @@
     
             relative <span x-text="globalStart"> </span>days ago to <span x-text="globalEnd"> </span>days ago <br/>
             absolute <span x-text="onlyDate(absoluteStart)"> </span> to <span x-text="onlyDate(absoluteEnd)"> </span><br/>
+            <button @click="preset('last_month')">Select last month</button>
+            <button @click="preset('this_month')"> Select this month</button>
+            <br/>
             <button @click="$dispatch('picker', $data)">go for it</button>
+
         </nav>
     </span>
 
