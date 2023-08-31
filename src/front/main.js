@@ -138,7 +138,7 @@ function globalPicker() {
       this.absoluteStart = this.toAbsolute(start);
       this.absoluteEnd = this.toAbsolute(end);
 
-      this.window = Math.abs(this.globalStart - this.globalEnd);
+      this.windowSize = Math.abs(this.globalStart - this.globalEnd);
       this.daysAgo = this.globalEnd;
 
       return {

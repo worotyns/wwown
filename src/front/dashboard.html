@@ -12,6 +12,7 @@
 
     <span x-show="pickerIsActive">
         <nav>
+            <br/>
             window size <input type="number" min="1" max="30" x-model="windowSize" @change="recalculateWindow()"/> days from
             <input type="number" min="-720" max="0" x-model="daysAgo" @change="recalculateWindow()"/>days ago<br/>
     
@@ -22,9 +23,10 @@
     </span>
 
     <h2>Activity</h2>
-    <div @picker.window="recalculate($data, $event.detail)" x-data="data({start: -7}, '/activity/dashboard/last')" x-init="calculate()">
+    <div @picker.window="recalculate($data, $event.detail)" x-data="data({start: -7, end: 0}, '/activity/dashboard/last')" x-init="calculate()">
         <h3>Last logged user interactions on channels (
-            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days)
+            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="-1" step="7"/> days, to
+            <input x-model="queryParams.end" @change="calculate()" type="number" min="-365" max="0" step="7"/> days)
             <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>

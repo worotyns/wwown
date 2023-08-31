@@ -220,7 +220,7 @@ export class ActivityService {
         `, [channelId, limit]);
     }
 
-    async getLastActivityOfAllSinceDate(dateTime: Date) {
+    async getLastActivityOfAllSinceDate(startDate: Date, endDate: Date) {
         return this.repository.all(`
             SELECT
                 s.channel_id,
@@ -231,10 +231,10 @@ export class ActivityService {
             FROM stats s
             JOIN mapping m_channel ON s.channel_id = m_channel.resource_id
             JOIN mapping m_user ON s.user_id = m_user.resource_id
-            WHERE s.last_activity_ts >= ?
+            WHERE s.last_activity_ts BETWEEN ? AND ?
             GROUP BY s.channel_id, m_channel.label
             ORDER BY last_activity_at DESC
-        `, [dateTime])
+        `, [startDate, endDate])
     }
     
     async getChannelUsersInTimeRange(channelId: string, startDate: Date, endDate: Date) {

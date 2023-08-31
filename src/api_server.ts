@@ -328,9 +328,10 @@ export class ApiServer {
      * dashboard.html
      */
     this.fastify.get("/activity/dashboard/last", async (request) => {
-      const [startDate] = this.parseT(request.query);
+      const [startDate, endDate] = this.parseT(request.query);
       return this.activityService.getLastActivityOfAllSinceDate(
         startDate,
+        endDate
       );
     });
 
