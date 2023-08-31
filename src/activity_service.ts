@@ -6,10 +6,6 @@ export class ActivityService {
         return ((originalValue - minValue) / (maxValue - minValue)) * (newMax - newMin) + newMin;
     }
 
-    static getKeyFromDay(day: number): string {
-        return new Date(day).toISOString().slice(0, 10)
-    }
-
     static dateDiffInDays(date1: Date, date2: Date): number {
         const timeDiff = Math.abs(date2.getTime() - date1.getTime());
         const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
@@ -87,57 +83,54 @@ export class ActivityService {
         `, [start, end]);
 
         const data = await this.repository.all(`
-            SELECT 
-                strftime('%Y-%m-%d', DATETIME(s.day / 1000, 'unixepoch')) as day,
-                SUM(s.value) as val,
-                COUNT(DISTINCT s.user_id) as uu,
-                COUNT(DISTINCT s.channel_id) as uc,
-                SUM(i.duration_seconds) / 60 as it,
-                SUM(tt.duration_seconds) / 60 as tt
-            FROM stats s
-            LEFT JOIN time_tracking tt ON s.channel_id = tt.channel_id AND strftime('%Y-%m-%d', DATETIME(s.day / 1000, 'unixepoch')) = strftime('%Y-%m-%d', DATETIME(tt.start_time / 1000, 'unixepoch'))
-            LEFT JOIN incidents i ON s.channel_id = i.channel_id AND strftime('%Y-%m-%d', DATETIME(s.day / 1000, 'unixepoch')) = strftime('%Y-%m-%d', DATETIME(i.start_time / 1000, 'unixepoch'))
-            WHERE day BETWEEN ? AND ?
-            GROUP BY day
-            ORDER BY day DESC
-            LIMIT ?
-        `, [start, end, ActivityService.dateDiffInDays(start, end)]);
+            WITH RECURSIVE date_ranges AS (
+                SELECT DATE('now') AS date, 0 AS days_passed
+                UNION ALL
+                SELECT DATE(date, '-1 day'), days_passed + 1
+                FROM date_ranges
+                WHERE days_passed < ?
+            )
             
-    
-        const dataMap = new Map(data.map(item => [item.day, item]));
-        const filledAndNormalizedData = [];
-        const currentDate = new Date(start)
-
-        while (currentDate <= end) {
-            const currentDay = ActivityService.getKeyFromDay(currentDate.getTime());
-            if (dataMap.has(currentDay)) {
-                const item = dataMap.get(currentDay);
-                const normalizedValue = Math.floor(ActivityService.normalizeValue(item.val, 0, max, 100, 155));
-
-                const color = `rgb(0, ${255 - normalizedValue}, 0)`;
-
-                filledAndNormalizedData.push({
-                    day: currentDay,
-                    color: color,
-                    incident: item.it > 0,
-                    title: [
-                        `${currentDate.toISOString().slice(0, 10)}: ${item.val} interactions by ${item.uu} users on ${item.uc} channels`,
-                        item.it ? `incidents duration ${item.it}min` : null,
-                        item.tt ? `and ${item.tt}min time records` : null,
-                    ].filter(i => i).join(', ')
-                });
-            } else {
-                filledAndNormalizedData.push({
-                    day: currentDay,
-                    color: 'lightgrey',
-                    incident: false,
-                    title: `${currentDate.toISOString().slice(0, 10)}`
-                });
-            }
-            currentDate.setDate(currentDate.getDate() + 1);
-        }
-
-        return filledAndNormalizedData; // Reverse the array to match your requirement
+            SELECT 
+                d.date as day, 
+                COALESCE(s.uc, 0) as uc,
+                COALESCE(s.uu, 0) as uu,
+                COALESCE(s.val, 0) as val,
+                COALESCE(SUM(i.duration_seconds / 60), 0) as it, 
+                COALESCE(COUNT(i.duration_seconds), 0) as itc,
+                COALESCE(SUM(tt.duration_seconds / 60), 0) as tt, 
+                COALESCE(COUNT(tt.duration_seconds), 0) as ttc
+            FROM date_ranges d
+            LEFT JOIN incidents i 
+                ON d.date = strftime('%Y-%m-%d', DATETIME(i.start_time / 1000, 'unixepoch'))
+            LEFT JOIN time_tracking tt 
+                ON d.date = strftime('%Y-%m-%d', DATETIME(tt.start_time / 1000, 'unixepoch'))
+            LEFT JOIN (
+                    SELECT
+                        strftime('%Y-%m-%d', DATETIME(day / 1000, 'unixepoch')) as day,
+                        COUNT(DISTINCT user_id) as uu,
+                        COUNT(DISTINCT channel_id) as uc,
+                        SUM(value) as val
+                    FROM stats
+                    WHERE day BETWEEN ? AND ?
+                    GROUP BY day
+                ) s
+                ON d.date = s.day
+            GROUP BY d.date
+            ORDER BY d.date ASC
+            LIMIT ?
+        `, [ActivityService.dateDiffInDays(start, end), start, end, ActivityService.dateDiffInDays(start, end)]);
+        
+        return data.map(dayItem => ({
+            day: dayItem.day,
+            color: (dayItem.val > 0 ? `rgb(0, ${255 - Math.floor(ActivityService.normalizeValue(dayItem.val, 0, max, 100, 155))}, 0)` : 'lightgray'),
+            incident: dayItem.it > 0,
+            title: [
+                `${dayItem.day}: ${dayItem.val} interactions by ${dayItem.uu} users on ${dayItem.uc} channels`,
+                dayItem.itc ? `${dayItem.itc} incidents with duration of ${dayItem.it}min` : null,
+                dayItem.ttc ? `and ${dayItem.ttc} time tracks with ${dayItem.tt}min duration` : null,
+            ].filter(i => i).join(', ')
+        }))
     }
 
     async getLastChannelUsers(channelId: string, limit: number) {
