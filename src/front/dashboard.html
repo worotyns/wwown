@@ -13,13 +13,18 @@
     <span x-show="pickerIsActive">
         <nav>
             <br/>
-            window size <input type="number" min="1" max="30" x-model="windowSize" @change="recalculateWindow()"/> days from
-            <input type="number" min="-720" max="0" x-model="daysAgo" @change="recalculateWindow()"/>days ago<br/>
-    
-            relative <span x-text="globalStart"> </span>days ago to <span x-text="globalEnd"> </span>days ago <br/>
-            absolute <span x-text="onlyDate(absoluteStart)"> </span> to <span x-text="onlyDate(absoluteEnd)"> </span><br/>
-            <button @click="preset('last_month')">Select last month</button>
-            <button @click="preset('this_month')"> Select this month</button>
+            <small>
+                window size <input type="number" min="1" max="30" x-model="windowSize" @change="recalculateWindow()"/> days from
+                <input type="number" min="-720" max="0" x-model="daysAgo" @change="recalculateWindow()"/>days ago<br/>
+        
+                relative <span x-text="globalStart"> </span>days ago to <span x-text="globalEnd"> </span>days ago <br/>
+                absolute <span x-text="onlyDate(absoluteStart)"> </span> to <span x-text="onlyDate(absoluteEnd)"> </span><br/>
+            </small>
+            <button class="preset" @click="preset('three_month')">Select three months</button>
+            <button class="preset" @click="preset('last_month')"> Select last month</button>
+            <button class="preset" @click="preset('this_month')"> Select this month</button>
+            <button class="preset" @click="preset('last_week')"> Select last week</button>
+            <button class="preset" @click="preset('this_week')"> Select this week</button>
             <br/>
             <button @click="$dispatch('picker', $data)">go for it</button>
 

@@ -109,16 +109,31 @@ function globalPicker() {
         d.setHours(0, 0, 0, 0);
         const daysInMonth = new Date(d.getFullYear(), d.getMonth(), 0).getDate();
         const day = d;
-        day.setDate(daysInMonth);
+        day.setDate(daysInMonth + 1);
         return [day, daysInMonth + 1];
       }
 
       switch(name) {
+        case 'three_month':
+          const [one] = getStartOfMonth(0);
+          const [tree] = getStartOfMonth(2);
+          this.setPickerForDay(one, -this.toDayAgo(tree, one));
+          break;
         case 'last_month':
           this.setPickerForDay(...getStartOfMonth(1));
           break;
         case 'this_month':
           this.setPickerForDay(...getStartOfMonth(0));
+          break;
+        case 'last_week':
+          const d = new Date();
+          d.setDate(d.getDate() - d.getDay() - 1);
+          this.setPickerForDay(d, 7);
+          break;
+        case 'this_week':
+          const today = new Date();
+          const weekDay = today.getDay();
+          this.setPickerForDay(today, weekDay === 0 ? 7 : weekDay + 1);
           break;
       }
     },

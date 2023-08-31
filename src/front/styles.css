@@ -83,3 +83,12 @@ sub, sub > span {
   font-size: 10px;
   font-weight: 200;
 }
+
+button.preset {
+  padding: 4px;
+  text-align: center;
+  line-height: 15px;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+}
