@@ -148,8 +148,7 @@ export class ActivityService {
                 ON d.date = s.day
             GROUP BY d.date
             ORDER BY d.date ASC
-            LIMIT ?
-        `, [ActivityService.dateDiffInDays(start, end), start, end, ActivityService.dateDiffInDays(start, end)]);
+        `, [ActivityService.dateDiffInDays(start, end), start, end]);
         
         return data.map(dayItem => ({
             day: dayItem.day,
