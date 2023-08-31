@@ -28,7 +28,7 @@ function emojis() {
           this.emoji = emoji;
         })
         .catch((error) => {
-          this.fetchPromise = null;
+          this.emojiPromise = null;
           console.error('Error fetching emoji data:', error)
         })
     }
@@ -90,8 +90,9 @@ function queryParamsFromQueryState(state) {
   return "?" + decodeURI(query.toString())
 }
 
-function data(query) {
+function data(query, uri) {
   return {
+    uri,
     fetchTimeMs: 0,
     queryParams: {
       period: 'd',
@@ -99,12 +100,12 @@ function data(query) {
     },
     items: [],
     item: {},
-    async query(url) {
+    async calculate() {
       const start = Date.now();
       this.items = [];
       this.item = {};
       try {
-        const response = await fetch(url + queryParamsFromQueryState(this.queryParams));
+        const response = await fetch(this.uri + queryParamsFromQueryState(this.queryParams));
         const body = await response.json();
         Array.isArray(body) ? this.items = body : this.item = body;
       } catch (error) {

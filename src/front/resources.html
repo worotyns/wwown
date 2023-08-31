@@ -1,4 +1,4 @@
-<section x-data="data({})" x-init="query('/resources')">
+<section x-data="data({}, '/resources')" x-init="calculate()">
     <h2>Channels</h2>
     <ul>
         <template x-for="(item, index) in items" :key="index">

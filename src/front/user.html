@@ -1,10 +1,10 @@
 <section>
     <h2>Activity</h2>
 
-    <div x-data="data({start: -7, end: 0, tzOffset: new Date().getTimezoneOffset() * -1 })"  x-init="query('/activity/users/' + $router.params.user_id + '/hourly')">
+    <div x-data="data({start: -7, end: 0, tzOffset: new Date().getTimezoneOffset() * -1 }, '/activity/users/' + $router.params.user_id + '/hourly')"  x-init="calculate()">
         <h3>Messages distribution in time (
-            <input x-model="queryParams.start" @change="query('/activity/users/' + $router.params.user_id + '/hourly')" type="number" min="-365" max="0" step="7"/> days)
-            <input x-model="queryParams.tzOffset" @change="query('/activity/users/' + $router.params.user_id + '/hourly')" type="number" min="-720" max="720" step="60"/>min timezone offset)
+            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days)
+            <input x-model="queryParams.tzOffset" @change="calculate()" type="number" min="-720" max="720" step="60"/>min timezone offset)
             <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <div class="bar-chart" style="margin: auto; height: 80px; width: 520px;">
@@ -17,9 +17,9 @@
         </div>
     </div>
 
-    <div x-data="data({limit: 15})"  x-init="query('/activity/users/' + $router.params.user_id + '/last')">
+    <div x-data="data({limit: 15}, '/activity/users/' + $router.params.user_id + '/last')"  x-init="calculate()">
         <h3>Last channels where user was engaged (
-            <input x-model="queryParams.limit" @change="query('/activity/users/' + $router.params.user_id + '/last')" type="number" min="1" max="100" step="5"/> items)
+            <input x-model="queryParams.limit" @change="calculate()" type="number" min="1" max="100" step="5"/> items)
             <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
@@ -48,9 +48,9 @@
         </table>
     </div>
 
-    <div x-data="data({limit: 10})"  x-init="query('/activity/users/' + $router.params.user_id + '/top')">
+    <div x-data="data({limit: 10}, '/activity/users/' + $router.params.user_id + '/top')"  x-init="calculate()">
         <h3>Top channels engaged by user all time (
-            <input x-model="queryParams.limit" @change="query('/activity/users/' + $router.params.user_id + '/top')" type="number" min="1" max="100" step="5"/> items)
+            <input x-model="queryParams.limit" @change="calculate()" type="number" min="1" max="100" step="5"/> items)
             <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
@@ -79,9 +79,9 @@
         </table>
     </div>
 
-    <div x-data="data({start: -7, end: 0})" x-init="query('/activity/users/' + $router.params.user_id + '/daily')">
+    <div x-data="data({start: -7, end: 0}, '/activity/users/' + $router.params.user_id + '/daily')" x-init="calculate()">
         <h3>Average daily user activity on slack with interactions (
-            <input x-model="queryParams.start" @change="query('/activity/users/' + $router.params.user_id + '/daily')" type="number" min="-365" max="-1" step="7"/> days)
+            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="-1" step="7"/> days)
             <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
@@ -111,10 +111,10 @@
     <h2>Karma</h2>
 
 
-    <div x-data="data({start: -30, end: 0, limit: 10})"  x-init="query('/karma/users/' + $router.params.user_id + '/received')">
+    <div x-data="data({start: -30, end: 0, limit: 10}, '/karma/users/' + $router.params.user_id + '/received')"  x-init="calculate()">
         <h3>Aggregated reactions received by users (
-            <input x-model="queryParams.start" @change="query('/karma/users/' + $router.params.user_id + '/received')" type="number" min="-365" max="0" step="7"/> days, 
-            <input x-model="queryParams.limit" @change="query('/karma/users/' + $router.params.user_id + '/received')" type="number" min="1" max="100" step="5"/> items)
+            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days, 
+            <input x-model="queryParams.limit" @change="calculate()" type="number" min="1" max="100" step="5"/> items)
             <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
@@ -141,7 +141,7 @@
                         </td>
                         <td x-data="emojis()" x-init="init(item.reaction)">
                             <span x-show="isCustomEmoji && emoji" x-text="emoji"></span>
-                            <img x-show="!isCustomEmoji && emoji" width="20px" height="20px" :src="`https://emojicdn.elk.sh/${emoji}`" />
+                            <img x-show="!isCustomEmoji && emoji" width="20px" height="20px" :src="emoji ? `https://emojicdn.elk.sh/${emoji}` : null" />
                         </td>
                         <td x-text="item.total"></td>
                     </tr>                    
@@ -150,10 +150,10 @@
         </table>
     </div>
 
-    <div x-data="data({start: -30, end: 0, limit: 10})"  x-init="query('/karma/users/' + $router.params.user_id + '/given')">
+    <div x-data="data({start: -30, end: 0, limit: 10}, '/karma/users/' + $router.params.user_id + '/given')"  x-init="calculate()">
         <h3>Aggregated reactions given to each others (
-            <input x-model="queryParams.start" @change="query('/karma/users/' + $router.params.user_id + '/given')" type="number" min="-365" max="0" step="7"/> days, 
-            <input x-model="queryParams.limit" @change="query('/karma/users/' + $router.params.user_id + '/given')" type="number" min="1" max="100" step="5"/> items)
+            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days, 
+            <input x-model="queryParams.limit" @change="calculate()" type="number" min="1" max="100" step="5"/> items)
             <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
@@ -180,7 +180,7 @@
                         </td>
                         <td x-data="emojis()" x-init="init(item.reaction)">
                             <span x-show="isCustomEmoji && emoji" x-text="emoji"></span>
-                            <img x-show="!isCustomEmoji && emoji" width="20px" height="20px" :src="`https://emojicdn.elk.sh/${emoji}`" />
+                            <img x-show="!isCustomEmoji && emoji" width="20px" height="20px" :src="emoji ? `https://emojicdn.elk.sh/${emoji}` : null" />
                         </td>
                         <td x-text="item.total"></td>
                     </tr>                    
@@ -191,9 +191,9 @@
 
     <h2>Time tracking</h2>
 
-    <div x-data="data({limit: 10})"  x-init="query('/timetracking/users/' + $router.params.user_id + '/last')">
+    <div x-data="data({limit: 10}, '/timetracking/users/' + $router.params.user_id + '/last')"  x-init="calculate()">
         <h3>Last time registrations ( 
-            <input x-model="queryParams.limit" @change="query('/timetracking/users/' + $router.params.user_id + '/last')" type="number" min="1" max="100" step="5"/> items)
+            <input x-model="queryParams.limit" @change="calculate()" type="number" min="1" max="100" step="5"/> items)
             <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
@@ -222,10 +222,10 @@
         </table>
     </div>
 
-    <div x-data="data({start: -365, end: 0, limit: 10})"  x-init="query('/timetracking/users/' + $router.params.user_id + '/monthly')">
+    <div x-data="data({start: -365, end: 0, limit: 10}, '/timetracking/users/' + $router.params.user_id + '/monthly')"  x-init="calculate()">
         <h3>Aggregated by date, channel for ( 
-            <input x-model="queryParams.start" @change="query('/timetracking/users/' + $router.params.user_id + '/monthly')" type="number" min="-365" max="0" step="7"/> days, 
-            <input x-model="queryParams.limit" @change="query('/timetracking/users/' + $router.params.user_id + '/monthly')" type="number" min="1" max="100" step="5"/> items)
+            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days, 
+            <input x-model="queryParams.limit" @change="calculate()" type="number" min="1" max="100" step="5"/> items)
             <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
