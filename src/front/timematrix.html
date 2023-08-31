@@ -1,27 +1,28 @@
-
-<div x-data="data({start: -365, end: 0, limit: 10})"  x-init="query('/timetracking/dashboard/matrix')">
-    <h3>Total registered time per channel, user  (
-        <input x-model="queryParams.start" @change="query('/timetracking/dashboard/matrix')" type="number" min="-365" max="0" step="30"/> days)
-        <sub><span x-text="fetchTimeMs"></span>ms.</sub>
-    </h3>
-    <table>
-        <thead class="rotate">
-            <tr>
-                <th><div>#channel</div></th>
-                <template x-for="(user_id, index) in item.users" :key="index">
-                    <th><div x-text="'@' + item.labels[user_id]"></div></th>
-                </template>
-            </tr>
-        </thead>
-        <tbody>
-            <template x-for="(channel_id, index) in item.channels" :key="index">
+<section>
+    <div x-data="data({start: -365, end: 0, limit: 10})"  x-init="query('/timetracking/dashboard/matrix')">
+        <h3>Total registered time per channel, user  (
+            <input x-model="queryParams.start" @change="query('/timetracking/dashboard/matrix')" type="number" min="-365" max="0" step="30"/> days)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
+        </h3>
+        <table>
+            <thead class="rotate">
                 <tr>
-                    <th><div x-text="'#' + item.labels[channel_id]"></div></th>
+                    <th>&nbsp;</th>
                     <template x-for="(user_id, index) in item.users" :key="index">
-                        <td><div x-text="duration(item.items[user_id+channel_id])"></div></td>
+                        <th><div x-text="'@' + item.labels[user_id]"></div></th>
                     </template>
                 </tr>
-            </template>
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+                <template x-for="(channel_id, index) in item.channels" :key="index">
+                    <tr>
+                        <th><div x-text="'#' + item.labels[channel_id]"></div></th>
+                        <template x-for="(user_id, index) in item.users" :key="index">
+                            <td><div x-text="duration(item.items[user_id+channel_id])"></div></td>
+                        </template>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+</section>
