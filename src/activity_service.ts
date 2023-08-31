@@ -6,6 +6,36 @@ export class ActivityService {
         return ((originalValue - minValue) / (maxValue - minValue)) * (newMax - newMin) + newMin;
     }
 
+    static readableSeconds(seconds: number) {
+        const SECONDS_IN_MINUTE = 60;
+        const SECONDS_IN_HOUR = 3600;
+        const SECONDS_IN_DAY = 86400;
+        const SECONDS_IN_WEEK = 604800;
+        const SECONDS_IN_MONTH = 2592000;
+        const SECONDS_IN_YEAR = 31536000;
+
+        const years = Math.floor(seconds / SECONDS_IN_YEAR);
+        seconds %= SECONDS_IN_YEAR;
+        const months = Math.floor(seconds / SECONDS_IN_MONTH);
+        seconds %= SECONDS_IN_MONTH;
+        const weeks = Math.floor(seconds / SECONDS_IN_WEEK);
+        seconds %= SECONDS_IN_WEEK;
+        const days = Math.floor(seconds / SECONDS_IN_DAY);
+        seconds %= SECONDS_IN_DAY;
+        const hours = Math.floor(seconds / SECONDS_IN_HOUR);
+        seconds %= SECONDS_IN_HOUR;
+        const minutes = Math.floor(seconds / SECONDS_IN_MINUTE);
+        
+        return [
+            (years) ? `${years}y` : null,
+            (months) ? `${months}m` : null,
+            (weeks) ? `${weeks}w` : null,
+            (days) ? `${days}d` : null,
+            (hours) ? `${hours}h` : null,
+            (minutes) ? `${minutes}min` : null
+        ].filter(i => i).join("");
+    }
+
     static dateDiffInDays(date1: Date, date2: Date): number {
         const timeDiff = Math.abs(date2.getTime() - date1.getTime());
         const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
@@ -96,9 +126,9 @@ export class ActivityService {
                 COALESCE(s.uc, 0) as uc,
                 COALESCE(s.uu, 0) as uu,
                 COALESCE(s.val, 0) as val,
-                COALESCE(SUM(i.duration_seconds / 60), 0) as it, 
+                COALESCE(SUM(i.duration_seconds), 0) as it, 
                 COALESCE(COUNT(i.duration_seconds), 0) as itc,
-                COALESCE(SUM(tt.duration_seconds / 60), 0) as tt, 
+                COALESCE(SUM(tt.duration_seconds), 0) as tt, 
                 COALESCE(COUNT(tt.duration_seconds), 0) as ttc
             FROM date_ranges d
             LEFT JOIN incidents i 
@@ -123,12 +153,12 @@ export class ActivityService {
         
         return data.map(dayItem => ({
             day: dayItem.day,
-            color: (dayItem.val > 0 ? `rgb(0, ${255 - Math.floor(ActivityService.normalizeValue(dayItem.val, 0, max, 100, 155))}, 0)` : 'lightgray'),
+            color: (dayItem.val > 0 ? `rgb(0, ${Math.floor(ActivityService.normalizeValue(dayItem.val, 0, max, 0, 155)) + 100}, 0)` : 'lightgray'),
             incident: dayItem.it > 0,
             title: [
                 `${dayItem.day}: ${dayItem.val} interactions by ${dayItem.uu} users on ${dayItem.uc} channels`,
-                dayItem.itc ? `${dayItem.itc} incidents with duration of ${dayItem.it}min` : null,
-                dayItem.ttc ? `and ${dayItem.ttc} time tracks with ${dayItem.tt}min duration` : null,
+                dayItem.itc ? `${dayItem.itc} incidents for ${ActivityService.readableSeconds(dayItem.it)}` : null,
+                dayItem.ttc ? `and ${dayItem.ttc} time tracks for ${ActivityService.readableSeconds(dayItem.tt)}` : null,
             ].filter(i => i).join(', ')
         }))
     }
