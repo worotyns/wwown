@@ -88,15 +88,15 @@ export class ActivityService {
 
         const data = await this.repository.all(`
             SELECT 
-                s.day, 
+                strftime('%Y-%m-%d', DATETIME(s.day / 1000, 'unixepoch')) as day,
                 SUM(s.value) as val,
-                COUNT(s.user_id) as uu,
-                COUNT(s.channel_id) as uc,
+                COUNT(DISTINCT s.user_id) as uu,
+                COUNT(DISTINCT s.channel_id) as uc,
                 SUM(i.duration_seconds) / 60 as it,
                 SUM(tt.duration_seconds) / 60 as tt
             FROM stats s
-            LEFT JOIN time_tracking tt ON s.channel_id = tt.channel_id AND DATE(s.day / 1000, 'unixepoch') = DATE(tt.start_time / 1000, 'unixepoch')
-            LEFT JOIN incidents i ON s.channel_id = i.channel_id AND DATE(s.day / 1000, 'unixepoch') = DATE(i.start_time / 1000, 'unixepoch')
+            LEFT JOIN time_tracking tt ON s.channel_id = tt.channel_id AND strftime('%Y-%m-%d', DATETIME(s.day / 1000, 'unixepoch')) = strftime('%Y-%m-%d', DATETIME(tt.start_time / 1000, 'unixepoch'))
+            LEFT JOIN incidents i ON s.channel_id = i.channel_id AND strftime('%Y-%m-%d', DATETIME(s.day / 1000, 'unixepoch')) = strftime('%Y-%m-%d', DATETIME(i.start_time / 1000, 'unixepoch'))
             WHERE day BETWEEN ? AND ?
             GROUP BY day
             ORDER BY day DESC
@@ -104,7 +104,7 @@ export class ActivityService {
         `, [start, end, ActivityService.dateDiffInDays(start, end)]);
             
     
-        const dataMap = new Map(data.map(item => [ActivityService.getKeyFromDay(item.day), item]));
+        const dataMap = new Map(data.map(item => [item.day, item]));
         const filledAndNormalizedData = [];
         const currentDate = new Date(start)
 

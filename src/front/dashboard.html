@@ -165,6 +165,7 @@
                     <th>user</th>
                     <th>description</th>
                     <th>duration</th>
+                    <th>when</th>
                 </tr>
             </thead>
             <tbody>
@@ -182,6 +183,7 @@
                         </td>
                         <td><span x-text="item.description"></span></td>
                         <td><span x-text="duration(item.total_duration)"></span></td>
+                        <td><span x-text="timeAgo(item.last_time_recorded)"></span></td>
                     </tr>
                 </template>
             </tbody>
@@ -198,7 +200,9 @@
                 <tr>
                     <th>channel</th>
                     <th>user</th>
-                    <th>when</th>
+                    <th>start</th>
+                    <th>end</th>
+                    <th>duration</th>
                     <th>description</th>
                 </tr>
             </thead>
@@ -216,11 +220,13 @@
                             </a>
                         </td>
                         <td>
-                           <small>
-                                <span x-text="date(item.start_time)"></span><br/>
-                                <span x-text="date(item.end_time)"></span><br/>
-                                <span x-text="duration(item.total_duration)"></span>
-                           </small>
+                            <span x-text="date(item.start_time)"></span><br/>
+                        </td>
+                        <td>
+                            <span x-text="date(item.end_time)"></span><br/>
+                        </td>
+                        <td>
+                            <span x-text="duration(item.total_duration)"></span>
                         </td>
                         <td><span x-text="item.description"></span></td>
                     </tr>                    

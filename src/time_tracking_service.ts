@@ -117,13 +117,14 @@ export class TimeTrackingService {
                 tt.user_id,
                 tt.channel_id,
                 tt.description,
-                SUM(tt.duration_seconds) AS total_duration
+                SUM(tt.duration_seconds) AS total_duration,
+                MAX(tt.end_time) AS last_time_recorded
             FROM time_tracking tt
             JOIN mapping mt ON tt.channel_id = mt.resource_id
             JOIN mapping mu ON tt.user_id = mu.resource_id
             WHERE tt.start_time BETWEEN ? AND ?
             GROUP BY channel_id, user_id, description
-            ORDER BY channel_id, user_id, description, total_duration;
+            ORDER BY channel_id, user_id, description, total_duration, last_time_recorded;
         `, [start, end])
     }
 
