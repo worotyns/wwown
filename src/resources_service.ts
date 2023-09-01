@@ -19,7 +19,14 @@ export class ResourcesService {
 
     async getResources() {
         return this.repository.all(`
-            SELECT resource_id, label FROM mapping ORDER BY label;
+            SELECT 
+                m.resource_id, 
+                m.label,
+                MAX(s.last_activity_ts) as last_activity_ts
+            FROM mapping m
+            LEFT JOIN stats s ON s.channel_id = m.resource_id OR s.user_id = m.resource_id
+            GROUP BY m.resource_id, m.label
+            ORDER BY s.last_activity_ts DESC, m.label
         `)
     }
 

@@ -218,6 +218,10 @@ function data(query, uri) {
 }
 
 function timeAgo(date) {
+  if (!date) {
+    return 'never';
+  }
+  
   const currentDate = new Date();
   const timestamp = date instanceof Date ? date.getTime() : new Date(date).getTime();
   const timeDiff = currentDate.getTime() - timestamp;

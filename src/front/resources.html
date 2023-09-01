@@ -4,7 +4,7 @@
         <template x-for="(item, index) in items" :key="index">
             <li x-show="item.resource_id.startsWith('C')">
                 <a x-link :href="'/channels/' + item.resource_id">
-                    #<span x-text="item.label"></span>
+                    #<span x-text="item.label"></span> - <small x-text="timeAgo(item.last_activity_ts)"></small>
                 </a>
             </li>
         </template>
@@ -14,7 +14,7 @@
         <template x-for="(item, index) in items" :key="index">
             <li x-show="item.resource_id.startsWith('U')">
                 <a x-link :href="'/users/' + item.resource_id">
-                    @<span x-text="item.label"></span>
+                    @<span x-text="item.label"></span> - <small x-text="timeAgo(item.last_activity_ts)"></small>
                 </a>
             </li>
         </template>
