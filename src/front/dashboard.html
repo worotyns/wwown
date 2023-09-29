@@ -81,7 +81,7 @@
 
     <h2>Karma</h2>
 
-    <div x-data="data({start: -30, end: 0, limit: 10}, '/karma/dashboard/receivers')"  x-init="calculate()">
+    <div x-data="data({start: -30, end: 0, limit: 15}, '/karma/dashboard/ranking')"  x-init="calculate()">
         <h3>Aggregated reactions received by users (
             <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days, 
             <input x-model="queryParams.limit" @change="calculate()" type="number" min="1" max="100" step="5"/> items)
@@ -90,7 +90,6 @@
         <table>
             <thead>
                 <tr>
-                    <th>channel</th>
                     <th>user</th>
                     <th>emoji</th>
                     <th>reactions</th>
@@ -100,115 +99,16 @@
                 <template x-for="(row, index) in items" :key="index">
                     <tr>
                         <td>
-                            <template x-for="channel of row.channels.split(',')">
-                                <span x-data="{channelData: channel.split('|')}">
-                                    <a x-link :href="'/channels/' + channelData[1] + ''">
-                                        <span x-text="'#' + channelData[0]"></span>
-                                    </a>
-                                </span>
-                            </template>
+                            <a x-link :href="'/users/' + row.user_id">
+                                <span x-text="'@' + row.user_label"></span>
+                            </a>
                         </td>
-                        <td>
-                            <template x-for="user of row.users.split(',')">
-                                <span x-data="{userData: user.split('|')}">
-                                    <a x-link :href="'/users/' + userData[1] + ''">
-                                        <span x-text="'@' + userData[0]"></span>
-                                    </a>
-                                </span>
-                            </template>
-                        </td>
-                        <td x-data="emojis()" x-init="init(row.reaction)">
+                        <td x-data="emojis()" x-init="init(row.emoji)">
                             <span x-show="isCustomEmoji && emoji" x-text="emoji"></span>
                             <img x-show="!isCustomEmoji && emoji" width="20px" height="20px" :src="emoji ? `https://emojicdn.elk.sh/${emoji}` : null" />
                         </td>
-                        <td x-text="row.total"></td>
+                        <td x-text="row.reaction_count"></td>
                     </tr>                    
-                </template>
-            </tbody>
-        </table>
-    </div>
-
-    <div x-data="data({start: -30, end: 0, limit: 10}, '/karma/dashboard/givers')"  x-init="calculate()">
-        <h3>Aggregated reactions given by users (
-            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days, 
-            <input x-model="queryParams.limit" @change="calculate()" type="number" min="1" max="100" step="5"/> items)
-            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
-        </h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>channel</th>
-                    <th>user</th>
-                    <th>emoji</th>
-                    <th>reactions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <template x-for="(row, index) in items" :key="index">
-                    <tr>
-                        <td>
-                            <template x-for="channel of row.channels.split(',')">
-                                <span x-data="{channelData: channel.split('|')}">
-                                    <a x-link :href="'/channels/' + channelData[1] + ''">
-                                        <span x-text="'#' + channelData[0]"></span>
-                                    </a>
-                                </span>
-                            </template>
-                        </td>
-                        <td>
-                            <template x-for="user of row.users.split(',')">
-                                <span x-data="{userData: user.split('|')}">
-                                    <a x-link :href="'/users/' + userData[1] + ''">
-                                        <span x-text="'@' + userData[0]"></span>
-                                    </a>
-                                </span>
-                            </template>
-                        </td>
-                        <td x-data="emojis()" x-init="init(row.reaction)">
-                            <span x-show="isCustomEmoji && emoji" x-text="emoji"></span>
-                            <img x-show="!isCustomEmoji && emoji" width="20px" height="20px" :src="emoji ? `https://emojicdn.elk.sh/${emoji}` : null" />
-                        </td>
-                        <td x-text="row.total"></td>
-                    </tr>                    
-                </template>
-            </tbody>
-        </table>
-    </div>
-
-    <h2>Time tracking</h2>
-
-    <div x-data="data({start: -30, end: 0}, '/timetracking/dashboard/last')"  x-init="calculate()">
-        <h3>Last logged time on channels (
-            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days)
-            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
-        </h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>channel</th>
-                    <th>user</th>
-                    <th>description</th>
-                    <th>duration</th>
-                    <th>when</th>
-                </tr>
-            </thead>
-            <tbody>
-                <template x-for="(item, index) in items" :key="index">
-                    <tr>
-                        <td>
-                            <a x-link :href="'/channels/' + item.channel_id + ''">
-                                <span x-text="'#' + item.channel_label"></span>
-                            </a>
-                        </td>
-                        <td>
-                            <a x-link :href="'/users/' + item.user_id + ''">
-                                <span x-text="'@' + item.user_label"></span>
-                            </a>
-                        </td>
-                        <td><span x-text="item.description"></span></td>
-                        <td><span x-text="duration(item.total_duration)"></span></td>
-                        <td><span x-text="timeAgo(item.last_time_recorded)"></span></td>
-                    </tr>
                 </template>
             </tbody>
         </table>

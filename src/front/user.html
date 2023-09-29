@@ -110,9 +110,8 @@
 
     <h2>Karma</h2>
 
-
-    <div x-data="data({start: -30, end: 0, limit: 10}, '/karma/users/' + $router.params.user_id + '/received')"  x-init="calculate()">
-        <h3>Aggregated reactions received by users (
+    <div x-data="data({start: -30, end: 0, limit: 10}, '/karma/users/' + $router.params.user_id + '/ranking')"  x-init="calculate()">
+        <h3>Aggregated reactions ranking (
             <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days, 
             <input x-model="queryParams.limit" @change="calculate()" type="number" min="1" max="100" step="5"/> items)
             <sub><span x-text="fetchTimeMs"></span>ms.</sub>
@@ -120,7 +119,6 @@
         <table>
             <thead>
                 <tr>
-                    <th>channel</th>
                     <th>user</th>
                     <th>emoji</th>
                     <th>reactions</th>
@@ -130,59 +128,13 @@
                 <template x-for="(item, index) in items" :key="index">
                     <tr>
                         <td>
-                            <a x-link :href="'/channels/' + item.channel_id + ''">
-                                <span x-text="'#' + item.channel_label"></span>
-                            </a>
+                            <span x-text="'@' + item.user_label"></span>
                         </td>
-                        <td>
-                            <a x-link :href="'/users/' + item.reacting_user_id + ''">
-                                <span x-text="'@' + item.reacting_user_label"></span>
-                            </a>
-                        </td>
-                        <td x-data="emojis()" x-init="init(item.reaction)">
+                        <td x-data="emojis()" x-init="init(item.emoji)">
                             <span x-show="isCustomEmoji && emoji" x-text="emoji"></span>
                             <img x-show="!isCustomEmoji && emoji" width="20px" height="20px" :src="emoji ? `https://emojicdn.elk.sh/${emoji}` : null" />
                         </td>
-                        <td x-text="item.total"></td>
-                    </tr>                    
-                </template>
-            </tbody>
-        </table>
-    </div>
-
-    <div x-data="data({start: -30, end: 0, limit: 10}, '/karma/users/' + $router.params.user_id + '/given')"  x-init="calculate()">
-        <h3>Aggregated reactions given to each others (
-            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days, 
-            <input x-model="queryParams.limit" @change="calculate()" type="number" min="1" max="100" step="5"/> items)
-            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
-        </h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>channel</th>
-                    <th>user</th>
-                    <th>emoji</th>
-                    <th>reactions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <template x-for="(item, index) in items" :key="index">
-                    <tr>
-                        <td>
-                            <a x-link :href="'/channels/' + item.channel_id + ''">
-                                <span x-text="'#' + item.channel_label"></span>
-                            </a>
-                        </td>
-                        <td>
-                            <a x-link :href="'/users/' + item.user_id + ''">
-                                <span x-text="'@' + item.user_label"></span>
-                            </a>
-                        </td>
-                        <td x-data="emojis()" x-init="init(item.reaction)">
-                            <span x-show="isCustomEmoji && emoji" x-text="emoji"></span>
-                            <img x-show="!isCustomEmoji && emoji" width="20px" height="20px" :src="emoji ? `https://emojicdn.elk.sh/${emoji}` : null" />
-                        </td>
-                        <td x-text="item.total"></td>
+                        <td x-text="item.reaction_count"></td>
                     </tr>                    
                 </template>
             </tbody>

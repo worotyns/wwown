@@ -7,6 +7,56 @@ export class KarmaService {
 
     }
 
+    async getGlobalRankingInRange(start: Date, end: Date, limit: number) {
+        return this.repository.all(`
+        SELECT
+            user_id,
+            mu.label as user_label,
+            CASE 
+                WHEN INSTR(reaction, '::') > 0 THEN SUBSTR(reaction, 1, INSTR(reaction, '::') - 1)
+                ELSE reaction
+            END AS emoji,
+            COUNT(*) AS reaction_count
+        FROM
+            karma
+        JOIN mapping mu ON mu.resource_id = user_id
+        WHERE
+            timestamp >= ? AND timestamp <= ?
+        GROUP BY
+            user_id,
+            emoji
+        ORDER BY
+            reaction_count DESC, user_id
+        LIMIT ?    
+            `,
+        [start, end, limit])
+    }
+
+    async getUserRankingInRange(userId: string, start: Date, end: Date, limit: number) {
+        return this.repository.all(`
+        SELECT
+            user_id,
+            mu.label as user_label,
+            CASE 
+                WHEN INSTR(reaction, '::') > 0 THEN SUBSTR(reaction, 1, INSTR(reaction, '::') - 1)
+                ELSE reaction
+            END AS emoji,
+            COUNT(*) AS reaction_count
+        FROM
+            karma
+        JOIN mapping mu ON mu.resource_id = user_id
+        WHERE
+            user_id = ? AND timestamp >= ? AND timestamp <= ?
+        GROUP BY
+            user_id,
+            emoji
+        ORDER BY
+            reaction_count DESC, user_id
+        LIMIT ?    
+            `,
+        [userId, start, end, limit])
+    }
+
     async registerReaction(channel: string, reactingUser: string, user: string, emoji: string) {
         await this.repository.run(`
             INSERT INTO karma (channel_id, reacting_user_id, user_id, timestamp, reaction)

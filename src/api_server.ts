@@ -148,9 +148,23 @@ export class ApiServer {
       },
     );
 
+
+    /**
+     * Get karma reactions ranking
+     * dashboard.html
+     */
+    this.fastify.get("/karma/dashboard/ranking", async (request) => {
+      const [startDate, endDate] = this.parseT(request.query);
+      return this.karmaService.getGlobalRankingInRange(
+        startDate,
+        endDate,
+        this.parseLimit(request.query),
+      );
+    });
+
     /**
      * Get karma reactions top
-     * users.html
+     * dashboard.html
      */
     this.fastify.get("/karma/dashboard/receivers", async (request) => {
       const [startDate, endDate] = this.parseT(request.query);
@@ -163,7 +177,7 @@ export class ApiServer {
 
     /**
      * Get given karma reactions top
-     * users.html
+     * dashboard.html
      */
     this.fastify.get("/karma/dashboard/givers", async (request) => {
       const [startDate, endDate] = this.parseT(request.query);
@@ -202,6 +216,20 @@ export class ApiServer {
       );
     });
 
+    /**
+     * Get ranking for user 
+     * users.html
+     */
+        this.fastify.get("/karma/users/:userid/ranking", async (request) => {
+          const [startDate, endDate] = this.parseT(request.query);
+          return this.karmaService.getUserRankingInRange(
+            this.getParam(request.params, "userid"),
+            startDate,
+            endDate,
+            this.parseLimit(request.query),
+          );
+        });
+    
     /**
      * Get karma reactions for user
      * channel.html
