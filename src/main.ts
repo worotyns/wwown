@@ -25,7 +25,8 @@ import { HourlyActivityService } from './hourly_service';
     const statsCollector = collectorFactory.createChannelCollector({count: 25, milliseconds: 25_000});
     const mappingCollector = collectorFactory.createMappingCollector({count: 50, milliseconds: 35_000});
     const hourlyCollector = collectorFactory.createHourlyCollector({count: 25, milliseconds: 15_000});
-
+    const threadsCollector = collectorFactory.createThreadCollector({count: 25, milliseconds: 20_000});
+    
     const karmaService = new KarmaService(repository);
     const resourceService = new ResourcesService(repository);
     const activityService = new ActivityService(repository);
@@ -35,6 +36,7 @@ import { HourlyActivityService } from './hourly_service';
 
     const botFactory = new BotFactory(
         statsCollector,
+        threadsCollector,
         mappingCollector,
         hourlyCollector,
         timeTrackingService,

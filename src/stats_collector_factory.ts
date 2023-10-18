@@ -2,6 +2,13 @@ import { Logger } from "./logger";
 import { Repository } from "./repository";
 import { CollectorOptions, StatsCollector } from "./stats_collector";
 
+export interface ThreadChannel {
+    channel: string,
+    thread: string,
+    user: string,
+    day: Date,
+}
+
 export interface DayChannel {
     channel: string,
     user: string,
@@ -56,6 +63,67 @@ export class StatsCollectorFactory {
                     `, [
                         update.label,
                         update.resource
+                    ]);
+                }
+            },
+            this.logger,
+            options,
+        )
+    }
+
+    createThreadCollector(options: CollectorOptions) {
+        return new StatsCollector<ThreadChannel>(
+            new Map([
+                ['channel', [
+                    (val) => val.toString(), 
+                    (val) => val
+                ]],
+                ['thread', [
+                    (val) => val.toString(), 
+                    (val) => val
+                ]],
+                ['user', [
+                    (val) => val.toString(), 
+                    (val) => val
+                ]],
+                ['day', [
+                    (val) => (val as Date).toISOString().split('T')[0], 
+                    (val) => new Date(val),
+                ]],
+            ]), 
+            async (state) => {
+                for (const update of state) {
+                    await this.repository.run(`
+                        INSERT OR IGNORE INTO 
+                            threads (channel_id, thread_id, user_id, day, value, last_activity_ts, first_activity_ts) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?)
+                        `, [
+                        update.channel, update.thread, update.user, update.day, 0, Date.now(), Date.now()
+                    ]);
+
+                    const existing = await this.repository.get(`
+                        SELECT rowid as id, channel_id, thread_id, user_id, day, value, last_activity_ts 
+                        FROM threads
+                        WHERE channel_id = ? AND user_id = ? AND day = ? AND thread_id = ?
+                    `, [
+                        update.channel, 
+                        update.user, 
+                        update.day, 
+                        update.thread
+                    ]);
+                    
+                    await this.repository.run(`
+                        UPDATE threads
+                        SET value = value + ?,
+                            last_activity_ts = ?
+                        WHERE channel_id = ? AND thread_id = ? AND user_id = ? AND day = ?
+                    `, [
+                        update.value,
+                        Date.now(),
+                        existing.channel_id,
+                        existing.thread_id,
+                        existing.user_id,
+                        existing.day
                     ]);
                 }
             },

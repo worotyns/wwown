@@ -1,6 +1,6 @@
 import { App } from '@slack/bolt';
 import { StatsCollector } from './stats_collector';
-import { DayChannel, HourlyChannel, Mapping } from './stats_collector_factory';
+import { DayChannel, HourlyChannel, Mapping, ThreadChannel } from './stats_collector_factory';
 import { IntentionType, SlackHelper } from './slack_helper';
 import { Logger } from './logger';
 import { WebClient } from '@slack/web-api';
@@ -12,6 +12,7 @@ import { KarmaService } from './karma_service';
 export class BotFactory {
   constructor(
     private readonly statsCollector: StatsCollector<DayChannel>,
+    private readonly threadsCollector: StatsCollector<ThreadChannel>,
     private readonly mappingCollector: StatsCollector<Mapping>,
     private readonly hourlyCollector: StatsCollector<HourlyChannel>,
     private readonly timeTrackingService: TimeTrackingService,
@@ -123,6 +124,17 @@ export class BotFactory {
 
     app.message(/.*/, async ({ message, say }) => {
       const user = (message as any).user;
+      const thread = (message as any).thread_ts;
+
+      if (thread) {
+        this.threadsCollector.register({
+          channel: message.channel,
+          thread: thread,
+          user: user,
+          day: slackHelper.resolveDateFromTS(message.event_ts)
+        });
+      }
+      
       this.statsCollector.register({
         channel: message.channel,
         user: user,
@@ -135,7 +147,7 @@ export class BotFactory {
         user: user,
         day: slackHelper.resolveDateFromTS(message.event_ts),
       });
-    
+
       await slackHelper.touchMappings(message.channel, user);
     });
 
