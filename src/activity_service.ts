@@ -50,53 +50,231 @@ export class ActivityService {
 
     async getDailyActivityForUsersInTime(start: Date, end: Date) {
         return this.repository.all(`
-            SELECT
-                strftime('%Y-%m-%d', DATE(day / 1000, 'unixepoch')) as date,
-                user_id,
-                mu.label as user_label,
-                ROUND(AVG(CASE WHEN type = 'message' THEN value ELSE 0 END), 1) AS avg_messages,
-                ROUND(AVG(CASE WHEN type = 'reaction_added' THEN value ELSE 0 END), 1) AS avg_reactions,
-                ROUND(AVG(last_activity_ts - first_activity_ts) / 1000 / 3600, 1) as avg_hours
-            FROM stats s
-            JOIN mapping mu ON mu.resource_id = s.user_id    
-            WHERE day BETWEEN ? AND ? 
-            GROUP BY date, user_id
-            ORDER BY date DESC, user_label;
+            SELECT 
+                date, 
+                user_id, 
+                user_label, 
+                COUNT(channel_id) as channels_count, 
+                SUM(threads_count) as threads_count, 
+                SUM(thread_messages_count) as thread_messages_count, 
+                SUM(thread_messages_avg) as thread_messages_avg, 
+                SUM(channel_messages) as channel_messages, 
+                SUM(channel_reactions) as channel_reactions, 
+                ROUND(AVG(channel_messages), 2) as channel_messages_avg, 
+                ROUND(AVG(channel_reactions), 2) as channel_reactions_avg, 
+                ROUND((MAX(last_activity_ts) - MIN(first_activity_ts)) / 1000 / 3600, 2) as activity_hours,
+                ROUND(AVG(last_activity_ts - first_activity_ts) / 1000 / 3600, 2) as activity_hours_avg
+            FROM (
+                SELECT
+                    strftime('%Y-%m-%d', DATE(day / 1000, 'unixepoch')) as date,
+                    user_id,
+                    channel_id,
+                    mu.label as user_label,
+                    COUNT(thread_id) as threads_count,
+                    SUM(value) as thread_messages_count,
+                    AVG(value) as thread_messages_avg,
+                    0 as channel_messages,
+                    0 as channel_reactions,
+                    MIN(first_activity_ts) as first_activity_ts,
+                    MAX(last_activity_ts) as last_activity_ts
+                FROM threads t
+                JOIN mapping mu ON mu.resource_id = t.user_id    
+                WHERE day BETWEEN ? AND ?
+                GROUP BY date, user_id
+            
+                UNION
+            
+                SELECT
+                    strftime('%Y-%m-%d', DATE(day / 1000, 'unixepoch')) as date,
+                    user_id,
+                    channel_id,
+                    mu.label as user_label,
+                    0 as threads_count,
+                    0 as thread_messages_count,
+                    0 as thread_messages_avg,
+                    SUM(CASE WHEN type = 'message' THEN value ELSE 0 END) AS channel_messages,
+                    SUM(CASE WHEN type = 'reaction_added' THEN value ELSE 0 END) AS channel_reactions,
+                    MIN(first_activity_ts) as first_activity_ts,
+                    MAX(last_activity_ts) as last_activity_ts
+                FROM stats s
+                JOIN mapping mu ON mu.resource_id = s.user_id    
+                WHERE day BETWEEN ? AND ?
+                GROUP BY date, user_id, channel_id
+            ) 
+            GROUP BY date, user_id, user_label
+            ORDER BY date, user_label;
+        `, [start, end]
+        )
+    }
+
+    async getDailyActivityForChannelsInTime(start: Date, end: Date) {
+        return this.repository.all(`
+            SELECT 
+                date, 
+                channel_label, 
+                COUNT(user_id) as users_count, 
+                SUM(threads_count) as threads_count, 
+                SUM(thread_messages_count) as thread_messages_count, 
+                SUM(thread_messages_avg) as thread_messages_avg_per_user, 
+                SUM(channel_messages) as channel_messages, 
+                SUM(channel_reactions) as channel_reactions, 
+                ROUND(AVG(channel_messages), 2) as channel_messages_avg_per_user, 
+                ROUND(AVG(channel_reactions), 2) as channel_reactions_avg_per_user, 
+                ROUND((MAX(last_activity_ts) - MIN(first_activity_ts)) / 1000 / 3600, 2) as activity_hours,
+                ROUND(AVG(last_activity_ts - first_activity_ts) / 1000 / 3600, 2) as activity_hours_avg_per_user
+            FROM (
+                SELECT
+                    strftime('%Y-%m-%d', DATE(day / 1000, 'unixepoch')) as date,
+                    user_id,
+                    channel_id,
+                    mu.label as channel_label,
+                    COUNT(thread_id) as threads_count,
+                    SUM(value) as thread_messages_count,
+                    AVG(value) as thread_messages_avg,
+                    0 as channel_messages,
+                    0 as channel_reactions,
+                    MIN(first_activity_ts) as first_activity_ts,
+                    MAX(last_activity_ts) as last_activity_ts
+                FROM threads t
+                JOIN mapping mu ON mu.resource_id = t.channel_id    
+                WHERE day BETWEEN ? AND ?
+                GROUP BY date, user_id, channel_id
+            
+                UNION
+            
+                SELECT
+                    strftime('%Y-%m-%d', DATE(day / 1000, 'unixepoch')) as date,
+                    user_id,
+                    channel_id,
+                    mu.label as channel_label,
+                    0 as threads_count,
+                    0 as thread_messages_count,
+                    0 as thread_messages_avg,
+                    SUM(CASE WHEN type = 'message' THEN value ELSE 0 END) AS channel_messages,
+                    SUM(CASE WHEN type = 'reaction_added' THEN value ELSE 0 END) AS channel_reactions,
+                    MIN(first_activity_ts) as first_activity_ts,
+                    MAX(last_activity_ts) as last_activity_ts
+                FROM stats s
+                JOIN mapping mu ON mu.resource_id = s.channel_id    
+                WHERE day BETWEEN ? AND ?
+                GROUP BY date, user_id, channel_id
+            ) 
+            GROUP BY date, channel_id, channel_label
+            ORDER BY date, channel_label;
         `, [start, end]
         )
     }
 
     async getDailyActivityForChannelInTime(channelId: string, start: Date, end: Date) {
         return this.repository.all(`
-            SELECT
-                strftime('%Y-%m-%d', DATE(day / 1000, 'unixepoch')) as date,
-                channel_id,
-                mc.label as channel_label,
-                ROUND(AVG(CASE WHEN type = 'message' THEN value ELSE 0 END), 1) AS avg_messages,
-                ROUND(AVG(CASE WHEN type = 'reaction_added' THEN value ELSE 0 END), 1) AS avg_reactions,
-                ROUND(AVG(last_activity_ts - first_activity_ts) / 1000 / 3600, 1) as avg_hours
-            FROM stats s
-            JOIN mapping mc ON mc.resource_id = s.channel_id    
-            WHERE day BETWEEN ? AND ? AND channel_id = ?
-            GROUP BY date, channel_id
-            ORDER BY date DESC;
+            SELECT 
+                date, 
+                channel_label, 
+                COUNT(user_id) as users_count, 
+                SUM(threads_count) as threads_count, 
+                SUM(thread_messages_count) as thread_messages_count, 
+                SUM(thread_messages_avg) as thread_messages_avg_per_user, 
+                SUM(channel_messages) as channel_messages, 
+                SUM(channel_reactions) as channel_reactions, 
+                ROUND(AVG(channel_messages), 2) as channel_messages_avg_per_user, 
+                ROUND(AVG(channel_reactions), 2) as channel_reactions_avg_per_user, 
+                ROUND((MAX(last_activity_ts) - MIN(first_activity_ts)) / 1000 / 3600, 2) as activity_hours,
+                ROUND(AVG(last_activity_ts - first_activity_ts) / 1000 / 3600, 2) as activity_hours_avg_per_user
+            FROM (
+                SELECT
+                    strftime('%Y-%m-%d', DATE(day / 1000, 'unixepoch')) as date,
+                    user_id,
+                    channel_id,
+                    mu.label as channel_label,
+                    COUNT(thread_id) as threads_count,
+                    SUM(value) as thread_messages_count,
+                    AVG(value) as thread_messages_avg,
+                    0 as channel_messages,
+                    0 as channel_reactions,
+                    MIN(first_activity_ts) as first_activity_ts,
+                    MAX(last_activity_ts) as last_activity_ts
+                FROM threads t
+                JOIN mapping mu ON mu.resource_id = t.channel_id    
+                WHERE day BETWEEN ? AND ? AND channel_id = ?
+                GROUP BY date, user_id, channel_id
+            
+                UNION
+            
+                SELECT
+                    strftime('%Y-%m-%d', DATE(day / 1000, 'unixepoch')) as date,
+                    user_id,
+                    channel_id,
+                    mu.label as channel_label,
+                    0 as threads_count,
+                    0 as thread_messages_count,
+                    0 as thread_messages_avg,
+                    SUM(CASE WHEN type = 'message' THEN value ELSE 0 END) AS channel_messages,
+                    SUM(CASE WHEN type = 'reaction_added' THEN value ELSE 0 END) AS channel_reactions,
+                    MIN(first_activity_ts) as first_activity_ts,
+                    MAX(last_activity_ts) as last_activity_ts
+                FROM stats s
+                JOIN mapping mu ON mu.resource_id = s.channel_id    
+                WHERE day BETWEEN ? AND ? AND channel_id = ?
+                GROUP BY date, user_id, channel_id
+            ) 
+            GROUP BY date, channel_id, channel_label;
         `, [start, end, channelId]);
     }
 
     async getDailyActivityForUserInTime(userId: string, start: Date, end: Date) {
         return this.repository.all(`
-            SELECT
-                strftime('%Y-%m-%d', DATE(day / 1000, 'unixepoch')) as date,
-                user_id,
-                mu.label as user_label,
-                ROUND(AVG(CASE WHEN type = 'message' THEN value ELSE 0 END), 1) AS avg_messages,
-                ROUND(AVG(CASE WHEN type = 'reaction_added' THEN value ELSE 0 END), 1) AS avg_reactions,
-                ROUND(AVG(last_activity_ts - first_activity_ts) / 1000 / 3600, 1) as avg_hours
-            FROM stats s
-            JOIN mapping mu ON mu.resource_id = s.user_id    
-            WHERE day BETWEEN ? AND ? AND user_id = ?
-            GROUP BY date, user_id
-            ORDER BY date DESC;
+            SELECT 
+                date, 
+                user_id, 
+                user_label, 
+                COUNT(channel_id) as channels_count, 
+                SUM(threads_count) as threads_count, 
+                SUM(thread_messages_count) as thread_messages_count, 
+                SUM(thread_messages_avg) as thread_messages_avg, 
+                SUM(channel_messages) as channel_messages, 
+                SUM(channel_reactions) as channel_reactions, 
+                ROUND(AVG(channel_messages), 2) as channel_messages_avg, 
+                ROUND(AVG(channel_reactions), 2) as channel_reactions_avg, 
+                ROUND((MAX(last_activity_ts) - MIN(first_activity_ts)) / 1000 / 3600, 2) as activity_hours,
+                ROUND(AVG(last_activity_ts - first_activity_ts) / 1000 / 3600, 2) as activity_hours_avg
+            FROM (
+                SELECT
+                    strftime('%Y-%m-%d', DATE(day / 1000, 'unixepoch')) as date,
+                    user_id,
+                    channel_id,
+                    mu.label as user_label,
+                    COUNT(thread_id) as threads_count,
+                    SUM(value) as thread_messages_count,
+                    AVG(value) as thread_messages_avg,
+                    0 as channel_messages,
+                    0 as channel_reactions,
+                    MIN(first_activity_ts) as first_activity_ts,
+                    MAX(last_activity_ts) as last_activity_ts
+                FROM threads t
+                JOIN mapping mu ON mu.resource_id = t.user_id    
+                WHERE day BETWEEN ? AND ? AND user_id = ?
+                GROUP BY date, user_id
+            
+                UNION
+            
+                SELECT
+                    strftime('%Y-%m-%d', DATE(day / 1000, 'unixepoch')) as date,
+                    user_id,
+                    channel_id,
+                    mu.label as user_label,
+                    0 as threads_count,
+                    0 as thread_messages_count,
+                    0 as thread_messages_avg,
+                    SUM(CASE WHEN type = 'message' THEN value ELSE 0 END) AS channel_messages,
+                    SUM(CASE WHEN type = 'reaction_added' THEN value ELSE 0 END) AS channel_reactions,
+                    MIN(first_activity_ts) as first_activity_ts,
+                    MAX(last_activity_ts) as last_activity_ts
+                FROM stats s
+                JOIN mapping mu ON mu.resource_id = s.user_id    
+                WHERE day BETWEEN ? AND ? AND user_id = ?
+                GROUP BY date, user_id, channel_id
+            ) 
+            GROUP BY date, user_id, user_label;
         `, [start, end, userId]
         )
     }

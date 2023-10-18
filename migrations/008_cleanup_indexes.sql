@@ -37,4 +37,4 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_fields_activity
 ON hourly_activity (day, user_id, channel_id);
 
 -- Step 6: Cleanup
-DROP TABLE hourly_activity_old;
+DROP TABLE IF EXISTS hourly_activity_old;

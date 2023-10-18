@@ -341,9 +341,9 @@ export class ApiServer {
 
     /**
      * Returns avg daily activity
-     * dashboard.html
+     * daily_users.html
      */
-    this.fastify.get("/activity/dashboard/daily", async (request) => {
+    this.fastify.get("/activity/dashboard/daily/users", async (request) => {
       const [startDate, endDate] = this.parseT(request.query);
       return this.activityService.getDailyActivityForUsersInTime(
         startDate,
@@ -351,6 +351,18 @@ export class ApiServer {
       );
     });
 
+    /**
+     * Returns avg daily activity
+     * daily_channels.html
+     */
+      this.fastify.get("/activity/dashboard/daily/channels", async (request) => {
+        const [startDate, endDate] = this.parseT(request.query);
+        return this.activityService.getDailyActivityForChannelsInTime(
+          startDate,
+          endDate,
+        );
+      });
+    
     /**
      * Returns last active users in all channels (who work on what now)
      * dashboard.html
@@ -444,7 +456,7 @@ export class ApiServer {
 
     /**
      * Returns user avg daily activity
-     * dashboard.html
+     * users.html
      */
     this.fastify.get("/activity/users/:userid/daily", async (request) => {
       const [startDate, endDate] = this.parseT(request.query);
