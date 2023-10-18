@@ -102,7 +102,7 @@ export class ActivityService {
                 GROUP BY date, user_id, channel_id
             ) 
             GROUP BY date, user_id, user_label
-            ORDER BY date, user_label;
+            ORDER BY date DESC, user_label;
         `, [start, end, start, end]
         )
     }
@@ -161,7 +161,7 @@ export class ActivityService {
                 GROUP BY date, user_id, channel_id
             ) 
             GROUP BY date, channel_id, channel_label
-            ORDER BY date, channel_label;
+            ORDER BY date DESC, channel_label;
         `, [start, end, start, end]
         )
     }
@@ -218,7 +218,8 @@ export class ActivityService {
                 WHERE day BETWEEN ? AND ? AND channel_id = ?
                 GROUP BY date, user_id, channel_id
             ) 
-            GROUP BY date, channel_id, channel_label;
+            GROUP BY date, channel_id, channel_label
+            ORDER by date DESC, channel_label;
         `, [start, end, channelId, start, end, channelId]);
     }
 
@@ -275,7 +276,8 @@ export class ActivityService {
                 WHERE day BETWEEN ? AND ? AND user_id = ?
                 GROUP BY date, user_id, channel_id
             ) 
-            GROUP BY date, user_id, user_label;
+            GROUP BY date, user_id, user_label
+            ORDER by date DESC, user_label;
         `, [start, end, userId, start, end, userId]
         )
     }
