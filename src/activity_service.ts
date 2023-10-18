@@ -111,6 +111,7 @@ export class ActivityService {
         return this.repository.all(`
             SELECT 
                 date, 
+                channel_id,
                 channel_label, 
                 COUNT(user_id) as users_count, 
                 SUM(threads_count) as threads_count, 
