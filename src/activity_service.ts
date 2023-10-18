@@ -103,7 +103,7 @@ export class ActivityService {
             ) 
             GROUP BY date, user_id, user_label
             ORDER BY date, user_label;
-        `, [start, end]
+        `, [start, end, start, end]
         )
     }
 
@@ -162,7 +162,7 @@ export class ActivityService {
             ) 
             GROUP BY date, channel_id, channel_label
             ORDER BY date, channel_label;
-        `, [start, end]
+        `, [start, end, start, end]
         )
     }
 
@@ -219,7 +219,7 @@ export class ActivityService {
                 GROUP BY date, user_id, channel_id
             ) 
             GROUP BY date, channel_id, channel_label;
-        `, [start, end, channelId]);
+        `, [start, end, channelId, start, end, channelId]);
     }
 
     async getDailyActivityForUserInTime(userId: string, start: Date, end: Date) {
@@ -276,7 +276,7 @@ export class ActivityService {
                 GROUP BY date, user_id, channel_id
             ) 
             GROUP BY date, user_id, user_label;
-        `, [start, end, userId]
+        `, [start, end, userId, start, end, userId]
         )
     }
 
