@@ -126,6 +126,10 @@ export class BotFactory {
       const user = (message as any).user;
       const thread = (message as any).thread_ts;
 
+      if (!user) {
+        return;
+      }
+
       if (thread) {
         this.threadsCollector.register({
           channel: message.channel,
@@ -149,6 +153,7 @@ export class BotFactory {
       });
 
       await slackHelper.touchMappings(message.channel, user);
+
     });
 
     return [app, slackHelper];
