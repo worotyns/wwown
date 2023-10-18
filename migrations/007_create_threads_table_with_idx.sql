@@ -9,5 +9,5 @@ CREATE TABLE IF NOT EXISTS threads (
     last_activity_ts TIMESTAMP
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_fields
+CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_fields_threads
 ON threads (day, thread_id, user_id, channel_id);

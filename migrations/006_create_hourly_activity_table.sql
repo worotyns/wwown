@@ -6,5 +6,5 @@ CREATE TABLE IF NOT EXISTS hourly_activity (
     count INTEGER
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_fields
-ON stats (day, user_id, channel_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_fields_activity
+ON hourly_activity (day, user_id, channel_id);

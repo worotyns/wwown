@@ -8,6 +8,6 @@ CREATE TABLE IF NOT EXISTS time_tracking (
     description TEXT
 );
 
-CREATE INDEX IF NOT EXISTS idx_channel_user ON time_tracking (channel_id, user_id);
-CREATE INDEX IF NOT EXISTS idx_start_time ON time_tracking (start_time);
-CREATE INDEX IF NOT EXISTS idx_end_time ON time_tracking (end_time);
+CREATE INDEX IF NOT EXISTS idx_tt_channel_user ON time_tracking (channel_id, user_id);
+CREATE INDEX IF NOT EXISTS idx_tt_start_time ON time_tracking (start_time);
+CREATE INDEX IF NOT EXISTS idx_tt_end_time ON time_tracking (end_time);
