@@ -282,6 +282,115 @@ export class ActivityService {
         )
     }
 
+    async getActivityChartDataForUser(userId: string, start: Date, end: Date) {
+        const [{max}] = await this.repository.all(`
+            SELECT MIN(value) as min, MAX(value) as max
+            FROM (
+                SELECT day, SUM(value) as value
+                FROM stats
+                WHERE day BETWEEN ? AND ? AND user_id = ?
+                GROUP by day
+            )
+        `, [start, end, userId]);
+
+        const data = await this.repository.all(`
+            WITH RECURSIVE date_ranges AS (
+                SELECT DATE(?) AS date, 0 AS days_passed
+                UNION ALL
+                SELECT DATE(date, '-1 day'), days_passed + 1
+                FROM date_ranges
+                WHERE days_passed < ?
+            )
+            
+            SELECT 
+                d.date as day, 
+                COALESCE(s.uc, 0) as uc,
+                COALESCE(s.uu, 0) as uu,
+                COALESCE(s.val, 0) as val,
+                COALESCE(SUM(tt.duration_seconds), 0) as tt, 
+                COALESCE(COUNT(tt.duration_seconds), 0) as ttc
+            FROM date_ranges d
+            LEFT JOIN time_tracking tt 
+                ON d.date = strftime('%Y-%m-%d', DATETIME(tt.start_time / 1000, 'unixepoch'))
+            LEFT JOIN (
+                    SELECT
+                        strftime('%Y-%m-%d', DATETIME(day / 1000, 'unixepoch')) as day,
+                        COUNT(DISTINCT user_id) as uu,
+                        COUNT(DISTINCT channel_id) as uc,
+                        SUM(value) as val
+                    FROM stats
+                    WHERE day BETWEEN ? AND ? AND user_id = ?
+                    GROUP BY day
+                ) s
+                ON d.date = s.day
+            GROUP BY d.date
+            ORDER BY d.date ASC
+        `, [
+            end.toISOString().split('T')[0], 
+            ActivityService.dateDiffInDays(start, end), 
+            start, 
+            end,
+            userId,
+        ]);
+        
+        return this.asDtoChart(data, max);
+    }
+
+
+    async getActivityChartDataForChannel(channelId: string, start: Date, end: Date) {
+        const [{max}] = await this.repository.all(`
+            SELECT MIN(value) as min, MAX(value) as max
+            FROM (
+                SELECT day, SUM(value) as value
+                FROM stats
+                WHERE day BETWEEN ? AND ? AND channel_id = ?
+                GROUP by day
+            )
+        `, [start, end, channelId]);
+
+        const data = await this.repository.all(`
+            WITH RECURSIVE date_ranges AS (
+                SELECT DATE(?) AS date, 0 AS days_passed
+                UNION ALL
+                SELECT DATE(date, '-1 day'), days_passed + 1
+                FROM date_ranges
+                WHERE days_passed < ?
+            )
+            
+            SELECT 
+                d.date as day, 
+                COALESCE(s.uc, 0) as uc,
+                COALESCE(s.uu, 0) as uu,
+                COALESCE(s.val, 0) as val,
+                COALESCE(SUM(tt.duration_seconds), 0) as tt, 
+                COALESCE(COUNT(tt.duration_seconds), 0) as ttc
+            FROM date_ranges d
+            LEFT JOIN time_tracking tt 
+                ON d.date = strftime('%Y-%m-%d', DATETIME(tt.start_time / 1000, 'unixepoch'))
+            LEFT JOIN (
+                    SELECT
+                        strftime('%Y-%m-%d', DATETIME(day / 1000, 'unixepoch')) as day,
+                        COUNT(DISTINCT user_id) as uu,
+                        COUNT(DISTINCT channel_id) as uc,
+                        SUM(value) as val
+                    FROM stats
+                    WHERE day BETWEEN ? AND ? AND channel_id = ?
+                    GROUP BY day
+                ) s
+                ON d.date = s.day
+            GROUP BY d.date
+            ORDER BY d.date ASC
+        `, [
+            end.toISOString().split('T')[0], 
+            ActivityService.dateDiffInDays(start, end), 
+            start, 
+            end,
+            channelId,
+        ]);
+        
+        return this.asDtoChart(data, max);
+    }
+
     async getActivityChartData(start: Date, end: Date) {
         const [{max}] = await this.repository.all(`
             SELECT MIN(value) as min, MAX(value) as max
@@ -336,6 +445,10 @@ export class ActivityService {
             end
         ]);
         
+        return this.asDtoChart(data, max);
+    }
+
+    private asDtoChart(data: any[], max: number) {
         return data.map(dayItem => ({
             day: dayItem.day,
             color: (dayItem.val > 0 ? `rgb(0, ${Math.floor(ActivityService.normalizeValue(dayItem.val, 0, max, 0, 155)) + 100}, 0)` : 'rgb(211, 211, 211)'),

@@ -329,6 +329,32 @@ export class ApiServer {
 
     /**
      * Returns lastactivity data for chart
+     * users.html
+     */
+        this.fastify.get("/activity/users/:userid/activity", async (request) => {
+          const [startDate, endDate] = this.parseT(request.query);
+          return this.activityService.getActivityChartDataForUser(
+            this.getParam(request.params, "userid"),
+            startDate,
+            endDate,
+          );
+        });
+
+    /**
+     * Returns lastactivity data for chart
+     * channels.html
+     */
+    this.fastify.get("/activity/channels/:channelid/activity", async (request) => {
+      const [startDate, endDate] = this.parseT(request.query);
+      return this.activityService.getActivityChartDataForChannel(
+        this.getParam(request.params, "channelid"),
+        startDate,
+        endDate,
+      );
+    });
+
+    /**
+     * Returns lastactivity data for chart
      * dashboard.html
      */
     this.fastify.get("/activity/dashboard/activity", async (request) => {
