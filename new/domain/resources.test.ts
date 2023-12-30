@@ -1,13 +1,33 @@
 import { createMemory } from "@worotyns/atoms";
 import { Resources } from "./resources.ts";
 import { assertEquals } from "@testing/asserts";
+import { ChannelEvent, UserEvent } from "./common/interfaces.ts";
 
 Deno.test("Resources test", async () => {
   const { persist, restore } = createMemory();
 
   const resources = new Resources();
-  resources.registerChannel("channel1", "Channel 1");
-  resources.registerUser("user1", "User 1");
+
+  const createChannelEvent: ChannelEvent = {
+    type: "channel",
+    meta: {
+      action: "add",
+      channelId: "channel1",
+      channelName: "Channel 1",
+      timestamp: new Date(),
+    },
+  };
+  const createUserEvent: UserEvent = {
+    type: "user",
+    meta: {
+      action: "add",
+      userId: "user1",
+      userName: "User 1",
+      timestamp: new Date(),
+    },
+  };
+  resources.register(createUserEvent);
+  resources.register(createChannelEvent);
 
   await persist(resources);
   const restored = await restore(resources.identity, Resources);

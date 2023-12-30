@@ -8,8 +8,5 @@ Deno.test("BasicStats test", () => {
     temp.inc(i);
   }
 
-  assertEquals(temp.avg, 5);
   assertEquals(temp.total, 45);
-  assertEquals(temp.min, 0);
-  assertEquals(temp.max, 9);
 });

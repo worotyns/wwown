@@ -4,3 +4,9 @@
 // - service calculator
 // - migration old data?
 // - process manager - zostawic i przetestowac - (mozna dac jako libka na deno tez jako osobny projekt) bo sie przyda atoms-util
+
+// Run Bot
+// Create object
+// Run API
+// Register Process Manager
+// Periodic Dumps

@@ -1,3 +1,5 @@
+DTOs with logic withotu services :D
+
 ```ts
 // // Dashboard
 // const activity = [

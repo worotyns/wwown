@@ -1,11 +1,12 @@
 import { Atom, PropertiesOnly } from "@worotyns/atoms";
-import { Day } from "./date_time.ts";
-import { SlackThreadId, SlackUserId } from "./interfaces.ts";
-import { SlackChannelId } from "./interfaces.ts";
-import { DateWithoutTime } from "./interfaces.ts";
-import { SerializableMap } from "./serializable_map.ts";
-import { DayRaw } from "./date_time.ts";
+import { Day } from "../common/date_time.ts";
+import { InteractionEvents, SlackUserId } from "../common/interfaces.ts";
+import { SlackChannelId } from "../common/interfaces.ts";
+import { DateWithoutTime } from "../common/interfaces.ts";
+import { SerializableMap } from "../common/serializable_map.ts";
+import { DayRaw } from "../common/date_time.ts";
 import { ResourceStats } from "./resource_stats.ts";
+import { Events } from "../common/interfaces.ts";
 
 /**
  * Contains all statistics need to be calculated for a given day.
@@ -13,32 +14,30 @@ import { ResourceStats } from "./resource_stats.ts";
 export class DayAggregate extends Atom<DayAggregate> {
   public identity = DayAggregate.createIdentifier(new Date());
 
-  public day: DateWithoutTime = Day(new Date());
-
   public users: SerializableMap<SlackUserId, ResourceStats> =
     new SerializableMap();
   public channels: SerializableMap<SlackChannelId, ResourceStats> =
     new SerializableMap();
 
-  public registerMessage(
-    user: SlackUserId,
-    channel: SlackChannelId,
-    thread?: SlackThreadId,
+  public register(
+    event: InteractionEvents,
   ) {
-    // if (thread) {
-    // this.threads.authored.getOrSet(channel, () => new BasicStats()).inc();
-    // this.messages.getOrSet(user, () => new BasicStats()).inc();
-    // }
-    this.channels.getOrSet(channel, () => new ResourceStats()).registerMessage(
-      user,
-      channel,
-      thread,
-    );
-    this.users.getOrSet(user, () => new ResourceStats()).registerMessage(
-      user,
-      channel,
-      thread,
-    );
+    switch (event.type) {
+      case "thread":
+      case "reaction":
+      case "message":
+        this.channels.getOrSet(
+          event.meta.channelId,
+          () => new ResourceStats(event.meta.channelId),
+        ).register(event);
+        this.users.getOrSet(
+          event.meta.userId,
+          () => new ResourceStats(event.meta.userId),
+        ).register(event);
+        break;
+      default:
+        throw new Error(`Unknown event type: ${(event as Events).type}`);
+    }
   }
 
   static createIdentifier(day: DateWithoutTime) {
@@ -66,7 +65,6 @@ export class DayAggregate extends Atom<DayAggregate> {
   static deserialize(json: PropertiesOnly<DayAggregate>): DayAggregate {
     return Object.assign(new DayAggregate(), {
       ...json,
-      day: Day(new Date(json.day)),
       users: DayAggregate.deserializeResourceStatsWithKeyAsSerializedMap(
         json.users,
       ),

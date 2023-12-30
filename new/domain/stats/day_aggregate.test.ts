@@ -7,12 +7,16 @@ Deno.test("DayAggregate test", async () => {
 
   const dayAggregate = new DayAggregate();
 
-  dayAggregate.registerMessage("sample", "samplech");
-
-  console.log(dayAggregate);
+  dayAggregate.register({
+    type: "message",
+    meta: {
+      channelId: "channel1",
+      userId: "user1",
+      timestamp: new Date(),
+    },
+  });
 
   await persist(dayAggregate);
   const restored = await restore(dayAggregate.identity, DayAggregate);
-
   assertEquals(restored, dayAggregate);
 });
