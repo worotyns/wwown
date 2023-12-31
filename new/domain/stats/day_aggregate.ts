@@ -1,5 +1,9 @@
 import { Atom, PropertiesOnly } from "@worotyns/atoms";
-import { InteractionEvents, MigrationEvents, SlackUserId } from "../common/interfaces.ts";
+import {
+  InteractionEvents,
+  MigrationEvents,
+  SlackUserId,
+} from "../common/interfaces.ts";
 import { SlackChannelId } from "../common/interfaces.ts";
 import { DateWithoutTime } from "../common/interfaces.ts";
 import { SerializableMap } from "../common/serializable_map.ts";
@@ -18,27 +22,27 @@ export class DayAggregate extends Atom<DayAggregate> {
   public channels: SerializableMap<SlackChannelId, ResourceStats> =
     new SerializableMap();
 
-    public migrate(
-      event: MigrationEvents,
-    ) {
-      switch (event.type) {
-        case "thread":
-        case "reaction":
-        case "message":
-        case "hourly":
-          this.channels.getOrSet(
-            event.meta.channelId,
-            () => new ResourceStats(ResourceType.channel),
-          ).migrate(event);
-          this.users.getOrSet(
-            event.meta.userId,
-            () => new ResourceStats(ResourceType.user),
-          ).migrate(event);
-          break;
-        default:
-          throw new Error(`Unknown event type: ${(event as Events).type}`);
-      }
-    }    
+  public migrate(
+    event: MigrationEvents,
+  ) {
+    switch (event.type) {
+      case "thread":
+      case "reaction":
+      case "message":
+      case "hourly":
+        this.channels.getOrSet(
+          event.meta.channelId,
+          () => new ResourceStats(ResourceType.channel),
+        ).migrate(event);
+        this.users.getOrSet(
+          event.meta.userId,
+          () => new ResourceStats(ResourceType.user),
+        ).migrate(event);
+        break;
+      default:
+        throw new Error(`Unknown event type: ${(event as Events).type}`);
+    }
+  }
 
   public register(
     event: InteractionEvents,

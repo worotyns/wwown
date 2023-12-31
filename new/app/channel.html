@@ -1,0 +1,310 @@
+<section>
+
+    <h2>Activity</h2>
+    
+    <div class="cal" x-data="data({start: -((52*7)+(new Date().getUTCDay())), end: 0}, '/activity/channels/' + $router.params.channel_id + '/activity')" x-init="calculate()">
+        <template x-for="(day, index) in items" :key="index">
+            <div
+            :class="{day: true, incident: day.incident}"
+            :style="`font-size: 10px; cursor: pointer; background-color: ${day.color}`"  
+            :title="day.title"
+          ></div>
+        </template>
+    </div>
+
+    <div x-data="data({start: -7, end: 0, tzOffset: new Date().getTimezoneOffset() * -1 }, '/activity/channels/' + $router.params.channel_id + '/hourly')"  x-init="calculate()">
+        <h3>Messages distribution in time (
+            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days, 
+            <input x-model="queryParams.tzOffset" @change="calculate()" type="number" min="-720" max="720" step="60"/>min timezone offset)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
+        </h3>
+        <div class="bar-chart" style="margin: auto; height: 80px; width: 520px;">
+            <template x-for="item of items">
+                <div class="bar-container" :title="'Hour: ' + item.hour">
+                    <div class="bar-fill" :style="{'height': item.value+'%'}"></div>
+                    <span class="label" x-text="item.hour"></span>
+                </div>
+            </template>
+        </div>
+    </div>
+    <div x-data="data({limit: 5}, '/activity/channels/' + $router.params.channel_id + '/last')"  x-init="calculate()">
+        <h3>Last logged user interactions (
+            <input x-model="queryParams.limit" @change="calculate()" type="number" min="1" max="100" step="5"/> items)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
+        </h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>channel</th>
+                    <th>user</th>
+                    <th>interactions</th>
+                    <th>last interaction</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in items" :key="index">
+                    <tr>
+                        <td><span x-text="'#' + item.channel_label"></span></td>
+                        <td><a x-link :href="'/users/' + item.user_id + ''"><span
+                                    x-text="'@' + item.user_label"></span></a></td>
+                        <td><span x-text="item.total_value"></span></td>
+                        <td><span x-text="timeAgo(item.last_activity_at)"></span></td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+
+    <div x-data="data({start: -7, end: 0}, '/activity/channels/' + $router.params.channel_id + '/range')"  x-init="calculate()">
+        <h3>Most active users within last (
+            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
+        </h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>channel</th>
+                    <th>user</th>
+                    <th>interactions</th>
+                    <th>last interaction</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in items" :key="index">
+                    <tr>
+                        <td><span x-text="'#' + item.channel_label"></span></td>
+                        <td>
+                            <a x-link :href="'/users/' + item.user_id + ''">
+                                <span x-text="'@' + item.user_label"></span>
+                            </a>
+                        </td>
+                        <td><span x-text="item.total_value"></span></td>
+                        <td><span x-text="timeAgo(item.last_activity_at)"></span></td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+
+    <div x-data="data({limit: 10}, '/activity/channels/' + $router.params.channel_id + '/top')"  x-init="calculate()">
+        <h3>Top active users - all time (
+            <input x-model="queryParams.limit" @change="calculate()" type="number" min="1" max="100" step="5"/> items)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
+        </h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>channel</th>
+                    <th>user</th>
+                    <th>interactions</th>
+                    <th>last interaction</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in items" :key="index">
+                    <tr>
+                        <td><span x-text="'#' + item.channel_label"></span></td>
+                        <td>
+                            <a x-link :href="'/users/' + item.user_id + ''">
+                                <span x-text="'@' + item.user_label"></span>
+                            </a>
+                        </td>
+                        <td><span x-text="item.total_value"></span></td>
+                        <td><span x-text="timeAgo(item.last_activity_at)"></span></td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+
+    <div x-data="data({start: -7, end: 0}, '/activity/channels/' + $router.params.channel_id + '/daily')"  x-init="calculate()">
+        <h3>Average daily channel activity on slack with interactions (
+            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
+        </h3>
+        <table>
+            <thead>
+                <tr>
+                    <th style="min-width: 100px">day</th>
+                    <th style="min-width: 100px">channel</th>
+                    <th>users</th>
+                    <th>threads</th>
+                    <th>threads messages</th>
+                    <th>avg threads messages (per user)</th>
+                    <th>channel messages</th>
+                    <th>channel reactions</th>
+                    <th>avg channels messages (per user)</th>
+                    <th>avg channels reactions (per user)</th>
+                    <th>activity hours</th>
+                    <th>channels avg activity hours (per user)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in items" :key="index">
+                    <tr>
+                        <td x-text="item.date"></td>
+                        <td x-text="'#' + item.channel_label"></td>
+                        <td x-text="item.users_count"></td>
+                        <td x-text="item.threads_count"></td>
+                        <td x-text="item.thread_messages_count"></td>
+                        <td x-text="item.thread_messages_avg_per_user"></td>
+                        <td x-text="item.channel_messages"></td>
+                        <td x-text="item.channel_reactions"></td>
+                        <td x-text="item.channel_messages_avg_per_user"></td>
+                        <td x-text="item.channel_reactions_avg_per_user"></td>
+                        <td x-text="item.activity_hours"></td>
+                        <td x-text="item.activity_hours_avg_per_user"></td>
+                    </tr>                    
+                </template>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Karma</h2>
+
+    <div x-data="data({start: -30, end: 0, limit: 10}, '/karma/channels/' + $router.params.channel_id + '/receivers')"  x-init="calculate()">
+        <h3>Aggregated reactions received by users (
+            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days, 
+            <input x-model="queryParams.limit" @change="calculate()" type="number" min="1" max="100" step="5"/> items)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
+        </h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>channel</th>
+                    <th>user</th>
+                    <th>emoji</th>
+                    <th>reactions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in items" :key="index">
+                    <tr>
+                        <td>
+                            <a x-link :href="'/channels/' + item.channel_id + ''">
+                                <span x-text="'#' + item.channel_label"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <a x-link :href="'/users/' + item.user_id + ''">
+                                <span x-text="'@' + item.user_label"></span>
+                            </a>
+                        </td>
+                        <td x-data="emojis()" x-init="init(item.reaction)">
+                            <span x-show="isCustomEmoji && emoji" x-text="emoji"></span>
+                            <img x-show="!isCustomEmoji && emoji" width="20px" height="20px" :src="emoji ? `https://emojicdn.elk.sh/${emoji}` : null" />
+                        </td>
+                        <td x-text="item.total"></td>
+                    </tr>                    
+                </template>
+            </tbody>
+        </table>
+    </div>
+
+    <div x-data="data({start: -30, end: 0, limit: 10}, '/karma/channels/' + $router.params.channel_id + '/givers')"  x-init="calculate()">
+        <h3>Aggregated reactions given by users (
+            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days, 
+            <input x-model="queryParams.limit" @change="calculate()" type="number" min="1" max="100" step="5"/> items)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
+        </h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>channel</th>
+                    <th>user</th>
+                    <th>emoji</th>
+                    <th>reactions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in items" :key="index">
+                    <tr>
+                        <td>
+                            <a x-link :href="'/channels/' + item.channel_id + ''">
+                                <span x-text="'#' + item.channel_label"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <a x-link :href="'/users/' + item.reacting_user_id + ''">
+                                <span x-text="'@' + item.reacting_user_label"></span>
+                            </a>
+                        </td>
+                        <td x-data="emojis()" x-init="init(item.reaction)">
+                            <span x-show="isCustomEmoji && emoji" x-text="emoji"></span>
+                            <img x-show="!isCustomEmoji && emoji" width="20px" height="20px" :src="emoji ? `https://emojicdn.elk.sh/${emoji}` : null" />
+                        </td>
+                        <td x-text="item.total"></td>
+                    </tr>                    
+                </template>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Time tracking</h2>
+
+    <div x-data="data({start: -30, end: 0}, '/timetracking/channels/' + $router.params.channel_id + '/sum')"  x-init="calculate()">
+        <h3>Last time registrations on this channel, aggregated by description ( 
+            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
+        </h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>channel</th>
+                    <th>user</th>
+                    <th>description</th>
+                    <th>duration</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in items" :key="index">
+                    <tr>
+                        <td>
+                            <span x-text="'#' + item.channel_label"></span>
+                        </td>
+                        <td>
+                            <a x-link :href="'/users/' + item.user_id + ''">
+                                <span x-text="'@' + item.user_label"></span>
+                            </a>
+                        </td>
+                        <td><span x-text="item.description"></span></td>
+                        <td><span x-text="duration(item.total_duration)"></span></td>
+                    </tr>                    
+                </template>
+            </tbody>
+        </table>
+    </div>
+
+    <div x-data="data({start: -365, end: 0, limit: 10}, '/timetracking/channels/' + $router.params.channel_id + '/monthly')"  x-init="calculate()">
+        <h3>Aggregated by date, user for ( 
+            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days, 
+            <input x-model="queryParams.limit" @change="calculate()" type="number" min="1" max="100" step="5"/> items)
+            <sub><span x-text="fetchTimeMs"></span>ms.</sub>
+        </h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>date</th>
+                    <th>user</th>
+                    <th>duration</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(item, index) in items" :key="index">
+                    <tr>
+                        <td>
+                            <span x-text="item.date"></span>
+                        </td>
+                        <td>
+                            <a x-link :href="'/users/' + item.user_id + ''">
+                                <span x-text="'@' + item.user_label"></span>
+                            </a>
+                        </td>
+                        <td><span x-text="duration(item.total_duration)"></span></td>
+                    </tr>                    
+                </template>
+            </tbody>
+        </table>
+    </div>
+
+</section>

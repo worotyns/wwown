@@ -3,43 +3,105 @@ import {
   HourPercentDistribution,
   LastChannels,
 } from "../application/interfaces.ts";
+import { generateDayRawRange } from "./common/date_time.ts";
 import {
   Max,
   Min,
   Percent,
   SlackChannelId,
+  SlackUserId,
   Total,
   TwoDigitHour,
 } from "./common/interfaces.ts";
 import { SerializableMap } from "./common/serializable_map.ts";
-import { ConcreteResourceData, ConcreteResourceDataParams } from "./stats/concrete_resource_data.ts";
-import { ResourceType } from "./stats/resource_stats.ts";
+import { BasicStats } from "./stats/basic_stats.ts";
+import {
+  ConcreteResourceData,
+  ConcreteResourceDataParams,
+} from "./stats/concrete_resource_data.ts";
+import { ResourceStats, ResourceType } from "./stats/resource_stats.ts";
 
 export class CalculationHelpers {
-
-  static normalizeValue(originalValue: number, minValue: number, maxValue: number, newMin: number, newMax: number) {
-    return ((originalValue - minValue) / (maxValue - minValue)) * (newMax - newMin) + newMin;
+  static normalizeValue(
+    originalValue: number,
+    minValue: number,
+    maxValue: number,
+    newMin: number,
+    newMax: number,
+  ) {
+    return ((originalValue - minValue) / (maxValue - minValue)) *
+        (newMax - newMin) + newMin;
   }
 
-  static getActivity(extendedStats: ConcreteResourceData): Array<Activity> {
-    
+  static getActivity(
+    extendedStats: ConcreteResourceData,
+  ): Array<Activity> {
     const activity: Array<Activity> = [];
 
-    const [_min, max, _sum] = this
-      .calculateMinMaxAndSumOfHourlyInteractionsDistributionAllTime(
-        extendedStats
+    const daysToSubtract = (52 * 7) + (new Date().getUTCDay());
+    const activityRangeFrom = new Date(
+      new Date().getTime() - (daysToSubtract * 24 * 60 * 60 * 1000),
+    );
+
+    const params: ConcreteResourceDataParams = {
+      from: activityRangeFrom,
+      to: new Date(),
+      lastItems: Infinity,
+    };
+
+    const values: number[] = [];
+
+    for (const dayAggregate of extendedStats.getDayAggregatesForRange(params)) {
+      for (const [_, value] of dayAggregate.messages.entries()) {
+        values.push(value.total);
+      }
+    }
+
+    const max = Math.max(...values);
+
+    for (const day of generateDayRawRange(params.from, params.to)) {
+      const resource = extendedStats.days.getOrSet(
+        day,
+        () => new ResourceStats(ResourceType.read),
       );
 
-    for (const [day, resource] of extendedStats.days.entries()) {
-      const currentValue = Array.from(resource.messages.values()).reduce((a, b) => a + b.total, 0);
+      const currentValue = [
+        Array.from(resource.messages.values()).reduce(
+          (a, b) => a + b.total,
+          0,
+        ),
+        Array.from(resource.reactions.given.values()).reduce(
+          (a, b) => a + b.total,
+          0,
+        ),
+        Array.from(resource.threads.contributed.values()).reduce(
+          (a, b) => a + b.total,
+          0,
+        ),
+        Array.from(resource.threads.authored.values()).reduce(
+          (a, b) => a + b.total,
+          0,
+        ),
+      ].reduce((a, b) => a + b, 0);
+
       activity.push(
         [
           day,
-          (currentValue > 0 ? `rgb(0, ${Math.floor(CalculationHelpers.normalizeValue(currentValue, 0, max, 0, 155)) + 100}, 0)` : 'rgb(211, 211, 211)'),
+          currentValue > 0
+            ? `rgb(0, ${
+              Math.floor(
+                CalculationHelpers.normalizeValue(currentValue, 0, max, 0, 155),
+              ) + 100
+            }, 0)`
+            : "rgb(211, 211, 211)",
           currentValue,
-          extendedStats.resourceType === ResourceType.user ? 1 : resource.messages.size,
-          extendedStats.resourceType === ResourceType.channel ? 1 : resource.messages.size,
-          0 // there is no incidents yet, - TODO based on emoji, after full rewrite of wwown
+          extendedStats.resourceType === ResourceType.user
+            ? 1
+            : resource.messages.size,
+          extendedStats.resourceType === ResourceType.channel
+            ? 1
+            : resource.messages.size,
+          0, // there is no incidents yet, - TODO based on emoji, after full rewrite of wwown
         ],
       );
     }
@@ -102,6 +164,7 @@ export class CalculationHelpers {
     params: ConcreteResourceDataParams,
   ): [Min, Max, Total] {
     const values = [];
+
     for (const dayAggregate of extended.getDayAggregatesForRange(params)) {
       for (const [_, value] of dayAggregate.hourly.entries()) {
         values.push(value.total);
@@ -138,16 +201,24 @@ export class CalculationHelpers {
     const [_min, _max, sum] = this
       .calculateMinMaxAndSumOfHourlyInteractionsDistributionInRange(
         extendedStats,
-        params
+        params,
       );
 
     const distribution: SerializableMap<TwoDigitHour, Percent> =
       new SerializableMap();
 
+    const hoursRange = new Array(24).fill(0).map((_, i) =>
+      i.toString().padStart(2, "0")
+    );
+
     for (const dayAggregate of extendedStats.getDayAggregatesForRange(params)) {
-      for (const [hour, value] of dayAggregate.hourly.entries()) {
+      for (const hour of hoursRange) {
+        const value = dayAggregate.hourly.getOrSet(
+          hour,
+          () => new BasicStats(),
+        );
         const current = distribution.get(hour) || 0;
-        const percent = value.total / sum;
+        const percent = value.total ? value.total / sum : 0;
         distribution.set(hour, current + percent);
       }
     }
@@ -166,9 +237,17 @@ export class CalculationHelpers {
     const distribution: SerializableMap<TwoDigitHour, Percent> =
       new SerializableMap();
 
-    for (const [hour, value] of extendedStats.allTime.hourly.entries()) {
+    const hoursRange = new Array(24).fill(0).map((_, i) =>
+      i.toString().padStart(2, "0")
+    );
+
+    for (const hour of hoursRange) {
+      const value = extendedStats.allTime.hourly.getOrSet(
+        hour,
+        () => new BasicStats(),
+      );
       const current = distribution.get(hour) || 0;
-      const percent = value.total / sum;
+      const percent = value.total ? value.total / sum : 0;
       distribution.set(hour, current + percent);
     }
 

@@ -36,7 +36,7 @@ export type Events =
   | MessageEvent
   | ThreadMessageEvent
   | ChannelEvent
-  | ReactionMessageEvent 
+  | ReactionMessageEvent
   | HourlyEvent;
 
 export type InteractionEvents =

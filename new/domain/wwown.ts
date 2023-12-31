@@ -30,7 +30,7 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
       case "thread":
       case "reaction":
       case "message":
-      case "hourly":  
+      case "hourly":
         this.getDayAggregate(event.meta.timestamp).migrate(event);
         this.users.getOrSet(
           event.meta.userId,
@@ -73,7 +73,8 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
   public getChannelData(
     channelId: SlackChannelId,
   ): ConcreteResourceData {
-    const days: SerializableMap<DateWithoutTimeRaw, ResourceStats> = new SerializableMap();
+    const days: SerializableMap<DateWithoutTimeRaw, ResourceStats> =
+      new SerializableMap();
 
     for (const [day, dayAggregate] of this.days.entries()) {
       days.set(
@@ -99,7 +100,8 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
   public getUserData(
     userId: SlackUserId,
   ): ConcreteResourceData {
-    const days: SerializableMap<DateWithoutTimeRaw, ResourceStats> = new SerializableMap();
+    const days: SerializableMap<DateWithoutTimeRaw, ResourceStats> =
+      new SerializableMap();
 
     for (const [day, dayAggregate] of this.days.entries()) {
       days.set(

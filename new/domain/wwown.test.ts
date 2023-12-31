@@ -8,7 +8,7 @@ Deno.test("wwown test", async () => {
   const { persist, restore } = createMemory();
 
   const wwown = createWwown();
-  
+
   const users = wwown.getUserData("user1");
 
   console.log(
@@ -23,7 +23,7 @@ Deno.test("wwown test", async () => {
   );
 
   await persist(wwown);
-  
+
   const restored = await restore(wwown.identity, WhoWorksOnWhatNow);
 
   assertEquals(restored, wwown);

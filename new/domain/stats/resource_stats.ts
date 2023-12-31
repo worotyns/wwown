@@ -29,6 +29,7 @@ class Reactions {
 }
 
 export enum ResourceType {
+  read = "READ ONLY",
   channel = "channel",
   user = "user",
 }
@@ -94,10 +95,12 @@ export class ResourceStats {
         break;
       case "hourly":
         this.hourly.getOrSet(Hour(event.meta.timestamp), () => new BasicStats())
-        .inc(event.meta.count);
+          .inc(event.meta.count);
         break;
       default:
-        throw new Error(`Unknown event type: ${(event as MigrationEvents).type}`);
+        throw new Error(
+          `Unknown event type: ${(event as MigrationEvents).type}`,
+        );
     }
   }
 
