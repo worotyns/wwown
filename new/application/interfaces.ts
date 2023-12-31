@@ -1,10 +1,25 @@
-import { Percent, SlackChannelId, SlackUserId, TwoDigitHour } from "../domain/common/interfaces.ts";
-import { ResourceStats } from "../domain/stats/resource_stats.ts";
+import {
+  DateWithoutTimeRaw,
+  LastTouchSerialized,
+  Percent,
+  SlackChannelId,
+  Total,
+  TwoDigitHour,
+} from "../domain/common/interfaces.ts";
 
-export interface ExtendedResourceStats {
-  resource: SlackChannelId | SlackUserId;
-  allTime: ResourceStats;
-  range: Array<ResourceStats>;
-}
+
+type Interactions = number;
+type ChannelsCount = number;
+type UsersCount = number;
+type IncidentsCount = number;
 
 export type HourPercentDistribution = [TwoDigitHour, Percent];
+export type LastChannels = [SlackChannelId, Total, LastTouchSerialized];
+export type TopChannels = [SlackChannelId, Total, LastTouchSerialized];
+export type Activity = [
+  DateWithoutTimeRaw,
+  Interactions,
+  UsersCount,
+  ChannelsCount,
+  IncidentsCount,
+];

@@ -27,13 +27,15 @@ class Reactions {
     new SerializableMap();
 }
 
+export enum ResourceType {
+  channel = "channel",
+  user = "user",
+}
+
 export class ResourceStats {
   constructor(
-    public readonly id: SlackChannelId | SlackUserId,
+    public readonly type: ResourceType,
   ) {
-    if (!id) {
-      throw new Error("ResourceStats must have id");
-    }
   }
 
   public readonly hourly: SerializableMap<TwoDigitHour, BasicStats> =
@@ -80,18 +82,14 @@ export class ResourceStats {
         }
         break;
       case "message":
-        if (this.id === event.meta.channelId) {
-          this.messages.getOrSet(event.meta.channelId, () => new BasicStats())
-            .inc();
-        } else if (this.id === event.meta.userId) {
+        if (this.type === ResourceType.channel) {
           this.messages.getOrSet(event.meta.userId, () => new BasicStats())
             .inc();
+        } else if (this.type === ResourceType.user) {
+          this.messages.getOrSet(event.meta.channelId, () => new BasicStats())
+            .inc();
         } else {
-          throw new Error(
-            `ResourceStats id ${this.id} does not match event meta ${
-              JSON.stringify(event.meta)
-            }`,
-          );
+          throw new Error("Unknown resource type");
         }
         break;
       default:
@@ -115,7 +113,7 @@ export class ResourceStats {
   }
 
   static deserialize(json: PropertiesOnly<ResourceStats>): ResourceStats {
-    return Object.assign(new ResourceStats(json.id), {
+    return Object.assign(new ResourceStats(json.type), {
       hourly: ResourceStats.deserializeBasicStatsWithKeyAsSerializedMap(
         json.hourly,
       ),

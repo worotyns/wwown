@@ -1,11 +1,10 @@
 import { Atom, PropertiesOnly } from "@worotyns/atoms";
-import { Day } from "../common/date_time.ts";
 import { InteractionEvents, SlackUserId } from "../common/interfaces.ts";
 import { SlackChannelId } from "../common/interfaces.ts";
 import { DateWithoutTime } from "../common/interfaces.ts";
 import { SerializableMap } from "../common/serializable_map.ts";
 import { DayRaw } from "../common/date_time.ts";
-import { ResourceStats } from "./resource_stats.ts";
+import { ResourceStats, ResourceType } from "./resource_stats.ts";
 import { Events } from "../common/interfaces.ts";
 
 /**
@@ -28,11 +27,11 @@ export class DayAggregate extends Atom<DayAggregate> {
       case "message":
         this.channels.getOrSet(
           event.meta.channelId,
-          () => new ResourceStats(event.meta.channelId),
+          () => new ResourceStats(ResourceType.channel),
         ).register(event);
         this.users.getOrSet(
           event.meta.userId,
-          () => new ResourceStats(event.meta.userId),
+          () => new ResourceStats(ResourceType.user),
         ).register(event);
         break;
       default:

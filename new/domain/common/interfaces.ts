@@ -10,6 +10,8 @@ export type LastActivityAt = Date;
 
 export type LastTouch = Date;
 
+export type LastTouchSerialized = number;
+
 export type DateWithoutTime = Date;
 export type DateWithoutTimeRaw = string;
 

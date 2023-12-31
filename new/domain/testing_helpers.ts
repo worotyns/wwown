@@ -19,6 +19,7 @@ export function createWwown(): WhoWorksOnWhatNow {
       for (const user of users) {
         now.setHours(now.getHours() + 1);
         wwown.register({
+          // deno-lint-ignore no-explicit-any
           type: "reaction" as any,
           meta: {
             channelId: channel,
@@ -30,6 +31,7 @@ export function createWwown(): WhoWorksOnWhatNow {
         for (const kind of kinds) {
           now.setSeconds(now.getSeconds() + 1);
           wwown.register({
+            // deno-lint-ignore no-explicit-any
             type: kind as any,
             meta: {
               channelId: channel,

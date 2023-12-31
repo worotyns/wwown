@@ -8,9 +8,9 @@ import {
 } from "./common/interfaces.ts";
 import { DayAggregate } from "./stats/day_aggregate.ts";
 import { SerializableMap } from "./common/serializable_map.ts";
-import { DayRaw, generateDayRawRange } from "./common/date_time.ts";
-import { ResourceStats } from "./stats/resource_stats.ts";
-import { ExtendedResourceStats } from "../application/interfaces.ts";
+import { DayRaw } from "./common/date_time.ts";
+import { ResourceStats, ResourceType } from "./stats/resource_stats.ts";
+import { ConcreteResourceData } from "./stats/concrete_resource_data.ts";
 
 /**
  * Main entry point for the application.
@@ -28,13 +28,13 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
       case "reaction":
       case "message":
         this.getDayAggregate(event.meta.timestamp).register(event);
-        this.channels.getOrSet(
-          event.meta.channelId,
-          () => new ResourceStats(event.meta.channelId),
-        ).register(event);
         this.users.getOrSet(
           event.meta.userId,
-          () => new ResourceStats(event.meta.userId),
+          () => new ResourceStats(ResourceType.user),
+        ).register(event);
+        this.channels.getOrSet(
+          event.meta.channelId,
+          () => new ResourceStats(ResourceType.channel),
         ).register(event);
         break;
       case "user":
@@ -44,52 +44,56 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
     }
   }
 
-  protected getDayAggregatesForRange(
-    from: Date,
-    to: Date,
-  ): Array<DayAggregate> {
-    const range = generateDayRawRange(from, to);
-    return range.map((day) =>
-      this.days.getOrSet(day, () => DayAggregate.createForDay(new Date(day)))
-    );
-  }
-
-  public getChannelDataForRange(
+  public getChannelData(
     channelId: SlackChannelId,
-    from: Date,
-    to: Date,
-  ): ExtendedResourceStats {
-    const dayAggregates = this.getDayAggregatesForRange(from, to);
-    const range = dayAggregates.map((dayAggregate) =>
-      dayAggregate.channels.getOrSet(
+  ): ConcreteResourceData {
+    const days: SerializableMap<DateWithoutTimeRaw, ResourceStats> = new SerializableMap();
+
+    for (const [day, dayAggregate] of this.days.entries()) {
+      days.set(
+        day,
+        dayAggregate.channels.getOrSet(
+          channelId,
+          () => new ResourceStats(ResourceType.channel),
+        ),
+      );
+    }
+
+    return new ConcreteResourceData(
+      ResourceType.channel,
+      channelId,
+      this.channels.getOrSet(
         channelId,
-        () => new ResourceStats(channelId),
-      )
-    );
-    return {
-      resource: channelId,
-      allTime: this.channels.getOrSet(
-        channelId,
-        () => new ResourceStats(channelId),
+        () => new ResourceStats(ResourceType.channel),
       ),
-      range,
-    };
+      days,
+    );
   }
 
-  public getUserDataForRange(
+  public getUserData(
     userId: SlackUserId,
-    from: Date,
-    to: Date,
-  ): ExtendedResourceStats {
-    const dayAggregates = this.getDayAggregatesForRange(from, to);
-    const range = dayAggregates.map((dayAggregate) =>
-      dayAggregate.users.getOrSet(userId, () => new ResourceStats(userId))
+  ): ConcreteResourceData {
+    const days: SerializableMap<DateWithoutTimeRaw, ResourceStats> = new SerializableMap();
+
+    for (const [day, dayAggregate] of this.days.entries()) {
+      days.set(
+        day,
+        dayAggregate.users.getOrSet(
+          userId,
+          () => new ResourceStats(ResourceType.channel),
+        ),
+      );
+    }
+
+    return new ConcreteResourceData(
+      ResourceType.user,
+      userId,
+      this.users.getOrSet(
+        userId,
+        () => new ResourceStats(ResourceType.user),
+      ),
+      days,
     );
-    return {
-      resource: userId,
-      allTime: this.users.getOrSet(userId, () => new ResourceStats(userId)),
-      range,
-    };
   }
 
   /**
