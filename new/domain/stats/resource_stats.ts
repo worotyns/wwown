@@ -4,6 +4,7 @@ import {
   FirstActivityAt,
   InteractionEvents,
   LastActivityAt,
+  MigrationEvents,
   SlackUserId,
   TwoDigitHour,
 } from "../common/interfaces.ts";
@@ -49,23 +50,22 @@ export class ResourceStats {
   public readonly firstAt: FirstActivityAt = new Date(0);
   public readonly lastAt: LastActivityAt = new Date(0);
 
-  public register(
-    event: InteractionEvents,
-  ) {
-    this.hourly.getOrSet(Hour(event.meta.timestamp), () => new BasicStats())
-      .inc();
+  /**
+   * @deprecated - used only once for migration data from SQLLite data
+   */
+  public migrate(event: MigrationEvents) {
     switch (event.type) {
       case "thread":
         if (event.meta.userId === event.meta.parentUserId) {
           this.threads.authored.getOrSet(
             event.meta.threadId,
             () => new BasicStats(),
-          ).inc();
+          ).inc(event.meta.count);
         } else {
           this.threads.contributed.getOrSet(
             event.meta.threadId,
             () => new BasicStats(),
-          ).inc();
+          ).inc(event.meta.count);
         }
         break;
       case "reaction":
@@ -73,21 +73,73 @@ export class ResourceStats {
           this.reactions.given.getOrSet(
             event.meta.emoji,
             () => new BasicStats(),
-          ).inc();
+          ).inc(event.meta.count);
         } else {
           this.reactions.received.getOrSet(
             event.meta.emoji,
             () => new BasicStats(),
-          ).inc();
+          ).inc(event.meta.count);
         }
         break;
       case "message":
         if (this.type === ResourceType.channel) {
           this.messages.getOrSet(event.meta.userId, () => new BasicStats())
-            .inc();
+            .inc(event.meta.count);
         } else if (this.type === ResourceType.user) {
           this.messages.getOrSet(event.meta.channelId, () => new BasicStats())
-            .inc();
+            .inc(event.meta.count);
+        } else {
+          throw new Error("Unknown resource type");
+        }
+        break;
+      case "hourly":
+        this.hourly.getOrSet(Hour(event.meta.timestamp), () => new BasicStats())
+        .inc(event.meta.count);
+        break;
+      default:
+        throw new Error(`Unknown event type: ${(event as MigrationEvents).type}`);
+    }
+  }
+
+  public register(
+    event: InteractionEvents,
+  ) {
+    this.hourly.getOrSet(Hour(event.meta.timestamp), () => new BasicStats())
+      .inc(event.meta.count);
+    switch (event.type) {
+      case "thread":
+        if (event.meta.userId === event.meta.parentUserId) {
+          this.threads.authored.getOrSet(
+            event.meta.threadId,
+            () => new BasicStats(),
+          ).inc(event.meta.count);
+        } else {
+          this.threads.contributed.getOrSet(
+            event.meta.threadId,
+            () => new BasicStats(),
+          ).inc(event.meta.count);
+        }
+        break;
+      case "reaction":
+        if (event.meta.userId === event.meta.itemUserId) {
+          this.reactions.given.getOrSet(
+            event.meta.emoji,
+            () => new BasicStats(),
+          ).inc(event.meta.count);
+        } else {
+          this.reactions.received.getOrSet(
+            event.meta.emoji,
+            () => new BasicStats(),
+          ).inc(event.meta.count);
+        }
+        break;
+      case "message":
+        if (this.type === ResourceType.channel) {
+          this.messages.getOrSet(event.meta.userId, () => new BasicStats())
+            .inc(event.meta.count);
+        } else if (this.type === ResourceType.user) {
+          this.messages.getOrSet(event.meta.channelId, () => new BasicStats())
+            .inc(event.meta.count);
         } else {
           throw new Error("Unknown resource type");
         }

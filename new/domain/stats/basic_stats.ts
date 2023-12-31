@@ -9,7 +9,7 @@ export class BasicStats {
   public total: Total = 0;
   public lastTs: LastTouch = new Date();
 
-  inc(by = 1) {
+  inc(by: number) {
     this.lastTs = new Date();
     this.total += by;
   }

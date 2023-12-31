@@ -3,7 +3,7 @@
     "dev": "deno run --watch main.ts"
   },
   "imports": {
-    "@worotyns/atoms": "https://deno.land/x/atoms@0.0.3/mod.ts",
+    "@worotyns/atoms": "../../atoms/mod.ts",
     "@testing/asserts": "https://deno.land/std@0.210.0/assert/mod.ts"
   }
 }

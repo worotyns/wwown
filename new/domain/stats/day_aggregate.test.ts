@@ -13,6 +13,7 @@ Deno.test("DayAggregate test", async () => {
       channelId: "channel1",
       userId: "user1",
       timestamp: new Date(),
+      count: 1,
     },
   });
 

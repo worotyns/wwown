@@ -23,7 +23,8 @@ export type SlackInteractionKind =
   | "message"
   | "reaction"
   | "channel"
-  | "user";
+  | "user"
+  | "hourly";
 
 interface Event<T> {
   type: SlackInteractionKind;
@@ -35,12 +36,31 @@ export type Events =
   | MessageEvent
   | ThreadMessageEvent
   | ChannelEvent
-  | ReactionMessageEvent;
+  | ReactionMessageEvent 
+  | HourlyEvent;
 
 export type InteractionEvents =
   | MessageEvent
   | ThreadMessageEvent
   | ReactionMessageEvent;
+
+/**
+ * @deprecated - used only for migrations
+ */
+export type MigrationEvents = InteractionEvents | HourlyEvent;
+/**
+ * @deprecated - used only for migrations
+ */
+export interface HourlyEvent {
+  type: "hourly";
+  meta: {
+    channelId: SlackChannelId;
+    userId: SlackUserId;
+    timestamp: Date;
+    count: Total; // Used only for migration testing field - usualy will be 1
+  };
+}
+
 export type ResourceEvents = UserEvent | ChannelEvent;
 
 export type ResourceAction = "add" | "remove";
@@ -71,6 +91,7 @@ export interface MessageEvent {
     channelId: SlackChannelId;
     userId: SlackUserId;
     timestamp: Date;
+    count: Total; // Used only for migration testing field - usualy will be 1
   };
 }
 
@@ -82,6 +103,7 @@ export interface ThreadMessageEvent {
     threadId: SlackThreadId;
     parentUserId: SlackUserId;
     timestamp: Date;
+    count: Total; // Used only for migration testing field - usualy will be 1
   };
 }
 
@@ -93,6 +115,7 @@ export interface ReactionMessageEvent {
     itemUserId: null | SlackUserId;
     emoji: Emoji;
     timestamp: Date;
+    count: Total; // Used only for migration testing field - usualy will be 1
   };
 }
 

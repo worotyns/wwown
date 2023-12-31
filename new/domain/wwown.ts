@@ -20,7 +20,33 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
    * Identity determine file name on disk
    * and is used to identify the application state.
    */
-  public readonly identity = "wwown_production";
+  public readonly identity = "wwown_prod";
+
+  /**
+   * @deprecated - used only once for initialize old sqldata data
+   */
+  public migrate(event: Events) {
+    switch (event.type) {
+      case "thread":
+      case "reaction":
+      case "message":
+      case "hourly":  
+        this.getDayAggregate(event.meta.timestamp).migrate(event);
+        this.users.getOrSet(
+          event.meta.userId,
+          () => new ResourceStats(ResourceType.user),
+        ).migrate(event);
+        this.channels.getOrSet(
+          event.meta.channelId,
+          () => new ResourceStats(ResourceType.channel),
+        ).migrate(event);
+        break;
+      case "user":
+      case "channel":
+        this.resources.register(event);
+        break;
+    }
+  }
 
   public register(event: Events) {
     switch (event.type) {

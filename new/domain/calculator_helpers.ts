@@ -12,22 +12,31 @@ import {
   TwoDigitHour,
 } from "./common/interfaces.ts";
 import { SerializableMap } from "./common/serializable_map.ts";
-import { BasicStats } from "./stats/basic_stats.ts";
 import { ConcreteResourceData, ConcreteResourceDataParams } from "./stats/concrete_resource_data.ts";
 import { ResourceType } from "./stats/resource_stats.ts";
 
 export class CalculationHelpers {
+
+  static normalizeValue(originalValue: number, minValue: number, maxValue: number, newMin: number, newMax: number) {
+    return ((originalValue - minValue) / (maxValue - minValue)) * (newMax - newMin) + newMin;
+  }
+
   static getActivity(extendedStats: ConcreteResourceData): Array<Activity> {
     
     const activity: Array<Activity> = [];
 
-    for (const [day, resource] of extendedStats.days.entries()) {
-      console.log(resource.messages, extendedStats.resource)
+    const [_min, max, _sum] = this
+      .calculateMinMaxAndSumOfHourlyInteractionsDistributionAllTime(
+        extendedStats
+      );
 
+    for (const [day, resource] of extendedStats.days.entries()) {
+      const currentValue = Array.from(resource.messages.values()).reduce((a, b) => a + b.total, 0);
       activity.push(
         [
           day,
-          Array.from(resource.messages.values()).reduce((a, b) => a + b.total, 0),
+          (currentValue > 0 ? `rgb(0, ${Math.floor(CalculationHelpers.normalizeValue(currentValue, 0, max, 0, 155)) + 100}, 0)` : 'rgb(211, 211, 211)'),
+          currentValue,
           extendedStats.resourceType === ResourceType.user ? 1 : resource.messages.size,
           extendedStats.resourceType === ResourceType.channel ? 1 : resource.messages.size,
           0 // there is no incidents yet, - TODO based on emoji, after full rewrite of wwown

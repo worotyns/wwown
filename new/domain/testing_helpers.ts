@@ -26,6 +26,7 @@ export function createWwown(): WhoWorksOnWhatNow {
             userId: user,
             emoji: "smile",
             timestamp: now,
+            count: 1,
           },
         });
         for (const kind of kinds) {
@@ -38,6 +39,7 @@ export function createWwown(): WhoWorksOnWhatNow {
               userId: user,
               emoji: "smile",
               timestamp: now,
+              count: 1,
             },
           });
         }
