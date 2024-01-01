@@ -91,8 +91,8 @@ export class CalculationHelpers {
           currentValue > 0
             ? `rgb(39, 90, ${
               Math.floor(
-                CalculationHelpers.normalizeValue(currentValue, 0, max, 0, 155),
-              ) + 100
+                CalculationHelpers.normalizeValue(currentValue, 0, max, 100, 255),
+              )
             })`
             : "rgb(211, 211, 211)",
           currentValue,
