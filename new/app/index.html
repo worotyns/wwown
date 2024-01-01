@@ -13,8 +13,6 @@
 
   <body x-cloak x-init="$router.config({ mode: 'hash' })">
     <template x-route="/" template="/dashboard.html"></template>
-    <template x-route="/daily/users" template="/daily_users.html"></template>
-    <template x-route="/daily/channels" template="/daily_channels.html"></template>
     <template x-route="/channels/:channel_id" template="/channel.html"></template>
     <template x-route="/users/:user_id" template="/user.html"></template>
     <footer>
@@ -24,7 +22,7 @@
             x-data="{currentSeconds: 360}" 
             x-init="setInterval(() => currentSeconds === 0 ? window.location.reload() : currentSeconds--, 1000)">
             <span class="grey">
-              <small><span style="cursor: pointer;" @click="window.location.reload()">🔄 in </span><span x-text="currentSeconds"></span>s.</small>
+              <small><span style="cursor: pointer;" @click="window.location.reload()">🔄 in</span><span x-text="currentSeconds"></span>s.</small>
             </span>
           </span>
         </small>
