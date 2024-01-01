@@ -25,3 +25,6 @@ export type Activity = [
   ChannelsCount,
   IncidentsCount,
 ];
+
+export type Received = number;
+export type Given = number;

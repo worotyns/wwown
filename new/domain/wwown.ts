@@ -9,8 +9,9 @@ import {
 import { DayAggregate } from "./stats/day_aggregate.ts";
 import { SerializableMap } from "./common/serializable_map.ts";
 import { DayRaw } from "./common/date_time.ts";
-import { ResourceStats, ResourceType } from "./stats/resource_stats.ts";
-import { ConcreteResourceData } from "./stats/concrete_resource_data.ts";
+import { UserStats } from "./stats/user/user_stats.ts";
+import { UserData } from "./stats/user/user_data.ts";
+import { ChannelStats } from "./stats/channel_stats.ts";
 
 /**
  * Main entry point for the application.
@@ -27,19 +28,33 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
    */
   public migrate(event: Events) {
     switch (event.type) {
-      case "thread":
       case "reaction":
+        this.getDayAggregate(event.meta.timestamp).register(event);
+        // Bidirectional registration for user, and receiver
+        this.users.getOrSet(
+          event.meta.userId,
+          () => new UserStats(event.meta.userId),
+        ).register(event);
+
+        if (event.meta.itemUserId) {
+          this.users.getOrSet(
+            event.meta.itemUserId,
+            () => new UserStats(event.meta.itemUserId!),
+          ).register(event);
+        }
+        break;
+      case "thread":
       case "message":
       case "hourly":
         this.getDayAggregate(event.meta.timestamp).migrate(event);
         this.users.getOrSet(
           event.meta.userId,
-          () => new ResourceStats(ResourceType.user),
+          () => new UserStats(event.meta.userId),
         ).migrate(event);
-        this.channels.getOrSet(
-          event.meta.channelId,
-          () => new ResourceStats(ResourceType.channel),
-        ).migrate(event);
+        // this.channels.getOrSet(
+        //   event.meta.channelId,
+        //   () => new ChannelStats(event.meta.channelId),
+        // ).migrate(event);
         break;
       case "user":
       case "channel":
@@ -50,18 +65,31 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
 
   public register(event: Events) {
     switch (event.type) {
-      case "thread":
       case "reaction":
+        this.getDayAggregate(event.meta.timestamp).register(event);
+        // Bidirectional registration for user, and receiver
+        this.users.getOrSet(
+          event.meta.userId,
+          () => new UserStats(event.meta.userId),
+        ).register(event);
+        if (event.meta.itemUserId) {
+          this.users.getOrSet(
+            event.meta.itemUserId,
+            () => new UserStats(event.meta.itemUserId!),
+          ).register(event);
+        }
+        break;
+      case "thread":
       case "message":
         this.getDayAggregate(event.meta.timestamp).register(event);
         this.users.getOrSet(
           event.meta.userId,
-          () => new ResourceStats(ResourceType.user),
+          () => new UserStats(event.meta.userId),
         ).register(event);
-        this.channels.getOrSet(
-          event.meta.channelId,
-          () => new ResourceStats(ResourceType.channel),
-        ).register(event);
+        // this.channels.getOrSet(
+        //   event.meta.channelId,
+        //   () => new ChannelStats(event.meta.channelId),
+        // ).register(event);
         break;
       case "user":
       case "channel":
@@ -70,37 +98,10 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
     }
   }
 
-  public getChannelData(
-    channelId: SlackChannelId,
-  ): ConcreteResourceData {
-    const days: SerializableMap<DateWithoutTimeRaw, ResourceStats> =
-      new SerializableMap();
-
-    for (const [day, dayAggregate] of this.days.entries()) {
-      days.set(
-        day,
-        dayAggregate.channels.getOrSet(
-          channelId,
-          () => new ResourceStats(ResourceType.channel),
-        ),
-      );
-    }
-
-    return new ConcreteResourceData(
-      ResourceType.channel,
-      channelId,
-      this.channels.getOrSet(
-        channelId,
-        () => new ResourceStats(ResourceType.channel),
-      ),
-      days,
-    );
-  }
-
   public getUserData(
     userId: SlackUserId,
-  ): ConcreteResourceData {
-    const days: SerializableMap<DateWithoutTimeRaw, ResourceStats> =
+  ): UserData {
+    const days: SerializableMap<DateWithoutTimeRaw, UserStats> =
       new SerializableMap();
 
     for (const [day, dayAggregate] of this.days.entries()) {
@@ -108,17 +109,16 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
         day,
         dayAggregate.users.getOrSet(
           userId,
-          () => new ResourceStats(ResourceType.user),
+          () => new UserStats(userId),
         ),
       );
     }
 
-    return new ConcreteResourceData(
-      ResourceType.user,
+    return new UserData(
       userId,
       this.users.getOrSet(
         userId,
-        () => new ResourceStats(ResourceType.user),
+        () => new UserStats(userId),
       ),
       days,
     );
@@ -132,13 +132,13 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
   /**
    * This is aggregated data for all-time-period with one channel -> user granularity.
    */
-  public readonly channels: SerializableMap<SlackUserId, ResourceStats> =
+  public readonly channels: SerializableMap<SlackChannelId, ChannelStats> =
     new SerializableMap();
 
   /**
    * This is aggregated data for all-time-period with one user -> channel granularity.
    */
-  public readonly users: SerializableMap<SlackChannelId, ResourceStats> =
+  public readonly users: SerializableMap<SlackUserId, UserStats> =
     new SerializableMap();
 
   /**
@@ -155,16 +155,16 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
     );
   }
 
-  static deserializeResourceStatsWithKeyAsSerializedMap<T>(
-    json: PropertiesOnly<SerializableMap<T, ResourceStats>>,
-  ): SerializableMap<T, ResourceStats> {
+  static deserializeUserStatsWithKeyAsSerializedMap<T>(
+    json: PropertiesOnly<SerializableMap<T, UserStats>>,
+  ): SerializableMap<T, UserStats> {
     return new SerializableMap(
-      (json as unknown as Array<[T, ResourceStats]>)
+      (json as unknown as Array<[T, UserStats]>)
         .map((
           item,
         ) => [
           item[0],
-          ResourceStats.deserialize(item[1]),
+          UserStats.deserialize(item[1]),
         ]),
     );
   }
@@ -176,10 +176,10 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
       ...value,
       resources: Resources.deserialize(value.resources),
       channels: WhoWorksOnWhatNow
-        .deserializeResourceStatsWithKeyAsSerializedMap(
+        .deserializeUserStatsWithKeyAsSerializedMap(
           value.channels,
         ),
-      users: WhoWorksOnWhatNow.deserializeResourceStatsWithKeyAsSerializedMap(
+      users: WhoWorksOnWhatNow.deserializeUserStatsWithKeyAsSerializedMap(
         value.users,
       ),
       days: new SerializableMap(

@@ -71,6 +71,7 @@ function data(query, uri) {
         console.error("Error fetching data:", error);
       } finally {
         this.__fetchTimeMs = Date.now() - start;
+        console.log(`Fetched data in ${this.__fetchTimeMs}ms`);
       }
     },
   };
@@ -146,6 +147,6 @@ function date(ts) {
 }
 
 function normalize(curent, min, max, newMin = 0, newMax = 100) {
-    curent = Math.min(Math.max(curent, min), max);
-    return ((curent - min) / (max - min)) * (newMax - newMin) + newMin;
+  curent = Math.min(Math.max(curent, min), max);
+  return ((curent - min) / (max - min)) * (newMax - newMin) + newMin;
 }

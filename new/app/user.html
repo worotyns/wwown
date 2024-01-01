@@ -1,4 +1,4 @@
-<section x-data="data({from: '2023-12-24', to: '2024-01-01', lastItems: 10}, '/users/' + $router.params.user_id)">
+<section x-data="data({from: '2023-12-01', to: '2024-01-01', lastItems: 10}, '/users/' + $router.params.user_id)">
     <h2><a x-link href="/">🔙&nbsp;</a><span x-text="t($router.params.user_id)"></span></h2>
     <div>
         <!-- Activity matrix -->
@@ -73,6 +73,57 @@
             </div>
             <figcaption>Top channels where user was engaged all-time</figcaption>
         </figure>
+        
+        <!-- Reactions given and received tag all time - and in range -->
+        <div style="display: flex; width: 100%;">
+            <div style="width: 100%; min-height: 50px;">
+                <figure>
+                    <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center;">
+                        <template x-for="(item, index) in get('reactionsAllTime')" :key="index">
+                            <div x-data="{minMax: get('reactionsAllTimeMinMax')}" style="text-align: center; display: inline-block;">
+                                <div :title="`${item[0]} - you give: ${item[1]} times - and receive ${item[2]} times`" x-data="emojis()" x-init="init(item[0])">
+                                    <div style="display: flex; align-items: center; padding: 2px; margin: 3px; background-color: rgb(211,211,211); border-radius: 3px;" x-data="{givenSize: `${normalize(item[1], minMax[0], minMax[1], 15, 100)}px`, receivedSize: `${normalize(item[2], minMax[0], minMax[1], 10, 100)}px`}">
+                                        <div :style="`opacity: ${item[1] === 0 ? 0.20 : 1.0}`">
+                                            <!-- <span x-show="isCustomEmoji && emoji" x-text="emoji"></span> -->
+                                            <img x-show="!isCustomEmoji && emoji" :width="givenSize" :height="givenSize" :src="emoji ? `https://emojicdn.elk.sh/${emoji}` : null" />    
+                                        </div>
+                                        <div :style="`margin-left: 5px; opacity: ${item[2] === 0 ? 0.20 : 1.0}`">
+                                            <!-- <span x-show="isCustomEmoji && emoji" x-text="emoji"></span> -->
+                                            <img x-show="!isCustomEmoji && emoji" :width="receivedSize" :height="receivedSize" :src="emoji ? `https://emojicdn.elk.sh/${emoji}` : null" />    
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <figcaption style="text-align: center;">all-time</figcaption>
+                </figure>
+            </div>
+            <div style="width: 100%; min-height: 50px;">
+                <figure>
+                    <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center;">
+                        <template x-for="(item, index) in get('reactionsInRange')" :key="index">
+                            <div x-data="{minMax: get('reactionsInRangeMinMax')}" style="text-align: center; display: inline-block;">
+                                <div :title="`${item[0]} - you give: ${item[1]} times - and receive ${item[2]} times`" x-data="emojis()" x-init="init(item[0])">
+                                    <div style="display: flex; align-items: center; padding: 2px; margin: 3px; background-color: rgb(211,211,211); border-radius: 3px;" x-data="{givenSize: `${normalize(item[1], minMax[0], minMax[1], 15, 100)}px`, receivedSize: `${normalize(item[2], minMax[0], minMax[1], 10, 100)}px`}">
+                                        <div :style="`opacity: ${item[1] === 0 ? 0.20 : 1.0}`">
+                                            <!-- <span x-show="isCustomEmoji && emoji" x-text="emoji"></span> -->
+                                            <img x-show="!isCustomEmoji && emoji" :width="givenSize" :height="givenSize" :src="emoji ? `https://emojicdn.elk.sh/${emoji}` : null" />    
+                                        </div>
+                                        <div :style="`margin-left: 5px; opacity: ${item[2] === 0 ? 0.20 : 1.0}`">
+                                            <!-- <span x-show="isCustomEmoji && emoji" x-text="emoji"></span> -->
+                                            <img x-show="!isCustomEmoji && emoji" :width="receivedSize" :height="receivedSize" :src="emoji ? `https://emojicdn.elk.sh/${emoji}` : null" />    
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <figcaption style="text-align: center;">in-range</figcaption>
+                </figure>
+            </div>
+        </div>
+        <figcaption>Reactions all-time and in range. On left you give, on right you receive. If it's transparent, then you will not receive or give.</figcaption>
     </div>
     <!--
     <div x-data="data({start: -7, end: 0}, '/activity/users/' + $router.params.user_id + '/daily')">

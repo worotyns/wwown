@@ -8,8 +8,9 @@ import { SlackChannelId } from "../common/interfaces.ts";
 import { DateWithoutTime } from "../common/interfaces.ts";
 import { SerializableMap } from "../common/serializable_map.ts";
 import { DayRaw } from "../common/date_time.ts";
-import { ResourceStats, ResourceType } from "./resource_stats.ts";
+import { UserStats } from "./user/user_stats.ts";
 import { Events } from "../common/interfaces.ts";
+import { ChannelStats } from "./channel_stats.ts";
 
 /**
  * Contains all statistics need to be calculated for a given day.
@@ -17,27 +18,46 @@ import { Events } from "../common/interfaces.ts";
 export class DayAggregate extends Atom<DayAggregate> {
   public identity = DayAggregate.createIdentifier(new Date());
 
-  public users: SerializableMap<SlackUserId, ResourceStats> =
+  public users: SerializableMap<SlackUserId, UserStats> =
     new SerializableMap();
-    
-  public channels: SerializableMap<SlackChannelId, ResourceStats> =
+
+  public channels: SerializableMap<SlackChannelId, ChannelStats> =
     new SerializableMap();
 
   public migrate(
     event: MigrationEvents,
   ) {
     switch (event.type) {
-      case "thread":
       case "reaction":
-      case "message":
-      case "hourly":
-        this.channels.getOrSet(
-          event.meta.channelId,
-          () => new ResourceStats(ResourceType.channel),
-        ).migrate(event);
+        // this.channels.getOrSet(
+        //   event.meta.channelId,
+        //   () => new UserStats(event.meta.channelId),
+        // ).register(event);
+
+        // Two dimensional stats - bidirection registration for user, and receiver
         this.users.getOrSet(
           event.meta.userId,
-          () => new ResourceStats(ResourceType.user),
+          () => new UserStats(event.meta.userId),
+        ).register(event);
+        
+        if (event.meta.itemUserId) {
+          this.users.getOrSet(
+            event.meta.itemUserId,
+            () => new UserStats(event.meta.itemUserId!),
+          ).register(event);
+        }
+
+        break;
+      case "thread":
+      case "message":
+      case "hourly":
+        // this.channels.getOrSet(
+        //   event.meta.channelId,
+        //   () => new UserStats(event.meta.channelId),
+        // ).migrate(event);
+        this.users.getOrSet(
+          event.meta.userId,
+          () => new UserStats(event.meta.userId),
         ).migrate(event);
         break;
       default:
@@ -49,17 +69,39 @@ export class DayAggregate extends Atom<DayAggregate> {
     event: InteractionEvents,
   ) {
     switch (event.type) {
-      case "thread":
       case "reaction":
-      case "message":
-        this.channels.getOrSet(
-          event.meta.channelId,
-          () => new ResourceStats(ResourceType.channel),
-        ).register(event);
+        // this.channels.getOrSet(
+        //   event.meta.channelId,
+        //   () => new UserStats(event.meta.channelId),
+        // ).register(event);
+
+        // Two dimensional stats - bidirection registration for user, and receiver
         this.users.getOrSet(
           event.meta.userId,
-          () => new ResourceStats(ResourceType.user),
+          () => new UserStats(event.meta.userId),
         ).register(event);
+
+        if (event.meta.itemUserId) {
+          this.users.getOrSet(
+            event.meta.itemUserId,
+            () => new UserStats(event.meta.itemUserId!),
+          ).register(event);
+        }
+
+        break;
+      case "thread":
+      case "message":
+        // One dimensional stats
+        // this.channels.getOrSet(
+        //   event.meta.channelId,
+        //   () => new UserStats(event.meta.channelId),
+        // ).register(event);
+
+        this.users.getOrSet(
+          event.meta.userId,
+          () => new UserStats(event.meta.userId),
+        ).register(event);
+
         break;
       default:
         throw new Error(`Unknown event type: ${(event as Events).type}`);
@@ -79,22 +121,22 @@ export class DayAggregate extends Atom<DayAggregate> {
     );
   }
 
-  static deserializeResourceStatsWithKeyAsSerializedMap<T>(
-    json: PropertiesOnly<SerializableMap<T, ResourceStats>>,
-  ): SerializableMap<T, ResourceStats> {
+  static deserializeUserStatsWithKeyAsSerializedMap<T>(
+    json: PropertiesOnly<SerializableMap<T, UserStats>>,
+  ): SerializableMap<T, UserStats> {
     return new SerializableMap(
-      (json as unknown as Array<[T, ResourceStats]>)
-        .map((item) => [item[0], ResourceStats.deserialize(item[1])]),
+      (json as unknown as Array<[T, UserStats]>)
+        .map((item) => [item[0], UserStats.deserialize(item[1])]),
     );
   }
 
   static deserialize(json: PropertiesOnly<DayAggregate>): DayAggregate {
     return Object.assign(new DayAggregate(), {
       ...json,
-      users: DayAggregate.deserializeResourceStatsWithKeyAsSerializedMap(
+      users: DayAggregate.deserializeUserStatsWithKeyAsSerializedMap(
         json.users,
       ),
-      channels: DayAggregate.deserializeResourceStatsWithKeyAsSerializedMap(
+      channels: DayAggregate.deserializeUserStatsWithKeyAsSerializedMap(
         json.channels,
       ),
     });

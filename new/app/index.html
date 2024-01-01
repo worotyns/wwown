@@ -12,13 +12,6 @@
   </head>
 
   <body x-cloak x-init="$router.config({ mode: 'hash' })">
-    <!-- <header>
-      <nav>
-        <a x-link href="/">Dashboard</a><span> | </span>
-        <a x-link href="/daily/channels">Channels</a><span> | </span>
-        <a x-link href="/daily/users">Users</a>
-      </nav>
-    </header> -->
     <template x-route="/" template="/dashboard.html"></template>
     <template x-route="/daily/users" template="/daily_users.html"></template>
     <template x-route="/daily/channels" template="/daily_channels.html"></template>
@@ -27,12 +20,11 @@
     <footer>
       <nav>
         <small>
-          <a href="https://github.com/worotyns/wwown/">wwown github</a><span> | </span>
           <span
             x-data="{currentSeconds: 360}" 
             x-init="setInterval(() => currentSeconds === 0 ? window.location.reload() : currentSeconds--, 1000)">
-            <span>
-              <small>auto reload in <span x-text="currentSeconds"></span>s.</small>
+            <span class="grey">
+              <small><span style="cursor: pointer;" @click="window.location.reload()">🔄 in </span><span x-text="currentSeconds"></span>s.</small>
             </span>
           </span>
         </small>

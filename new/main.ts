@@ -33,16 +33,18 @@ router
     const to = context.request.url.searchParams.get("to");
     const lastItems = context.request.url.searchParams.get("lastItems");
 
-    if (!from || !to || !lastItems) { 
+    if (!from || !to || !lastItems) {
       throw new Error("Missing query params: from, to or lastItems");
     }
 
     context.response.body = new UserViewDto(
       wwown.getUserData(context.params.userId),
       {
-        from: new Date(from), to: new Date(to), lastItems: Number(lastItems),
+        from: new Date(from),
+        to: new Date(to),
+        lastItems: Number(lastItems),
       },
-      wwown.resources
+      wwown.resources,
     );
   });
 
