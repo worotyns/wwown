@@ -1,5 +1,5 @@
 <section x-data="globalPicker()">
-    <div class="cal" x-data="data({start: -((52*7)+(new Date().getUTCDay())), end: 0}, '/activity/dashboard/activity')" x-init="calculate()">
+    <div class="cal" x-data="data({start: -((52*7)+(new Date().getUTCDay())), end: 0}, '/activity/dashboard/activity')" >
         <template x-for="(day, index) in items" :key="index">
           <div
             :class="{day: true, incident: day.incident, active: isActive(day.day)}"
@@ -11,10 +11,10 @@
     </div>
 
     <h2>Activity</h2>
-    <div x-data="data({start: -7, end: 0}, '/activity/dashboard/last')" x-init="calculate()">
+    <div x-data="data({start: -7, end: 0}, '/activity/dashboard/last')" >
         <h3>Last logged user interactions on channels (
-            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="-1" step="7"/> days, to
-            <input x-model="queryParams.end" @change="calculate()" type="number" min="-365" max="0" step="7"/> days)
+            <input x-model="queryParams.start"  type="number" min="-365" max="-1" step="7"/> days, to
+            <input x-model="queryParams.end"  type="number" min="-365" max="0" step="7"/> days)
             <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
@@ -47,7 +47,7 @@
                         <td><span x-text="row.total_value"></span></td>
                         <td><span x-text="timeAgo(row.last_activity_at)"></span></td>
                         <td>
-                            <div x-data="data({start: queryParams.start, end: '0', tzOffset: new Date().getTimezoneOffset() * -1 }, '/activity/channels/' + row.channel_id + '/hourly')" x-init="calculate()">
+                            <div x-data="data({start: queryParams.start, end: '0', tzOffset: new Date().getTimezoneOffset() * -1 }, '/activity/channels/' + row.channel_id + '/hourly')" >
                                 <div class="bar-chart" style="height: 20px; width: 120px;">
                                     <template x-for="item of items">
                                         <div :title="'Hour: ' + item.hour" class="bar" :style="{'height': item.value+'%'}"></div>
@@ -63,10 +63,10 @@
 
     <h2>Karma</h2>
 
-    <div x-data="data({start: -30, end: 0, limit: 15}, '/karma/dashboard/ranking')"  x-init="calculate()">
+    <div x-data="data({start: -30, end: 0, limit: 15}, '/karma/dashboard/ranking')"  >
         <h3>Aggregated reactions received by users (
-            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days, 
-            <input x-model="queryParams.limit" @change="calculate()" type="number" min="1" max="100" step="5"/> items)
+            <input x-model="queryParams.start"  type="number" min="-365" max="0" step="7"/> days, 
+            <input x-model="queryParams.limit"  type="number" min="1" max="100" step="5"/> items)
             <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>
@@ -97,9 +97,9 @@
     </div>
 
     <h2>Incidents</h2>
-    <div x-data="data({limit: 10}, '/incidents/dashboard/last')"  x-init="calculate()">
+    <div x-data="data({limit: 10}, '/incidents/dashboard/last')"  >
         <h3>Last logged incidents (
-            <input x-model="queryParams.limit" @change="calculate()" type="number" min="1" max="100" step="5"/> items)
+            <input x-model="queryParams.limit"  type="number" min="1" max="100" step="5"/> items)
             <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>

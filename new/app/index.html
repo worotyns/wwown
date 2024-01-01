@@ -12,13 +12,13 @@
   </head>
 
   <body x-cloak x-init="$router.config({ mode: 'hash' })">
-    <header>
+    <!-- <header>
       <nav>
         <a x-link href="/">Dashboard</a><span> | </span>
         <a x-link href="/daily/channels">Channels</a><span> | </span>
         <a x-link href="/daily/users">Users</a>
       </nav>
-    </header>
+    </header> -->
     <template x-route="/" template="/dashboard.html"></template>
     <template x-route="/daily/users" template="/daily_users.html"></template>
     <template x-route="/daily/channels" template="/daily_channels.html"></template>

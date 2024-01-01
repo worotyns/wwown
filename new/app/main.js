@@ -45,28 +45,32 @@ function queryParamsFromQueryState(state) {
 
 function data(query, uri) {
   return {
-    uri,
-    fetchTimeMs: 0,
-    queryParams: query,
-    items: [],
-    item: {},
-    get(path) {
-      return this.item[path];
+    __uri: uri,
+    __fetchTimeMs: 0,
+    __queryParams: query,
+    __item: {},
+    __resources: new Map(),
+    get(path, defaultValue) {
+      return this.__item[path] || defaultValue;
     },
-    async calculate() {
+    t(key) {
+      return this.__resources.get(key) || key;
+    },
+    async init() {
       const start = Date.now();
-      this.items = [];
-      this.item = {};
+      this.__item = {};
       try {
         const response = await fetch(
-          this.uri + queryParamsFromQueryState(this.queryParams),
+          this.__uri + queryParamsFromQueryState(this.__queryParams),
         );
-        const body = await response.json();
-        Array.isArray(body) ? this.items = body : this.item = body;
+        this.__item = await response.json();
+        if (this.__item.resources) {
+          this.__resources = new Map(this.__item.resources);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        this.fetchTimeMs = Date.now() - start;
+        this.__fetchTimeMs = Date.now() - start;
       }
     },
   };
@@ -139,4 +143,9 @@ function duration(durationInSeconds) {
 
 function date(ts) {
   return new Date(ts).toLocaleString();
+}
+
+function normalize(curent, min, max, newMin = 0, newMax = 100) {
+    curent = Math.min(Math.max(curent, min), max);
+    return ((curent - min) / (max - min)) * (newMax - newMin) + newMin;
 }

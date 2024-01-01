@@ -55,18 +55,19 @@ export class ResourceStats {
    * @deprecated - used only once for migration data from SQLLite data
    */
   public migrate(event: MigrationEvents) {
+    this.touchTimes(event.meta.timestamp);
     switch (event.type) {
       case "thread":
         if (event.meta.userId === event.meta.parentUserId) {
           this.threads.authored.getOrSet(
             event.meta.threadId,
             () => new BasicStats(),
-          ).inc(event.meta.count);
+          ).inc(event.meta.count, event.meta.timestamp);
         } else {
           this.threads.contributed.getOrSet(
             event.meta.threadId,
             () => new BasicStats(),
-          ).inc(event.meta.count);
+          ).inc(event.meta.count, event.meta.timestamp);
         }
         break;
       case "reaction":
@@ -74,28 +75,28 @@ export class ResourceStats {
           this.reactions.given.getOrSet(
             event.meta.emoji,
             () => new BasicStats(),
-          ).inc(event.meta.count);
+          ).inc(event.meta.count, event.meta.timestamp);
         } else {
           this.reactions.received.getOrSet(
             event.meta.emoji,
             () => new BasicStats(),
-          ).inc(event.meta.count);
+          ).inc(event.meta.count, event.meta.timestamp);
         }
         break;
       case "message":
         if (this.type === ResourceType.channel) {
           this.messages.getOrSet(event.meta.userId, () => new BasicStats())
-            .inc(event.meta.count);
+            .inc(event.meta.count, event.meta.timestamp);
         } else if (this.type === ResourceType.user) {
           this.messages.getOrSet(event.meta.channelId, () => new BasicStats())
-            .inc(event.meta.count);
+            .inc(event.meta.count, event.meta.timestamp);
         } else {
           throw new Error("Unknown resource type");
         }
         break;
       case "hourly":
         this.hourly.getOrSet(Hour(event.meta.timestamp), () => new BasicStats())
-          .inc(event.meta.count);
+          .inc(event.meta.count, event.meta.timestamp);
         break;
       default:
         throw new Error(
@@ -108,19 +109,22 @@ export class ResourceStats {
     event: InteractionEvents,
   ) {
     this.hourly.getOrSet(Hour(event.meta.timestamp), () => new BasicStats())
-      .inc(event.meta.count);
+      .inc(event.meta.count, event.meta.timestamp);
+
+    this.touchTimes(event.meta.timestamp);
+
     switch (event.type) {
       case "thread":
         if (event.meta.userId === event.meta.parentUserId) {
           this.threads.authored.getOrSet(
             event.meta.threadId,
             () => new BasicStats(),
-          ).inc(event.meta.count);
+          ).inc(event.meta.count, event.meta.timestamp);
         } else {
           this.threads.contributed.getOrSet(
             event.meta.threadId,
             () => new BasicStats(),
-          ).inc(event.meta.count);
+          ).inc(event.meta.count, event.meta.timestamp);
         }
         break;
       case "reaction":
@@ -128,21 +132,21 @@ export class ResourceStats {
           this.reactions.given.getOrSet(
             event.meta.emoji,
             () => new BasicStats(),
-          ).inc(event.meta.count);
+          ).inc(event.meta.count, event.meta.timestamp);
         } else {
           this.reactions.received.getOrSet(
             event.meta.emoji,
             () => new BasicStats(),
-          ).inc(event.meta.count);
+          ).inc(event.meta.count, event.meta.timestamp);
         }
         break;
       case "message":
         if (this.type === ResourceType.channel) {
           this.messages.getOrSet(event.meta.userId, () => new BasicStats())
-            .inc(event.meta.count);
+            .inc(event.meta.count, event.meta.timestamp);
         } else if (this.type === ResourceType.user) {
           this.messages.getOrSet(event.meta.channelId, () => new BasicStats())
-            .inc(event.meta.count);
+            .inc(event.meta.count, event.meta.timestamp);
         } else {
           throw new Error("Unknown resource type");
         }
@@ -150,6 +154,14 @@ export class ResourceStats {
       default:
         throw new Error(`Unknown event type: ${(event as Events).type}`);
     }
+  }
+
+  private touchTimes(ts: Date) {
+    if (this.firstAt.getTime() === 0) {
+      this.firstAt.setTime(ts.getTime());
+    }
+
+    this.lastAt.setTime(ts.getTime());
   }
 
   static deserializeBasicStatsWithKeyAsSerializedMap<T>(

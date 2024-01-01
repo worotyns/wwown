@@ -1,10 +1,10 @@
 <section>
     <h2>Daily Users Activity</h2>
 
-    <div x-data="data({start: -1, end: 0, limit: 10}, '/activity/dashboard/daily/users')"  x-init="calculate()">
+    <div x-data="data({start: -1, end: 0, limit: 10}, '/activity/dashboard/daily/users')"  >
         <h3>Average daily user activity on slack with interactions (
-            <input x-model="queryParams.start" @change="calculate()" type="number" min="-365" max="0" step="7"/> days, 
-            <input x-model="queryParams.limit" @change="calculate()" type="number" min="1" max="100" step="5"/> items)
+            <input x-model="queryParams.start"  type="number" min="-365" max="0" step="7"/> days, 
+            <input x-model="queryParams.limit"  type="number" min="1" max="100" step="5"/> items)
             <sub><span x-text="fetchTimeMs"></span>ms.</sub>
         </h3>
         <table>

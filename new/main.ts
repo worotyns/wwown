@@ -13,26 +13,36 @@
 
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { UserViewDto } from "./application/api/dtos/user_dto.ts";
-import { WhoWorksOnWhatNow } from "./domain/wwown.ts";
 import { createFs } from "@worotyns/atoms";
 import { send } from "https://deno.land/x/oak@v12.6.1/send.ts";
+import { migratedResource } from "./migrate.ts";
+import { WhoWorksOnWhatNow } from "./domain/wwown.ts";
 
-const { restore } = createFs("./data");
+const { restore, persist } = createFs("./data");
 
 const router = new Router();
 
-console.log("Restoring data...", new Date());
-const wwown = await restore("wwown_prod", WhoWorksOnWhatNow);
-console.log("Data restored", new Date());
+console.log("Starting... ", new Date());
+// const wwown = await restore("wwown_prod", WhoWorksOnWhatNow);
+const wwown = migratedResource;
+// await persist(wwown);
+
 router
   .get("/users/:userId", (context) => {
+    const from = context.request.url.searchParams.get("from");
+    const to = context.request.url.searchParams.get("to");
+    const lastItems = context.request.url.searchParams.get("lastItems");
+
+    if (!from || !to || !lastItems) { 
+      throw new Error("Missing query params: from, to or lastItems");
+    }
+
     context.response.body = new UserViewDto(
-      wwown.getUserData("U01D70X18QL"),
+      wwown.getUserData(context.params.userId),
       {
-        from: new Date("2023-12-01"),
-        to: new Date("2023-12-05"),
-        lastItems: 10,
+        from: new Date(from), to: new Date(to), lastItems: Number(lastItems),
       },
+      wwown.resources
     );
   });
 

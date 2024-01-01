@@ -19,6 +19,7 @@ export class DayAggregate extends Atom<DayAggregate> {
 
   public users: SerializableMap<SlackUserId, ResourceStats> =
     new SerializableMap();
+    
   public channels: SerializableMap<SlackChannelId, ResourceStats> =
     new SerializableMap();
 

@@ -108,7 +108,7 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
         day,
         dayAggregate.users.getOrSet(
           userId,
-          () => new ResourceStats(ResourceType.channel),
+          () => new ResourceStats(ResourceType.user),
         ),
       );
     }

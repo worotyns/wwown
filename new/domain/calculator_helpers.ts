@@ -22,6 +22,7 @@ import {
 import { ResourceStats, ResourceType } from "./stats/resource_stats.ts";
 
 export class CalculationHelpers {
+
   static normalizeValue(
     originalValue: number,
     minValue: number,
@@ -36,6 +37,7 @@ export class CalculationHelpers {
   static getActivity(
     extendedStats: ConcreteResourceData,
   ): Array<Activity> {
+
     const activity: Array<Activity> = [];
 
     const daysToSubtract = (52 * 7) + (new Date().getUTCDay());
@@ -116,16 +118,17 @@ export class CalculationHelpers {
     const lastChannels: SerializableMap<SlackChannelId, LastChannels> =
       new SerializableMap();
 
-    for (const [channelId, channelStats] of extendedStats.allTime.messages) {
-      const { total, lastTs } = channelStats;
-      const item = lastChannels.getOrSet(
-        channelId,
-        () => [channelId, total, lastTs.getTime()],
-      );
-      item[1] += total;
-      item[2] = Math.min(item[2], lastTs.getTime());
-      lastChannels.set(channelId, item);
-    }
+      for (const [channelId, channelStats] of extendedStats.allTime.messages) {
+        const { total, lastTs } = channelStats;
+        const item = lastChannels.getOrSet(
+          channelId,
+          () => [channelId, 0, 0],
+        );
+        item[1] += total;
+        item[2] = Math.max(item[2], lastTs.getTime());
+        lastChannels.set(channelId, item);
+      }
+
 
     return Array.from(lastChannels.values()).sort((a, b) => b[1] - a[1]).slice(
       0,
@@ -141,22 +144,54 @@ export class CalculationHelpers {
       new SerializableMap();
 
     for (const dayStats of extendedStats.getDayAggregatesForRange(params)) {
+
       for (const [channelId, channelStats] of dayStats.messages) {
         const { total, lastTs } = channelStats;
         const item = lastChannels.getOrSet(
           channelId,
-          () => [channelId, total, lastTs.getTime()],
+          () => [channelId, 0, 0],
         );
         item[1] += total;
-        item[2] = Math.min(item[2], lastTs.getTime());
+        item[2] = Math.max(item[2], lastTs.getTime());
         lastChannels.set(channelId, item);
       }
     }
 
-    return Array.from(lastChannels.values()).sort((a, b) => b[1] - a[1]).slice(
+    return Array.from(lastChannels.values()).sort((a, b) => b[2] - a[2]).slice(
       0,
       params.lastItems,
     );
+  }
+
+  static calculateMinMaxInteractionsInRangeChannels(
+    extendedStats: ConcreteResourceData,
+    params: ConcreteResourceDataParams,
+  ): [Min, Max, Min, Max] {
+    const values = [];
+    const ts = [];
+
+    for (const dayAggregate of extendedStats.getDayAggregatesForRange(params)) {
+      for (const [_, value] of dayAggregate.messages.entries()) {
+        values.push(value.total);
+        ts.push(value.lastTs.getTime());
+      }
+    }
+
+    return [Math.min(...values), Math.max(...values), Math.min(...ts), Math.max(...ts)];
+  }
+
+  static calculateMinMaxInteractionsInAllChannels(
+    extendedStats: ConcreteResourceData,
+  ): [Min, Max, Min, Max] {
+    const values = [];
+    const ts = [];
+
+    for (const [_, value] of extendedStats.allTime.messages.entries()) {
+      values.push(value.total);
+      ts.push(value.lastTs.getTime());
+    }
+
+    return [Math.min(...values), Math.max(...values), Math.min(...ts), Math.max(...ts)];
   }
 
   static calculateMinMaxAndSumOfHourlyInteractionsDistributionInRange(
@@ -164,13 +199,13 @@ export class CalculationHelpers {
     params: ConcreteResourceDataParams,
   ): [Min, Max, Total] {
     const values = [];
-
+  
     for (const dayAggregate of extended.getDayAggregatesForRange(params)) {
       for (const [_, value] of dayAggregate.hourly.entries()) {
         values.push(value.total);
       }
     }
-
+    
     return [
       Math.min(...values),
       Math.max(...values),
@@ -186,7 +221,7 @@ export class CalculationHelpers {
     for (const [_, value] of extended.allTime.hourly.entries()) {
       values.push(value.total);
     }
-
+  
     return [
       Math.min(...values),
       Math.max(...values),

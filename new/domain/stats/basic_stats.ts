@@ -9,8 +9,8 @@ export class BasicStats {
   public total: Total = 0;
   public lastTs: LastTouch = new Date();
 
-  inc(by: number) {
-    this.lastTs = new Date();
+  inc(by: number, ts: Date) {
+    this.lastTs = ts;
     this.total += by;
   }
 }
