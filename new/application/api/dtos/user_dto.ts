@@ -2,17 +2,18 @@ import {
   Emoji,
   Max,
   Min,
+  Percent,
   SlackChannelId,
   SlackChannelName,
   SlackUserId,
   SlackUserName,
-  Percent,
   Total,
   TwoDigitHour,
 } from "../../../domain/common/interfaces.ts";
 import { Resources } from "../../../domain/resources.ts";
 import {
-  UserData, UserDataParams,
+  UserData,
+  UserDataParams,
 } from "../../../domain/stats/user/user_data.ts";
 import {
   Activity,
@@ -20,14 +21,14 @@ import {
   HourPercentDistribution,
   LastChannels,
   Received,
+  SummaryDescription,
+  UserSummaryLabel,
   TopChannels,
 } from "../../interfaces.ts";
 import { generateDayRawRange } from "../../../domain/common/date_time.ts";
 import { SerializableMap } from "../../../domain/common/serializable_map.ts";
 import { BasicStats } from "../../../domain/stats/common/basic_stats.ts";
-import {
-  UserStats,
-} from "../../../domain/stats/user/user_stats.ts";
+import { UserStats } from "../../../domain/stats/user/user_stats.ts";
 
 /**
  * Collected user information for user page
@@ -78,10 +79,10 @@ export class UserViewDto {
     [SlackChannelId | SlackUserId, SlackChannelName | SlackUserName]
   >;
 
+  public summary: Array<[SummaryDescription, Total, Total]>;
+
   constructor(
     extendedStats: UserData,
-    // A moze tutaj dorzucic parametry pobierania? np. lastItems: number, czy activityRange i dataRange - rozdziclic
-    // Extended stats mozna zrobic class i dac jej metody z range - to by bylo najsensowniejsze ;D
     params: UserDataParams,
     resources: Resources,
   ) {
@@ -136,8 +137,107 @@ export class UserViewDto {
       extendedStats,
       params,
     );
+
+    this.summary = UserViewDto.getSummary(extendedStats, params);
   }
 
+  static getSummary(extendedStats: UserData, params: UserDataParams) {
+    const summary: SerializableMap<UserSummaryLabel, [SummaryDescription, Total, Total]> =
+      new SerializableMap();
+
+    const days = extendedStats.getDayAggregatesForRange(params);
+    const allTimeMessages = extendedStats.allTime.messages;
+    const allTimeThreadsAuthored = extendedStats.allTime.threads.authored;
+    const allTimeThreadsContributed = extendedStats.allTime.threads.contributed;
+    const allTimeReactionsGiven = extendedStats.allTime.reactions.given;
+    const allTimeReactionsReceived = extendedStats.allTime.reactions.received;
+
+    const msgsTotalAllTime = Array.from(allTimeMessages.values()).reduce((a, b) => a + b.total, 0);
+    const msgsTotalInRange = days.reduce((a, b) => a + Array.from(b.messages.values()).reduce((a, b) => a + b.total, 0), 0);
+    summary.set('msgsCount', ['Total messages are you sent', msgsTotalInRange, msgsTotalAllTime]);
+
+    const channelsCountAllTime = Array.from(allTimeMessages.keys()).filter((key) => key.startsWith('C')).length;
+    const channelsCountInRange = days.reduce((a, b) => a + Array.from(b.messages.keys()).filter((key) => key.startsWith('C')).length, 0);
+    summary.set('channelsCount', ['Unique channels are you participating', channelsCountInRange , channelsCountAllTime]);
+
+    const threadCountAuthoredAllTime = allTimeThreadsAuthored.size;
+    const threadCountContributedAllTime = allTimeThreadsContributed.size;
+    const threadCountAllTime = threadCountAuthoredAllTime + threadCountContributedAllTime;
+    const threadCountAuthoredInRange = days.reduce((a, b) => a + b.threads.authored.size, 0);
+    const threadCountContributedInRange = days.reduce((a, b) => a + b.threads.contributed.size, 0);
+    const threadCountInRange = threadCountAuthoredInRange + threadCountContributedInRange;
+    summary.set('threadCount', ['Total threads', threadCountInRange , threadCountAllTime]);
+    summary.set('threadAuthoredCount', ['Total messages in threads authored by you', threadCountAuthoredInRange, threadCountAuthoredAllTime]);
+    summary.set('threadContributedCount', ['Total messages in other threads', threadCountAuthoredInRange, threadCountAuthoredAllTime]);
+
+    const threadMessagesAuthoredAllTime = Array.from(allTimeThreadsAuthored.values()).reduce((a, b) => a + b.total, 0);
+    const threadMessagesContributedAllTime = Array.from(allTimeThreadsContributed.values()).reduce((a, b) => a + b.total, 0);
+    const threadMessagesAuthoredInRange = days.reduce((a, b) => a + Array.from(b.threads.authored.values()).reduce((a, b) => a + b.total, 0), 0);
+    const threadMessagesContributedInRange = days.reduce((a, b) => a + Array.from(b.threads.contributed.values()).reduce((a, b) => a + b.total, 0), 0);
+    const threadMessagesAllTime = threadMessagesAuthoredAllTime + threadMessagesContributedAllTime;
+    const threadMessagesInRange = threadMessagesAuthoredInRange + threadMessagesContributedInRange;
+    const threadAvgMessagesAuthoredAllTime = threadMessagesAuthoredAllTime / threadCountAuthoredAllTime;
+    const threadAvgMessagesContributedAllTime = threadMessagesContributedAllTime / threadCountContributedAllTime;
+    const threadAvgMessagesAuthoredInRange = threadMessagesAuthoredInRange / threadCountAuthoredInRange;
+    const threadAvgMessagesContributedInRange = threadMessagesContributedInRange / threadCountContributedInRange;
+    const threadAvgMessagesAllTime = threadMessagesAllTime / threadCountAllTime;
+    const threadAvgMessagesInRange = threadMessagesInRange / threadCountInRange;
+
+    summary.set('threadMessages', ['Total messages sent in threads', threadMessagesInRange, threadMessagesAllTime]);
+    summary.set('threadAvgMessages', ['Average messages per thread', threadAvgMessagesInRange, threadAvgMessagesAllTime]);
+    summary.set('threadAvgMessagesAuthored', ['Average messages per thread authored by you', threadAvgMessagesAuthoredInRange, threadAvgMessagesAuthoredAllTime]);
+    summary.set('threadAvgMessagesContributed', ['Average messages per thread contributed by you', threadAvgMessagesContributedInRange, threadAvgMessagesContributedAllTime]);
+
+    const threadMaxMessagesAuthoredAllTime = Array.from(allTimeThreadsAuthored.values()).reduce((a, b) => Math.max(a, b.total), 0);
+    const threadMaxMessagesContributedAllTime = Array.from(allTimeThreadsContributed.values()).reduce((a, b) => Math.max(a, b.total), 0);
+    const threadMaxMessagesAuthoredInRange = days.reduce((a, b) => Math.max(a, Array.from(b.threads.authored.values()).reduce((a, b) => Math.max(a, b.total), 0)), 0);
+    const threadMaxMessagesContributedInRange = days.reduce((a, b) => Math.max(a, Array.from(b.threads.contributed.values()).reduce((a, b) => Math.max(a, b.total), 0)), 0);  
+    const threadMaxMessagesAllTime = Math.max(threadMaxMessagesAuthoredAllTime, threadMaxMessagesContributedAllTime); 
+    const threadMaxMessagesInRange = Math.max(threadMaxMessagesAuthoredInRange, threadMaxMessagesContributedInRange);
+
+    summary.set('threadMaxMessages', ['Maximum messages per thread', threadMaxMessagesInRange, threadMaxMessagesAllTime]);
+    summary.set('threadAuthoredMaxMessages', ['Maximum messages per thread authored by you', threadMaxMessagesAuthoredInRange, threadMaxMessagesAuthoredAllTime]);
+    summary.set('threadContributedMaxMessages', ['Maximum messages per thread contributed by you', threadMaxMessagesContributedInRange, threadMaxMessagesContributedAllTime]);
+
+    const threadAvgMinutesAuthoredAllTime = Array.from(allTimeThreadsAuthored.values()).reduce((a, b) => a + Math.ceil((b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000), 0) / threadCountAuthoredAllTime;
+    const threadAvgMinutesContributedAllTime = Array.from(allTimeThreadsContributed.values()).reduce((a, b) => a + Math.ceil((b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000), 0) / threadCountContributedAllTime;
+    const threadAvgMinutesAuthoredInRange = days.reduce((a, b) => a + Array.from(b.threads.authored.values()).reduce((a, b) => a + Math.ceil((b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000), 0), 0) / threadCountAuthoredInRange;
+    const threadAvgMinutesContributedInRange = days.reduce((a, b) => a + Array.from(b.threads.contributed.values()).reduce((a, b) => a + Math.ceil((b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000), 0), 0) / threadCountContributedInRange;
+    const threadAvgMinutesAllTime = (threadAvgMinutesAuthoredAllTime + threadAvgMinutesContributedAllTime) / 2;
+    const threadAvgMinutesInRange = (threadAvgMinutesAuthoredInRange + threadAvgMinutesContributedInRange) / 2;
+    summary.set('threadAvgMinutes', ['Average thread duration', threadAvgMinutesInRange, threadAvgMinutesAllTime]);
+    summary.set('threadAuthoredAvgMinutes', ['Average thread duration authored by you', threadAvgMinutesAuthoredInRange, threadAvgMinutesAuthoredAllTime]);
+    summary.set('threadContributedAvgMinutes', ['Average thread duration contributed by you', threadAvgMinutesContributedInRange, threadAvgMinutesContributedAllTime]);
+
+    const threadMaxMinutesAuthoredAllTime = Array.from(allTimeThreadsAuthored.values()).reduce((a, b) => Math.max(a, Math.ceil((b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000)), 0);
+    const threadMaxMinutesContributedAllTime = Array.from(allTimeThreadsContributed.values()).reduce((a, b) => Math.max(a, Math.ceil((b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000)), 0);
+    const threadMaxMinutesAuthoredInRange = days.reduce((a, b) => Math.max(a, Array.from(b.threads.authored.values()).reduce((a, b) => Math.max(a, Math.ceil((b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000)), 0)), 0);  
+    const threadMaxMinutesContributedInRange = days.reduce((a, b) => Math.max(a, Array.from(b.threads.contributed.values()).reduce((a, b) => Math.max(a, Math.ceil((b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000)), 0)), 0);  
+    const threadMaxMinutesAllTime = Math.max(threadMaxMinutesAuthoredAllTime, threadMaxMinutesContributedAllTime);
+    const threadMaxMinutesInRange = Math.max(threadMaxMinutesAuthoredInRange, threadMaxMinutesContributedInRange);
+    summary.set('threadMaxMinutes', ['Maximum thread duration', threadMaxMinutesInRange, threadMaxMinutesAllTime]);
+    summary.set('threadAuthoredMaxMinutes', ['Maximum thread duration authored by you', threadMaxMinutesAuthoredInRange, threadMaxMinutesAuthoredAllTime]);
+    summary.set('threadContributedMaxMinutes', ['Maximum thread duration contributed by you', threadMaxMinutesContributedInRange, threadMaxMinutesContributedAllTime]);
+
+    const reactionsGivenAllTime = Array.from(allTimeReactionsGiven.values()).reduce((a, b) => a + b.total, 0);
+    const reactionsReceivedAllTime = Array.from(allTimeReactionsReceived.values()).reduce((a, b) => a + b.total, 0);
+    const reactionsReceivedInRange = days.reduce((a, b) => a + Array.from(b.reactions.received.values()).reduce((a, b) => a + b.total, 0), 0);
+    const reactionsGivenInRange = days.reduce((a, b) => a + Array.from(b.reactions.given.values()).reduce((a, b) => a + b.total, 0), 0);  
+
+    summary.set('reactionsReceived', ['Total reactions are you received', reactionsReceivedInRange, reactionsReceivedAllTime]);
+    summary.set('reactionsGiven', ['Total reactions are you given', reactionsGivenInRange, reactionsGivenAllTime]);
+
+    const totalActivityHoursAllTime = Math.ceil((extendedStats.allTime.lastAt.getTime() - extendedStats.allTime.firstAt.getTime()) / 3_600_000);
+    const totalActivityHoursInRange = days.reduce((a, b) => a + Math.ceil((b.lastAt.getTime() - b.firstAt.getTime()) / 3_600_000), 0);
+    const averageActivityHoursPerDayAllTime = totalActivityHoursAllTime / extendedStats.days.size;
+    const averageActivityHoursPerDayInRange = totalActivityHoursInRange / days.length;
+    
+    summary.set('totalActivityHours', ['Total hours are you active', totalActivityHoursInRange, totalActivityHoursAllTime]);
+    summary.set('avgActivityHoursPerDay', ['Average hours active per day', averageActivityHoursPerDayInRange, averageActivityHoursPerDayAllTime]);
+  
+    return Array.from(summary.values());
+  }
+  
   static normalizeValue(
     originalValue: number,
     minValue: number,

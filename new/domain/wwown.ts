@@ -11,7 +11,8 @@ import { SerializableMap } from "./common/serializable_map.ts";
 import { DayRaw } from "./common/date_time.ts";
 import { UserStats } from "./stats/user/user_stats.ts";
 import { UserData } from "./stats/user/user_data.ts";
-import { ChannelStats } from "./stats/channel_stats.ts";
+import { ChannelStats } from "./stats/channel/channel_stats.ts";
+import { ChannelData } from "./stats/channel/channel_data.ts";
 
 /**
  * Main entry point for the application.
@@ -30,6 +31,12 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
     switch (event.type) {
       case "reaction":
         this.getDayAggregate(event.meta.timestamp).register(event);
+
+        this.channels.getOrSet(
+          event.meta.channelId,
+          () => new ChannelStats(event.meta.channelId),
+        ).register(event);
+
         // Bidirectional registration for user, and receiver
         this.users.getOrSet(
           event.meta.userId,
@@ -51,10 +58,10 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
           event.meta.userId,
           () => new UserStats(event.meta.userId),
         ).migrate(event);
-        // this.channels.getOrSet(
-        //   event.meta.channelId,
-        //   () => new ChannelStats(event.meta.channelId),
-        // ).migrate(event);
+        this.channels.getOrSet(
+          event.meta.channelId,
+          () => new ChannelStats(event.meta.channelId),
+        ).migrate(event);
         break;
       case "user":
       case "channel":
@@ -86,16 +93,42 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
           event.meta.userId,
           () => new UserStats(event.meta.userId),
         ).register(event);
-        // this.channels.getOrSet(
-        //   event.meta.channelId,
-        //   () => new ChannelStats(event.meta.channelId),
-        // ).register(event);
+        this.channels.getOrSet(
+          event.meta.channelId,
+          () => new ChannelStats(event.meta.channelId),
+        ).register(event);
         break;
       case "user":
       case "channel":
         this.resources.register(event);
         break;
     }
+  }
+
+  public getChannelData(
+    channelId: SlackChannelId,
+  ): ChannelData {
+    const days: SerializableMap<DateWithoutTimeRaw, ChannelStats> =
+      new SerializableMap();
+
+    for (const [day, dayAggregate] of this.days.entries()) {
+      days.set(
+        day,
+        dayAggregate.channels.getOrSet(
+          channelId,
+          () => new ChannelStats(channelId),
+        ),
+      );
+    }
+
+    return new ChannelData(
+      channelId,
+      this.channels.getOrSet(
+        channelId,
+        () => new ChannelStats(channelId),
+      ),
+      days,
+    );
   }
 
   public getUserData(

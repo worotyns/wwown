@@ -17,6 +17,7 @@ import { createFs } from "@worotyns/atoms";
 import { send } from "https://deno.land/x/oak@v12.6.1/send.ts";
 import { migratedResource } from "./migrate.ts";
 import { WhoWorksOnWhatNow } from "./domain/wwown.ts";
+import { ChannelViewDto } from "./application/api/dtos/channel_dto.ts";
 
 const { restore, persist } = createFs("./data");
 
@@ -47,6 +48,27 @@ router
       wwown.resources,
     );
   });
+
+  router
+  .get("/channels/:channelId", (context) => {
+    const from = context.request.url.searchParams.get("from");
+    const to = context.request.url.searchParams.get("to");
+    const lastItems = context.request.url.searchParams.get("lastItems");
+
+    if (!from || !to || !lastItems) {
+      throw new Error("Missing query params: from, to or lastItems");
+    }
+
+    context.response.body = new ChannelViewDto(
+      wwown.getChannelData(context.params.channelId),
+      {
+        from: new Date(from),
+        to: new Date(to),
+        lastItems: Number(lastItems),
+      },
+      wwown.resources,
+    );
+  });  
 
 const app = new Application();
 

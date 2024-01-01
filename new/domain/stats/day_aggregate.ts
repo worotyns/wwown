@@ -10,7 +10,7 @@ import { SerializableMap } from "../common/serializable_map.ts";
 import { DayRaw } from "../common/date_time.ts";
 import { UserStats } from "./user/user_stats.ts";
 import { Events } from "../common/interfaces.ts";
-import { ChannelStats } from "./channel_stats.ts";
+import { ChannelStats } from "./channel/channel_stats.ts";
 
 /**
  * Contains all statistics need to be calculated for a given day.
@@ -18,8 +18,7 @@ import { ChannelStats } from "./channel_stats.ts";
 export class DayAggregate extends Atom<DayAggregate> {
   public identity = DayAggregate.createIdentifier(new Date());
 
-  public users: SerializableMap<SlackUserId, UserStats> =
-    new SerializableMap();
+  public users: SerializableMap<SlackUserId, UserStats> = new SerializableMap();
 
   public channels: SerializableMap<SlackChannelId, ChannelStats> =
     new SerializableMap();
@@ -29,17 +28,17 @@ export class DayAggregate extends Atom<DayAggregate> {
   ) {
     switch (event.type) {
       case "reaction":
-        // this.channels.getOrSet(
-        //   event.meta.channelId,
-        //   () => new UserStats(event.meta.channelId),
-        // ).register(event);
+        this.channels.getOrSet(
+          event.meta.channelId,
+          () => new ChannelStats(event.meta.channelId),
+        ).register(event);
 
         // Two dimensional stats - bidirection registration for user, and receiver
         this.users.getOrSet(
           event.meta.userId,
           () => new UserStats(event.meta.userId),
         ).register(event);
-        
+
         if (event.meta.itemUserId) {
           this.users.getOrSet(
             event.meta.itemUserId,
@@ -51,10 +50,10 @@ export class DayAggregate extends Atom<DayAggregate> {
       case "thread":
       case "message":
       case "hourly":
-        // this.channels.getOrSet(
-        //   event.meta.channelId,
-        //   () => new UserStats(event.meta.channelId),
-        // ).migrate(event);
+        this.channels.getOrSet(
+          event.meta.channelId,
+          () => new ChannelStats(event.meta.channelId),
+        ).migrate(event);
         this.users.getOrSet(
           event.meta.userId,
           () => new UserStats(event.meta.userId),
@@ -70,10 +69,10 @@ export class DayAggregate extends Atom<DayAggregate> {
   ) {
     switch (event.type) {
       case "reaction":
-        // this.channels.getOrSet(
-        //   event.meta.channelId,
-        //   () => new UserStats(event.meta.channelId),
-        // ).register(event);
+        this.channels.getOrSet(
+          event.meta.channelId,
+          () => new ChannelStats(event.meta.channelId),
+        ).register(event);
 
         // Two dimensional stats - bidirection registration for user, and receiver
         this.users.getOrSet(
@@ -92,10 +91,10 @@ export class DayAggregate extends Atom<DayAggregate> {
       case "thread":
       case "message":
         // One dimensional stats
-        // this.channels.getOrSet(
-        //   event.meta.channelId,
-        //   () => new UserStats(event.meta.channelId),
-        // ).register(event);
+        this.channels.getOrSet(
+          event.meta.channelId,
+          () => new ChannelStats(event.meta.channelId),
+        ).register(event);
 
         this.users.getOrSet(
           event.meta.userId,

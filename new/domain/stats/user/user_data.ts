@@ -1,8 +1,5 @@
 import { generateDayRawRange } from "../../common/date_time.ts";
-import {
-  DateWithoutTimeRaw,
-  SlackUserId,
-} from "../../common/interfaces.ts";
+import { DateWithoutTimeRaw, SlackUserId } from "../../common/interfaces.ts";
 import { SerializableMap } from "../../common/serializable_map.ts";
 import { UserStats } from "./user_stats.ts";
 
