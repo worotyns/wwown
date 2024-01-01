@@ -13,29 +13,21 @@
             <figcaption>Last year activity - interactions per day</figcaption>
         </figure>
 
-        <!-- Hourly distribution -->
         <figure>
             <div class="bar-chart" style="margin: auto; height: 80px; width: 540px;">
-                <template x-for="item of get('hourlyInRange')">
-                    <div class="bar-container" :title="'Hour: ' + item[0]">
-                        <div class="bar-fill" :style="{'height': (item[1] * 150) + 'px'}"></div>
-                        <span class="label" x-text="item[0]"></span>
+                <template x-for="(item, hour) of get('hourlyAllTime')">
+                    <div x-data="{all: get('hourlyAllTime')[hour], range: get('hourlyInRange')[hour]}" class="bar-container">
+                        <div class="bar">
+                            <div class="bar-fill" :style="{'height': (range[1] * 200) + 'px'}"></div>
+                        </div>
+                        <div class="bar">
+                            <div class="bar-fill-all" :style="{'height': (all[1] * 200) + 'px'}"></div>
+                        </div>
+                        <label x-text="hour"></label>
                     </div>
                 </template>
             </div>
-            <figcaption>Messages distribution in time</figcaption>
-        </figure>
-
-        <figure>
-            <div class="bar-chart" style="margin: auto; height: 80px; width: 540px;">
-                <template x-for="item of get('hourlyAllTime')">
-                    <div class="bar-container" :title="'Hour: ' + item[0]">
-                        <div class="bar-fill" :style="{'height': (item[1] * 150) + 'px'}"></div>
-                        <span class="label" x-text="item[0]"></span>
-                    </div>
-                </template>
-            </div>
-            <figcaption>Messages distribution in all-time</figcaption>
+            <figcaption>Messages distribution in <span class="bar-legend-second">all-time</span> and <span class="bar-legend-main">in-range</figcaption>
         </figure>
 
         <!-- Last channels in date range -->

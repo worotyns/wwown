@@ -47,36 +47,54 @@ table tr td, table tr th {
   max-width: 350px;
 }
 
-.bar-chart {
+/**
+ * Bar Chart
+ */
+ 
+ .bar-chart {
+  display: flex;
+ }
+
+ .bar-container {
   display: flex;
   justify-content: space-between;
+  padding-right: 5px;
+  width: 30px;
+  margin: 10px auto;
   align-items: flex-end;
-  width: 80%; /* same value as in .bar width! */
-  height: 100%;
-  padding: 0px;
-}
-
-.bar-container {
-  width: calc(80% / 24 - 1px);
-  align-items: flex-end;
+  align-content: space-around;
 }
 
 .bar {
-  width: calc(80% / 24 - 1px);
+  width: 49%; /* Adjust as needed */
+  background-color: #275a90;
+  display: flex;
   align-items: flex-end;
+  justify-content: center;
+  position: relative;
+}
+
+.bar-legend-main {
+  color: #275a90;
+}
+
+.bar-legend-second {
+  color: #275a90;
+  opacity: 0.8;
+}
+
+.bar:nth-child(2) {
+  opacity: 0.8;
   background-color: #275a90;
 }
 
-.bar-fill {
-  background-color: #275a90;
-}
-
-.label {
+.bar-container label {
+  position: absolute;
+  margin-bottom: -25px;
   color: #252525; 
-  font-size: 10px; 
-  padding: 0; 
-  margin: 0;
-  bottom: 0;
+  width: 20px;
+  text-align: center;
+  font-size: 10px;
 }
 
 sub, sub > span {

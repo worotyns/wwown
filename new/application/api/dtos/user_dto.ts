@@ -1,4 +1,4 @@
-import { CalculationHelpers } from "../../../domain/calculator_helpers.ts";
+import { CalculationHelpers } from "./calculator_helpers.ts";
 import { Max, Min, SlackChannelId, SlackChannelName, SlackUserId, SlackUserName } from "../../../domain/common/interfaces.ts";
 import { Resources } from "../../../domain/resources.ts";
 import {
