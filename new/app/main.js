@@ -4,6 +4,7 @@ function app() {
   return {
     __fromDate: new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString().split("T")[0],
     __toDate: new Date().toISOString().split("T")[0],
+    __lastItems: 10,
     __resources: new Map(),
     __resourcesRaw: [],
     t(key) {
@@ -17,22 +18,88 @@ function app() {
       }
     },
     async init() {
-     try{
-      const response = await fetch(
-        '/resources',
-      );
-      this.__resourcesRaw = await response.json();
-      this.__resources = new Map(
-        this.__resourcesRaw
-      );
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      this.__fetchTimeMs = Date.now() - start;
-      console.log(`Fetched data in ${this.__fetchTimeMs}ms`);
-    }
+      const start = Date.now();
+      try {
+        const response = await fetch(
+          '/resources',
+        );
+        this.__resourcesRaw = await response.json();
+        this.__resources = new Map(
+          this.__resourcesRaw
+        );
+      } catch (error) {
+        console.error("Error fetching resources data:", error);
+      } finally {
+        this.__fetchTimeMs = Date.now() - start;
+        console.log(`Fetched resources data in ${this.__fetchTimeMs}ms`);
+      }
     }
   }
+}
+
+function debounce(func, wait = 100) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      func.apply(this, args);
+    }, wait);
+  };
+}
+
+function data(query, uri) {
+  return {
+    __uri: uri,
+    __fetchTimeMs: 0,
+    __queryParams: query,
+    __item: {},
+
+    bindToAppState($watch) {
+
+      const debouncedCalculate = debounce(() => {
+        this.calculate();
+      });
+
+      $watch('__fromDate', (__fromDate) => {
+        this.__queryParams.fromDate = __fromDate;
+        debouncedCalculate();
+      })
+
+      $watch('__toDate', (__toDate) => {
+        this.__queryParams.toDate = __toDate;
+        debouncedCalculate();
+      });
+
+      $watch('__lastItems', (__lastItems) => {
+        this.__queryParams.lastItems = __lastItems;
+        debouncedCalculate();
+      });
+    },
+
+    get(path, defaultValue) {
+      return this.__item[path] || defaultValue;
+    },
+
+    async calculate() {
+      const start = Date.now();
+      try {
+        const response = await fetch(
+          this.__uri + queryParamsFromQueryState(this.__queryParams),
+        );
+        this.__item = await response.json();
+      } catch (error) {
+        console.error("Error fetching stats data:", error);
+      } finally {
+        this.__fetchTimeMs = Date.now() - start;
+        console.log(`Fetched stats data in ${this.__fetchTimeMs}ms`);
+      }
+    },
+
+    async init() {
+      this.__item = {};
+      return this.calculate();
+    },
+  };
 }
 
 function emojis() {
@@ -76,38 +143,6 @@ function queryParamsFromQueryState(state) {
     query.set(key, value);
   }
   return "?" + decodeURI(query.toString());
-}
-
-function data(query, uri) {
-  return {
-    __uri: uri,
-    __fetchTimeMs: 0,
-    __queryParams: query,
-    __item: {},
-    get(path, defaultValue) {
-      return this.__item[path] || defaultValue;
-    },
-
-    async calculate() {
-      const start = Date.now();
-      try {
-        const response = await fetch(
-          this.__uri + queryParamsFromQueryState(this.__queryParams),
-        );
-        this.__item = await response.json();
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        this.__fetchTimeMs = Date.now() - start;
-        console.log(`Fetched data in ${this.__fetchTimeMs}ms`);
-      }
-    },
-
-    async init() {
-      this.__item = {};
-      return this.calculate();
-    },
-  };
 }
 
 function round(number, precision = 2) {

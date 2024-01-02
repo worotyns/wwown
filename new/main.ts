@@ -89,10 +89,7 @@ router
 
 router
 .get("/resources", (context) => {
-  context.response.body = [
-    ...wwown.resources.getChannels(),
-    ...wwown.resources.getUsers(),
-  ]
+  context.response.body = wwown.resources.getAsResources();
 });
 
 const app = new Application();

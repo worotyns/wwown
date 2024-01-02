@@ -8,6 +8,13 @@ import {
 } from "./common/interfaces.ts";
 import { Events } from "./common/interfaces.ts";
 
+interface BaseEventMetadata {
+  meta: {
+    channelId: SlackChannelId;
+    userId: SlackUserId;
+  }
+}
+
 /**
  * Contains all data about resources (channels, users).
  * Can translate between ids and names and manage theis own state.
@@ -16,6 +23,11 @@ export class Resources extends Atom<Resources> {
   private users: Record<SlackUserId, SlackUserName> = {};
   private channels: Record<SlackChannelId, SlackChannelName> = {};
   private lastActivity: Record<SlackUserId | SlackChannelId, number> = {};
+
+  public touch(event: BaseEventMetadata) {
+    this.lastActivity[event.meta.channelId] = Date.now();
+    this.lastActivity[event.meta.userId] = Date.now();
+  }
 
   public register(event: ResourceEvents) {
     switch (event.type) {
@@ -36,6 +48,18 @@ export class Resources extends Atom<Resources> {
       default:
         throw new Error(`Unknown event type: ${(event as Events).type}`);
     }
+  }
+
+  public getAsResources(): Array<[SlackUserId | SlackChannelId, SlackUserName | SlackChannelName]> {
+    const combinedArray = Object.keys(this.users).map(id => ({ id, name: this.users[id], lastActivity: this.lastActivity[id] }));
+    
+    Object.keys(this.channels).forEach(id => {
+      combinedArray.push({ id, name: this.channels[id], lastActivity: this.lastActivity[id] });
+    });
+
+    combinedArray.filter(a => a.lastActivity > 0).sort((a, b) => b.lastActivity - a.lastActivity);
+
+    return combinedArray.map(({ id, name }) => [id, name]);
   }
 
   public getChannels() {
@@ -69,7 +93,7 @@ export class Resources extends Atom<Resources> {
 
   private registerUser(userId: SlackUserId, userName: SlackUserName) {
     this.users[userId] = userName;
-    this.lastActivity[userId] = Date.now();
+    this.lastActivity[userId] = 0;
   }
 
   private registerChannel(
@@ -77,7 +101,7 @@ export class Resources extends Atom<Resources> {
     channelName: SlackChannelName,
   ) {
     this.channels[channelId] = channelName;
-    this.lastActivity[channelId] = Date.now();
+    this.lastActivity[channelId] = 0;
   }
 
   private removeUser(userId: SlackUserId) {

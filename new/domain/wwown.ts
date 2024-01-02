@@ -31,6 +31,7 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
   public migrate(event: Events) {
     switch (event.type) {
       case "reaction":
+        this.resources.touch(event);
         this.getDayAggregate(event.meta.timestamp).register(event);
 
         this.channels.getOrSet(
@@ -54,6 +55,7 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
       case "thread":
       case "message":
       case "hourly":
+        this.resources.touch(event);
         this.getDayAggregate(event.meta.timestamp).migrate(event);
         this.users.getOrSet(
           event.meta.userId,
@@ -74,6 +76,7 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
   public register(event: Events) {
     switch (event.type) {
       case "reaction":
+        this.resources.touch(event);
         this.getDayAggregate(event.meta.timestamp).register(event);
         // Bidirectional registration for user, and receiver
         this.users.getOrSet(
@@ -89,6 +92,7 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
         break;
       case "thread":
       case "message":
+        this.resources.touch(event);
         this.getDayAggregate(event.meta.timestamp).register(event);
         this.users.getOrSet(
           event.meta.userId,

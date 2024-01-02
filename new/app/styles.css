@@ -119,6 +119,33 @@ sub, sub > span {
 .grid-item {
   padding: 6px;
   border-radius: 5px;
-  border: 1px solid #ddd; /* Optional: Add a border for better visualization */
+  border: 1px solid #ddd;   
   text-align: center;
+}
+
+input[type="date"], input[type="number"] {
+  all: unset;
+  color: #595959;
+  font-family: normal 400 normal 1.125rem/1.85625rem system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
+  border: 1px solid #ddd; 
+  border-radius: 3.6px;
+  text-align: center;
+  text-align-last: center;
+  line-height: 16px;
+  font-size: 12px;
+}
+
+select {
+  all: unset;
+  color: #595959;
+  padding: 2px;
+  margin: 0;
+  border-radius: 3.6px;
+  border: 1px solid #ddd; 
+  text-align: center;
+  width: 160px;
+  text-align-last: center;
+  line-height: 16px;
+  font-size: 12px;
+  font-family: normal 400 normal 1.125rem/1.85625rem system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
 }

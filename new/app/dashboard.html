@@ -1,4 +1,4 @@
-<section x-init="$watch('__fromDate', () => calculate())" x-data="data({from: __fromDate, to: __toDate, lastItems: 10}, '/dashboard')">
+<section x-init="bindToAppState($watch)" x-data="data({from: __fromDate, to: __toDate, lastItems: __lastItems}, '/dashboard')">
     <h2 style="text-align: center; margin-top: auto;">who works on what now?</h2>
     <div>
         <!-- Activity matrix -->

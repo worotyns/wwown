@@ -1,4 +1,4 @@
-<section x-data="data({from: __fromDate, to: __toDate, lastItems: 10}, '/users/' + $router.params.user_id)">
+<section x-init="bindToAppState($watch)" x-data="data({from: __fromDate, to: __toDate, lastItems: __lastItems}, '/users/' + $router.params.user_id)">
     <h2><a href="javascript: window.history.back()">🔙&nbsp;</a><span x-text="t($router.params.user_id)"></span><span style="float: right"><a x-link href="/">🏠</a></span></h2>
     <div>
         <!-- Activity matrix -->

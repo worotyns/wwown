@@ -15,25 +15,17 @@
     <template x-route="/" template="/dashboard.html"></template>
     <template x-route="/channels/:channel_id" template="/channel.html"></template>
     <template x-route="/users/:user_id" template="/user.html"></template>
-    <footer>
+    <footer x-show="__resources.size">
       <nav>
-        <small>
-          <span
-            x-data="{currentSeconds: 360}" 
-            x-init="setInterval(() => currentSeconds === 0 ? window.location.reload() : currentSeconds--, 1000)">
-            <span class="grey">
-              <small><span style="cursor: pointer;" @click="window.location.reload()">🔄 in</span><span x-text="currentSeconds"></span>s.</small>
-            </span>
-          </span>
-        </small>
-        <br/>
         <div>
-          <label for="from">From date:</label>
-          <input type="date" id="from" name="range-from" x-model="__fromDate" x-bind:value="__fromDate" />
-          <label for="to">To date:</label>
-          <input type="date" id="to" name="range-from" x-model="__toDate" x-bind:value="__toDate" />
-
+          <div>
+            <input type="date" id="from" name="range-from" x-model="__fromDate" x-bind:value="__fromDate" />
+            <input type="number" min="5" max="50" id="items" name="range-items" x-model="__lastItems" x-bind:value="__lastItems" />  
+            <input type="date" id="to" name="range-from" x-model="__toDate" x-bind:value="__toDate" />  
+          </div>
+          
           <select id="resources" @change="$router.push(goto($event.target.value))">
+            <option value="none">Go to another resource</option>
             <template x-for="(item, index) of __resourcesRaw" :key="index">
               <option x-text="item[1]" :value="item[0]"></option>
             </template> 
