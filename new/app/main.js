@@ -37,7 +37,7 @@ function app() {
   }
 }
 
-function debounce(func, wait = 100) {
+function debounce(func, wait = 750) {
   let timeout;
   return function (...args) {
     clearTimeout(timeout);
@@ -61,12 +61,12 @@ function data(query, uri) {
       });
 
       $watch('__fromDate', (__fromDate) => {
-        this.__queryParams.fromDate = __fromDate;
+        this.__queryParams.from = __fromDate;
         debouncedCalculate();
       })
 
       $watch('__toDate', (__toDate) => {
-        this.__queryParams.toDate = __toDate;
+        this.__queryParams.to = __toDate;
         debouncedCalculate();
       });
 
