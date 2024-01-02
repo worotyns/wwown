@@ -53,7 +53,7 @@ export class DashboardViewDto {
               params.from.getTime(),
               params.to.getTime(),
               0.05,
-              1,
+              1.00,
             );
 
           const lastTs = channelItem.getOrSet(
