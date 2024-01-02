@@ -12,7 +12,7 @@ interface BaseEventMetadata {
   meta: {
     channelId: SlackChannelId;
     userId: SlackUserId;
-  }
+  };
 }
 
 /**
@@ -50,14 +50,26 @@ export class Resources extends Atom<Resources> {
     }
   }
 
-  public getAsResources(): Array<[SlackUserId | SlackChannelId, SlackUserName | SlackChannelName]> {
-    const combinedArray = Object.keys(this.users).map(id => ({ id, name: this.users[id], lastActivity: this.lastActivity[id] }));
-    
-    Object.keys(this.channels).forEach(id => {
-      combinedArray.push({ id, name: this.channels[id], lastActivity: this.lastActivity[id] });
+  public getAsResources(): Array<
+    [SlackUserId | SlackChannelId, SlackUserName | SlackChannelName]
+  > {
+    const combinedArray = Object.keys(this.users).map((id) => ({
+      id,
+      name: this.users[id],
+      lastActivity: this.lastActivity[id],
+    }));
+
+    Object.keys(this.channels).forEach((id) => {
+      combinedArray.push({
+        id,
+        name: this.channels[id],
+        lastActivity: this.lastActivity[id],
+      });
     });
 
-    combinedArray.filter(a => a.lastActivity > 0).sort((a, b) => b.lastActivity - a.lastActivity);
+    combinedArray.filter((a) => a.lastActivity > 0).sort((a, b) =>
+      b.lastActivity - a.lastActivity
+    );
 
     return combinedArray.map(({ id, name }) => [id, name]);
   }

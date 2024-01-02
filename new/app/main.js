@@ -2,7 +2,8 @@ const emojiRequest = fetch("./sctuc.json").then((response) => response.json());
 
 function app() {
   return {
-    __fromDate: new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString().split("T")[0],
+    __fromDate:
+      new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString().split("T")[0],
     __toDate: new Date().toISOString().split("T")[0],
     __lastItems: 10,
     __resources: new Map(),
@@ -23,11 +24,11 @@ function app() {
       const start = Date.now();
       try {
         const response = await fetch(
-          '/resources',
+          "/resources",
         );
         this.__resourcesRaw = await response.json();
         this.__resources = new Map(
-          this.__resourcesRaw
+          this.__resourcesRaw,
         );
       } catch (error) {
         console.error("Error fetching resources data:", error);
@@ -35,8 +36,8 @@ function app() {
         this.__fetchTimeMs = Date.now() - start;
         console.log(`Fetched resources data in ${this.__fetchTimeMs}ms`);
       }
-    }
-  }
+    },
+  };
 }
 
 function debounce(func, wait = 750) {
@@ -58,22 +59,21 @@ function data(query, path, resId) {
     __item: {},
 
     bindToAppState($watch) {
-
       const debouncedCalculate = debounce(() => {
         this.calculate();
       });
 
-      $watch('__fromDate', (__fromDate) => {
+      $watch("__fromDate", (__fromDate) => {
         this.__queryParams.from = __fromDate;
         debouncedCalculate();
-      })
+      });
 
-      $watch('__toDate', (__toDate) => {
+      $watch("__toDate", (__toDate) => {
         this.__queryParams.to = __toDate;
         debouncedCalculate();
       });
 
-      $watch('__lastItems', (__lastItems) => {
+      $watch("__lastItems", (__lastItems) => {
         this.__queryParams.lastItems = __lastItems;
         debouncedCalculate();
       });
@@ -89,12 +89,13 @@ function data(query, path, resId) {
         this.calculate();
       }
     },
-  
+
     async calculate() {
       const start = Date.now();
       try {
         const response = await fetch(
-          `/${this.__path}/${this.__resId}` + queryParamsFromQueryState(this.__queryParams),
+          `/${this.__path}/${this.__resId}` +
+            queryParamsFromQueryState(this.__queryParams),
         );
         this.__item = await response.json();
       } catch (error) {

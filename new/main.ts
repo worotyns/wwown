@@ -66,7 +66,7 @@ router
     );
   });
 
-  router
+router
   .get("/dashboard", (context) => {
     const from = context.request.url.searchParams.get("from");
     const to = context.request.url.searchParams.get("to");
@@ -86,11 +86,10 @@ router
     );
   });
 
-
 router
-.get("/resources", (context) => {
-  context.response.body = wwown.resources.getAsResources();
-});
+  .get("/resources", (context) => {
+    context.response.body = wwown.resources.getAsResources();
+  });
 
 const app = new Application();
 

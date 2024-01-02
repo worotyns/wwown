@@ -34,8 +34,8 @@ type ChannelSummaryLabel =
   | "threadMessages" // How many messages are you sending via threads?
   | "threadAvgMessages" // What is your average number of messages authored per thread?
   | "threadMaxMessages" // What is your maximum number of messages per thread?
-  | "threadAvgMinutes" // What is your average thread duration?
-  | "threadMaxMinutes" // What is your maximum thread duration?
+  | "threadAvgHours" // What is your average thread duration (hours)?
+  | "threadMaxHours" // What is your maximum thread duration (hours)?
   | "usersCount" // How many channels are you participating in?
   | "msgsInThreads" // How many messages are you sending via threads?
   | "msgsInChannels" // How many messages are you sending via channels?
@@ -240,51 +240,52 @@ export class ChannelViewDto {
       threadMaxMessagesAllTime,
     ]);
 
-    const threadAvgMinutesAllTime = Array.from(allTimeThreads.values()).reduce(
-      (a, b) =>
-        a + Math.ceil((b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000),
+    const threadAvgHoursAllTime = Array.from(allTimeThreads.values()).reduce(
+      (a, b) => a + (b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000,
       0,
     ) / threadCountAllTime;
-    const threadAvgMinutesInRange = days.reduce(
+
+    const threadAvgHoursInRange = days.reduce(
       (a, b) =>
         a + Array.from(b.threads.values()).reduce(
           (a, b) =>
             a +
-            Math.ceil((b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000),
+            (b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000,
           0,
         ),
       0,
     ) / threadCountInRange;
-    summary.set("threadAvgMinutes", [
-      "Average thread duration",
-      threadAvgMinutesInRange,
-      threadAvgMinutesAllTime,
+
+    summary.set("threadAvgHours", [
+      "Average thread duration (hours)",
+      threadAvgHoursInRange,
+      threadAvgHoursAllTime,
     ]);
 
-    const threadMaxMinutesAllTime = Array.from(allTimeThreads.values()).reduce(
+    const threadMaxHoursAllTime = Array.from(allTimeThreads.values()).reduce(
       (a, b) =>
         Math.max(
           a,
-          Math.ceil((b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000),
+          (b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000,
         ),
       0,
     );
-    const threadMaxMinutesInRange = days.reduce(
+    const threadMaxHoursInRange = days.reduce(
       (a, b) =>
         Math.max(
           a,
           Array.from(b.threads.values()).reduce((a, b) =>
             Math.max(
               a,
-              Math.ceil((b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000),
+              (b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000,
             ), 0),
         ),
       0,
     );
-    summary.set("threadMaxMinutes", [
-      "Maximum thread duration",
-      threadMaxMinutesInRange,
-      threadMaxMinutesAllTime,
+    summary.set("threadMaxHours", [
+      "Maximum thread duration (hours)",
+      threadMaxHoursInRange,
+      threadMaxHoursAllTime,
     ]);
 
     const reactionsAllTime = Array.from(allTimeReactions.values()).reduce(
@@ -303,13 +304,10 @@ export class ChannelViewDto {
       reactionsAllTime,
     ]);
 
-    const totalActivityHoursAllTime = Math.ceil(
-      (extendedStats.allTime.lastAt.getTime() -
-        extendedStats.allTime.firstAt.getTime()) / 3_600_000,
-    );
+    const totalActivityHoursAllTime = (extendedStats.allTime.lastAt.getTime() -
+      extendedStats.allTime.firstAt.getTime()) / 3_600_000;
     const totalActivityHoursInRange = days.reduce(
-      (a, b) =>
-        a + Math.ceil((b.lastAt.getTime() - b.firstAt.getTime()) / 3_600_000),
+      (a, b) => a + (b.lastAt.getTime() - b.firstAt.getTime()) / 3_600_000,
       0,
     );
     const averageActivityHoursPerDayAllTime = totalActivityHoursAllTime /

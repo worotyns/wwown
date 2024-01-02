@@ -49,12 +49,19 @@ export class DashboardViewDto {
             channelId,
             () => new SerializableMap(),
           );
-          
-          const normalizeTs = (ts: Date) => normalizeValue(ts.getTime(), params.from.getTime(), params.to.getTime(), 0, 1);
+
+          const normalizeTs = (ts: Date) =>
+            normalizeValue(
+              ts.getTime(),
+              params.from.getTime(),
+              params.to.getTime(),
+              0,
+              1,
+            );
 
           const lastTs = channelItem.getOrSet(
             userId,
-            () => normalizeTs(user.lastTs)
+            () => normalizeTs(user.lastTs),
           );
 
           const normalized = normalizeTs(user.lastTs);
@@ -63,7 +70,7 @@ export class DashboardViewDto {
             channelItem.set(userId, normalized);
           }
 
-          wwown.set(channelId, channelItem)
+          wwown.set(channelId, channelItem);
         }
       }
     }
@@ -73,7 +80,13 @@ export class DashboardViewDto {
       Array.from(channel).map(([userId, lastTs]) => [userId, lastTs]).sort(
         (a, b) => (b[1] as number) - (a[1] as number),
       ) as [SlackUserId, ScoreOpacity][],
-    ]).sort((a: any, b: any) => b[1].reduce((sum: number, item: [SlackUserId, ScoreOpacity]) => sum+item[1], 0) - a[1].reduce((sum: number, item: [SlackUserId, ScoreOpacity]) => sum+item[1], 0)) as Array<[SlackChannelId, [SlackUserId, ScoreOpacity][]]>;
+    ]).sort((a: any, b: any) =>
+      b[1].reduce(
+        (sum: number, item: [SlackUserId, ScoreOpacity]) => sum + item[1],
+        0,
+      ) - a[1].reduce((sum: number, item: [SlackUserId, ScoreOpacity]) =>
+        sum + item[1], 0)
+    ) as Array<[SlackChannelId, [SlackUserId, ScoreOpacity][]]>;
   }
 
   static getActivity(
