@@ -4,13 +4,9 @@ import {
   Min,
   Percent,
   SlackChannelId,
-  SlackChannelName,
-  SlackUserId,
-  SlackUserName,
   Total,
   TwoDigitHour,
 } from "../../../domain/common/interfaces.ts";
-import { Resources } from "../../../domain/resources.ts";
 import {
   Activity,
   HourPercentDistribution,

@@ -1,12 +1,9 @@
 import { generateDayRawRange } from "../../../domain/common/date_time.ts";
 import {
   SlackChannelId,
-  SlackChannelName,
   SlackUserId,
-  SlackUserName,
 } from "../../../domain/common/interfaces.ts";
 import { SerializableMap } from "../../../domain/common/serializable_map.ts";
-import { Resources } from "../../../domain/resources.ts";
 import {
   DashboardData,
   DashboardDataParams,
@@ -55,7 +52,7 @@ export class DashboardViewDto {
               ts.getTime(),
               params.from.getTime(),
               params.to.getTime(),
-              0,
+              0.05,
               1,
             );
 

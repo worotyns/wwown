@@ -90,11 +90,18 @@ function data(query, path, resId) {
       }
     },
 
+    getPath() {
+      if (this.__resId) {
+        return `${this.__path}/${this.__resId}`;
+      }
+      return this.__path;
+    },
+
     async calculate() {
       const start = Date.now();
       try {
         const response = await fetch(
-          `/${this.__path}/${this.__resId}` +
+          this.getPath() +
             queryParamsFromQueryState(this.__queryParams),
         );
         this.__item = await response.json();
