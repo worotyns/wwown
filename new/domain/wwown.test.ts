@@ -19,7 +19,6 @@ Deno.test("wwown test", async () => {
         to: new Date("2023-01-02"),
         lastItems: 10,
       },
-      wwown.resources
     ),
   );
 

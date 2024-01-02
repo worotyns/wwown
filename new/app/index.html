@@ -11,7 +11,7 @@
       </title>
   </head>
 
-  <body x-cloak x-init="$router.config({ mode: 'hash' })">
+  <body x-cloak x-init="$router.config({ mode: 'hash' })" x-data="app()">
     <template x-route="/" template="/dashboard.html"></template>
     <template x-route="/channels/:channel_id" template="/channel.html"></template>
     <template x-route="/users/:user_id" template="/user.html"></template>
@@ -26,6 +26,19 @@
             </span>
           </span>
         </small>
+        <br/>
+        <div>
+          <label for="from">From date:</label>
+          <input type="date" id="from" name="range-from" x-model="__fromDate" x-bind:value="__fromDate" />
+          <label for="to">To date:</label>
+          <input type="date" id="to" name="range-from" x-model="__toDate" x-bind:value="__toDate" />
+
+          <select id="resources" @change="$router.push(goto($event.target.value))">
+            <template x-for="(item, index) of __resourcesRaw" :key="index">
+              <option x-text="item[1]" :value="item[0]"></option>
+            </template> 
+          </select>
+          </div>
       </nav>
     </footer>
   </body>

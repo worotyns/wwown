@@ -1,5 +1,40 @@
 const emojiRequest = fetch("./sctuc.json").then((response) => response.json());
 
+function app() {
+  return {
+    __fromDate: new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString().split("T")[0],
+    __toDate: new Date().toISOString().split("T")[0],
+    __resources: new Map(),
+    __resourcesRaw: [],
+    t(key) {
+      return this.__resources.get(key) || key;
+    },
+    goto(resource) {
+      if (resource.startsWith("C")) {
+        return "/channels/" + resource;
+      } else if (resource.startsWith("U")) {
+        return "/users/" + resource;
+      }
+    },
+    async init() {
+     try{
+      const response = await fetch(
+        '/resources',
+      );
+      this.__resourcesRaw = await response.json();
+      this.__resources = new Map(
+        this.__resourcesRaw
+      );
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      this.__fetchTimeMs = Date.now() - start;
+      console.log(`Fetched data in ${this.__fetchTimeMs}ms`);
+    }
+    }
+  }
+}
+
 function emojis() {
   return {
     emoji: null,
@@ -49,30 +84,28 @@ function data(query, uri) {
     __fetchTimeMs: 0,
     __queryParams: query,
     __item: {},
-    __resources: new Map(),
     get(path, defaultValue) {
       return this.__item[path] || defaultValue;
     },
-    t(key) {
-      return this.__resources.get(key) || key;
-    },
-    async init() {
+
+    async calculate() {
       const start = Date.now();
-      this.__item = {};
       try {
         const response = await fetch(
           this.__uri + queryParamsFromQueryState(this.__queryParams),
         );
         this.__item = await response.json();
-        if (this.__item.resources) {
-          this.__resources = new Map(this.__item.resources);
-        }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
         this.__fetchTimeMs = Date.now() - start;
         console.log(`Fetched data in ${this.__fetchTimeMs}ms`);
       }
+    },
+
+    async init() {
+      this.__item = {};
+      return this.calculate();
     },
   };
 }

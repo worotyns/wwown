@@ -11,7 +11,7 @@ type Interactions = number;
 type ChannelsCount = number;
 type UsersCount = number;
 type IncidentsCount = number;
-type Color = string;
+type ColorOpacity = number;
 
 export type HourPercentDistribution = [TwoDigitHour, Percent];
 export type LastChannels = [SlackChannelId, Total, LastTouchSerialized];
@@ -19,12 +19,14 @@ export type TopChannels = [SlackChannelId, Total, LastTouchSerialized];
 
 export type Activity = [
   DateWithoutTimeRaw,
-  Color,
+  ColorOpacity,
   Interactions,
   UsersCount,
   ChannelsCount,
   IncidentsCount,
 ];
+
+export type ScoreOpacity = number;
 
 export type Received = number;
 export type Given = number;

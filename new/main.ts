@@ -1,8 +1,5 @@
 // TODO:
-// - api - proste API zrobic, mozna nawet podejsc tak, zeby zwracac: resources, top, zakres dni - wtedy nie trzeba bedzie robic osobnego endpointa na wszystko?
 // - okresowy dump
-// - service calculator
-// - migration old data?
 // - process manager - zostawic i przetestowac - (mozna dac jako libka na deno tez jako osobny projekt) bo sie przyda atoms-util
 
 // Run Bot
@@ -16,8 +13,9 @@ import { UserViewDto } from "./application/api/dtos/user_dto.ts";
 import { createFs } from "@worotyns/atoms";
 import { send } from "https://deno.land/x/oak@v12.6.1/send.ts";
 import { migratedResource } from "./migrate.ts";
-import { WhoWorksOnWhatNow } from "./domain/wwown.ts";
 import { ChannelViewDto } from "./application/api/dtos/channel_dto.ts";
+import { DashboardViewDto } from "./application/api/dtos/dashboard_dto.ts";
+import { WhoWorksOnWhatNow } from "./domain/wwown.ts";
 
 const { restore, persist } = createFs("./data");
 
@@ -45,11 +43,10 @@ router
         to: new Date(to),
         lastItems: Number(lastItems),
       },
-      wwown.resources,
     );
   });
 
-  router
+router
   .get("/channels/:channelId", (context) => {
     const from = context.request.url.searchParams.get("from");
     const to = context.request.url.searchParams.get("to");
@@ -66,9 +63,37 @@ router
         to: new Date(to),
         lastItems: Number(lastItems),
       },
-      wwown.resources,
     );
-  });  
+  });
+
+  router
+  .get("/dashboard", (context) => {
+    const from = context.request.url.searchParams.get("from");
+    const to = context.request.url.searchParams.get("to");
+    const lastItems = context.request.url.searchParams.get("lastItems");
+
+    if (!from || !to || !lastItems) {
+      throw new Error("Missing query params: from, to or lastItems");
+    }
+
+    context.response.body = new DashboardViewDto(
+      wwown.getDashboardData(),
+      {
+        from: new Date(from),
+        to: new Date(to),
+        lastItems: Number(lastItems),
+      },
+    );
+  });
+
+
+router
+.get("/resources", (context) => {
+  context.response.body = [
+    ...wwown.resources.getChannels(),
+    ...wwown.resources.getUsers(),
+  ]
+});
 
 const app = new Application();
 

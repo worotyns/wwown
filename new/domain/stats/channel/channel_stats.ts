@@ -1,7 +1,7 @@
 import { PropertiesOnly } from "@worotyns/atoms";
 import { BasicStats } from "../common/basic_stats.ts";
 import {
-Emoji,
+  Emoji,
   FirstActivityAt,
   InteractionEvents,
   LastActivityAt,
@@ -19,7 +19,6 @@ export class ChannelStats {
   constructor(
     public readonly channelId: SlackChannelId,
   ) {
-
   }
 
   public readonly hourly: SerializableMap<TwoDigitHour, BasicStats> =
@@ -28,12 +27,12 @@ export class ChannelStats {
   public readonly threads: SerializableMap<
     SlackThreadId,
     BasicStats
-  > = new SerializableMap()
+  > = new SerializableMap();
 
   public readonly reactions: SerializableMap<
     Emoji,
     BasicStats
-  > = new SerializableMap()
+  > = new SerializableMap();
 
   public readonly messages: SerializableMap<
     SlackUserId,
@@ -56,10 +55,10 @@ export class ChannelStats {
         ).inc(event.meta.count, event.meta.timestamp);
         break;
       case "reaction":
-          this.reactions.getOrSet(
-            event.meta.emoji,
-            () => new BasicStats(),
-          ).inc(event.meta.count, event.meta.timestamp);
+        this.reactions.getOrSet(
+          event.meta.emoji,
+          () => new BasicStats(),
+        ).inc(event.meta.count, event.meta.timestamp);
         break;
       case "message":
         this.messages.getOrSet(event.meta.userId, () => new BasicStats())
@@ -79,7 +78,6 @@ export class ChannelStats {
   public register(
     event: InteractionEvents,
   ) {
-
     this.hourly.getOrSet(Hour(event.meta.timestamp), () => new BasicStats())
       .inc(event.meta.count, event.meta.timestamp);
 
@@ -87,16 +85,16 @@ export class ChannelStats {
 
     switch (event.type) {
       case "thread":
-          this.threads.getOrSet(
-            event.meta.threadId,
-            () => new BasicStats(),
-          ).inc(event.meta.count, event.meta.timestamp);
+        this.threads.getOrSet(
+          event.meta.threadId,
+          () => new BasicStats(),
+        ).inc(event.meta.count, event.meta.timestamp);
         break;
       case "reaction":
-          this.reactions.getOrSet(
-            event.meta.emoji,
-            () => new BasicStats(),
-          ).inc(event.meta.count, event.meta.timestamp);
+        this.reactions.getOrSet(
+          event.meta.emoji,
+          () => new BasicStats(),
+        ).inc(event.meta.count, event.meta.timestamp);
         break;
       case "message":
         this.messages.getOrSet(event.meta.userId, () => new BasicStats())

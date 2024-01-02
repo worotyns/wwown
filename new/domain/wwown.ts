@@ -13,6 +13,7 @@ import { UserStats } from "./stats/user/user_stats.ts";
 import { UserData } from "./stats/user/user_data.ts";
 import { ChannelStats } from "./stats/channel/channel_stats.ts";
 import { ChannelData } from "./stats/channel/channel_data.ts";
+import { DashboardData } from "./stats/dashboard_data.ts";
 
 /**
  * Main entry point for the application.
@@ -103,6 +104,12 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
         this.resources.register(event);
         break;
     }
+  }
+
+  public getDashboardData() {
+    return new DashboardData(
+      this.days,
+    );
   }
 
   public getChannelData(

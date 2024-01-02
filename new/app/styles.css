@@ -85,17 +85,15 @@ table tr td, table tr th {
 }
 
 .bar-legend-main {
-  color: #275a90;
+  color: rgba(39,90,144,1);
 }
 
 .bar-legend-second {
-  color: #275a90;
-  opacity: 0.8;
+  color: rgba(39,90,144,0.50)
 }
 
 .bar:nth-child(2) {
-  opacity: 0.8;
-  background-color: #275a90;
+  background-color: rgba(39,90,144,0.50);
 }
 
 .bar-container label {
@@ -110,4 +108,17 @@ table tr td, table tr th {
 sub, sub > span {
   font-size: 10px;
   font-weight: 200;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Creates 4 equal columns */
+  gap: 16px; /* Adjust the gap between columns as needed */
+}
+
+.grid-item {
+  padding: 6px;
+  border-radius: 5px;
+  border: 1px solid #ddd; /* Optional: Add a border for better visualization */
+  text-align: center;
 }

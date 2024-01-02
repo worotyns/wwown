@@ -1,13 +1,13 @@
-<section x-data="data({from: '2023-12-01', to: '2024-01-01', lastItems: 10}, '/users/' + $router.params.user_id)">
-    <h2><a x-link href="/">🔙&nbsp;</a><span x-text="t($router.params.user_id)"></span></h2>
+<section x-data="data({from: __fromDate, to: __toDate, lastItems: 10}, '/users/' + $router.params.user_id)">
+    <h2><a href="javascript: window.history.back()">🔙&nbsp;</a><span x-text="t($router.params.user_id)"></span><span style="float: right"><a x-link href="/">🏠</a></span></h2>
     <div>
         <!-- Activity matrix -->
         <figure>
             <div class="cal">
                 <template x-for="(day, index) in get('activityAllTime')" :key="index">
                     <div :class="{day: true, incident: day[5]}"
-                        :style="`font-size: 10px; cursor: pointer; background-color: ${day[1]}`"
-                        :title="`${day[0]}: ${day[2]} interactions by ${day[3]} users in ${day[4]} channels`"></div>
+                    :style="`font-size: 10px; cursor: pointer; background-color: rgba(39, 90, 144, ${day[1]})`"
+                    :title="`${day[0]}: ${day[2]} interactions by ${day[3]} users in ${day[4]} channels`"></div>
                 </template>
             </div>
             <figcaption>Last year activity - interactions per day</figcaption>
@@ -19,17 +19,16 @@
                     <div x-data="{all: get('hourlyAllTime')[hour], range: get('hourlyInRange')[hour]}"
                         class="bar-container">
                         <div class="bar">
-                            <div class="bar-fill" :style="{'height': (range[1] * 200) + 'px'}"></div>
+                            <div class="bar-fill" :style="{'height': (range[1] * 100) + 'px'}"></div>
                         </div>
                         <div class="bar">
-                            <div class="bar-fill-all" :style="{'height': (all[1] * 200) + 'px'}"></div>
+                            <div class="bar-fill-all" :style="{'height': (all[1] * 100) + 'px'}"></div>
                         </div>
                         <label x-text="hour"></label>
                     </div>
                 </template>
             </div>
-            <figcaption>Messages distribution in <span class="bar-legend-second">all-time</span> and <span
-                    class="bar-legend-main">in-range</figcaption>
+            <figcaption>Messages distribution in <span class="bar-legend-main">in-range and <span class="bar-legend-second">all-time</span> </figcaption>
         </figure>
 
         <!-- Last channels in date range -->
@@ -42,7 +41,7 @@
                             <a :title="`${item[1]} interactions ${timeAgo(item[2])}`" x-link
                                 :href="'/channels/' + item[0] + ''">
                                 <div
-                                    :style="`display: inline-block; margin: 2px; padding: 1.5px; border-radius: 5px; transition: transform 0.25s; background-color: rgba(211, 211, 211, 0.8); font-size: ${normalize(item[1], minMax[0], minMax[1], 10, 28)}px`">
+                                    :style="`display: inline-block; margin: 2px; padding: 1.5px; border-radius: 5px; transition: transform 0.25s; background-color: rgba(39, 90, 144, 0.15); font-size: ${normalize(item[1], minMax[0], minMax[1], 10, 28)}px`">
                                     <span x-text="'#' + t(item[0])"></span>
                                 </div>
                             </a>
@@ -63,7 +62,7 @@
                             <a :title="`${item[1]} interactions ${timeAgo(item[2])}`" x-link
                                 :href="'/channels/' + item[0] + ''">
                                 <div
-                                    :style="`display: inline-block; margin: 2px; padding: 1.5px; border-radius: 5px; transition: transform 0.25s; background-color: rgba(211, 211, 211, 0.8); font-size: ${normalize(item[1], minMax[0], minMax[1], 10, 28)}px`">
+                                    :style="`display: inline-block; margin: 2px; padding: 1.5px; border-radius: 5px; transition: transform 0.25s; background-color: rgba(39, 90, 144, 0.15); font-size: ${normalize(item[1], minMax[0], minMax[1], 10, 28)}px`">
                                     <span x-text="'#' + t(item[0])"></span>
                                 </div>
                             </a>
@@ -84,7 +83,7 @@
                                 style="text-align: center; display: inline-block;">
                                 <div :title="`${item[0]} - you give: ${item[1]} times - and receive ${item[2]} times`"
                                     x-data="emojis()" x-init="init(item[0])">
-                                    <div style="display: flex; align-items: center; padding: 2px; margin: 3px; background-color: rgb(211,211,211); border-radius: 3px;"
+                                    <div style="display: flex; align-items: center; padding: 2px; margin: 3px; background-color: rgba(39,90,144,0.15); border-radius: 3px;"
                                         x-data="{givenSize: `${normalize(item[1], minMax[0], minMax[1], 20, 45)}px`, receivedSize: `${normalize(item[2], minMax[0], minMax[1], 20, 45)}px`}">
                                         <div :style="`opacity: ${item[1] === 0 ? 0.20 : 1.0}`">
                                             <!-- <span x-show="isCustomEmoji && emoji" x-text="emoji"></span> -->
@@ -113,7 +112,7 @@
                                 style="text-align: center; display: inline-block;">
                                 <div :title="`${item[0]} - you give: ${item[1]} times - and receive ${item[2]} times`"
                                     x-data="emojis()" x-init="init(item[0])">
-                                    <div style="display: flex; align-items: center; padding: 2px; margin: 3px; background-color: rgb(211,211,211); border-radius: 3px;"
+                                    <div style="display: flex; align-items: center; padding: 2px; margin: 3px; background-color: rgba(39,90,144,0.15); border-radius: 3px;"
                                         x-data="{givenSize: `${normalize(item[1], minMax[0], minMax[1], 20, 45)}px`, receivedSize: `${normalize(item[2], minMax[0], minMax[1], 20, 45)}px`}">
                                         <div :style="`opacity: ${item[1] === 0 ? 0.20 : 1.0}`">
                                             <!-- <span x-show="isCustomEmoji && emoji" x-text="emoji"></span> -->
