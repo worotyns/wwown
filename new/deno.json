@@ -3,6 +3,7 @@
     "dev": "deno run --watch main.ts"
   },
   "imports": {
+    "oak": "https://deno.land/x/oak@v12.6.1/mod.ts",
     "@worotyns/atoms": "https://deno.land/x/atoms@0.0.4/mod.ts",
     "@testing/asserts": "https://deno.land/std@0.210.0/assert/mod.ts"
   }
