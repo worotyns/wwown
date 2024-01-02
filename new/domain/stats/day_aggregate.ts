@@ -129,13 +129,22 @@ export class DayAggregate extends Atom<DayAggregate> {
     );
   }
 
+  static deserializeChannelStatsWithKeyAsSerializedMap<T>(
+    json: PropertiesOnly<SerializableMap<T, ChannelStats>>,
+  ): SerializableMap<T, ChannelStats> {
+    return new SerializableMap(
+      (json as unknown as Array<[T, ChannelStats]>)
+        .map((item) => [item[0], ChannelStats.deserialize(item[1])]),
+    );
+  }
+
   static deserialize(json: PropertiesOnly<DayAggregate>): DayAggregate {
     return Object.assign(new DayAggregate(), {
       ...json,
       users: DayAggregate.deserializeUserStatsWithKeyAsSerializedMap(
         json.users,
       ),
-      channels: DayAggregate.deserializeUserStatsWithKeyAsSerializedMap(
+      channels: DayAggregate.deserializeChannelStatsWithKeyAsSerializedMap(
         json.channels,
       ),
     });

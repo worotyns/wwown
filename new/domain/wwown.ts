@@ -213,6 +213,20 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
     );
   }
 
+  static deserializeChannelStatsWithKeyAsSerializedMap<T>(
+    json: PropertiesOnly<SerializableMap<T, ChannelStats>>,
+  ): SerializableMap<T, ChannelStats> {
+    return new SerializableMap(
+      (json as unknown as Array<[T, ChannelStats]>)
+        .map((
+          item,
+        ) => [
+          item[0],
+          ChannelStats.deserialize(item[1]),
+        ]),
+    );
+  }
+
   static deserialize(
     value: PropertiesOnly<WhoWorksOnWhatNow>,
   ): WhoWorksOnWhatNow {
@@ -220,7 +234,7 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
       ...value,
       resources: Resources.deserialize(value.resources),
       channels: WhoWorksOnWhatNow
-        .deserializeUserStatsWithKeyAsSerializedMap(
+        .deserializeChannelStatsWithKeyAsSerializedMap(
           value.channels,
         ),
       users: WhoWorksOnWhatNow.deserializeUserStatsWithKeyAsSerializedMap(
