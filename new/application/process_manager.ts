@@ -76,11 +76,11 @@ export class ProcessManager {
 
   private async stopProcess() {
     if (this.stopping) {
-        this.logger.info('Already stopping process... wait')
-        return;
+      this.logger.info("Already stopping process... wait");
+      return;
     }
 
-    this.logger.info('Stopping process...');
+    this.logger.info("Stopping process...");
 
     this.abortController.abort();
 
