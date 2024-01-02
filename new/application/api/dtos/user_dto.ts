@@ -320,19 +320,20 @@ export class UserViewDto {
       threadMaxMessagesContributedAllTime,
     ]);
 
-    const threadAvgMinutesAuthoredAllTime =
+    const threadAvgHoursAuthoredAllTime =
       Array.from(allTimeThreadsAuthored.values()).reduce(
         (a, b) =>
           a + Math.ceil((b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000),
         0,
       ) / threadCountAuthoredAllTime;
-    const threadAvgMinutesContributedAllTime =
+    const threadAvgHoursContributedAllTime =
       Array.from(allTimeThreadsContributed.values()).reduce(
         (a, b) =>
           a + Math.ceil((b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000),
         0,
       ) / threadCountContributedAllTime;
-    const threadAvgMinutesAuthoredInRange = days.reduce(
+
+    const threadAvgHoursAuthoredInRange = days.reduce(
       (a, b) =>
         a + Array.from(b.threads.authored.values()).reduce(
           (a, b) =>
@@ -342,7 +343,8 @@ export class UserViewDto {
         ),
       0,
     ) / threadCountAuthoredInRange;
-    const threadAvgMinutesContributedInRange = days.reduce(
+
+    const threadAvgHoursContributedInRange = days.reduce(
       (a, b) =>
         a + Array.from(b.threads.contributed.values()).reduce(
           (a, b) =>
@@ -352,29 +354,33 @@ export class UserViewDto {
         ),
       0,
     ) / threadCountContributedInRange;
-    const threadAvgMinutesAllTime =
-      (threadAvgMinutesAuthoredAllTime + threadAvgMinutesContributedAllTime) /
+
+    const threadAvgHoursAllTime =
+      (threadAvgHoursAuthoredAllTime + threadAvgHoursContributedAllTime) /
       2;
-    const threadAvgMinutesInRange =
-      (threadAvgMinutesAuthoredInRange + threadAvgMinutesContributedInRange) /
+    
+      const threadAvgHoursInRange =
+      (threadAvgHoursAuthoredInRange + threadAvgHoursContributedInRange) /
       2;
-    summary.set("threadAvgMinutes", [
+
+    summary.set("threadAvgHours", [
       "Average thread duration",
-      threadAvgMinutesInRange,
-      threadAvgMinutesAllTime,
+      threadAvgHoursInRange,
+      threadAvgHoursAllTime,
     ]);
-    summary.set("threadAuthoredAvgMinutes", [
+    
+    summary.set("threadAuthoredAvgHours", [
       "Average thread duration authored by you",
-      threadAvgMinutesAuthoredInRange,
-      threadAvgMinutesAuthoredAllTime,
+      threadAvgHoursAuthoredInRange,
+      threadAvgHoursAuthoredAllTime,
     ]);
-    summary.set("threadContributedAvgMinutes", [
+    summary.set("threadContributedAvgHours", [
       "Average thread duration contributed by you",
-      threadAvgMinutesContributedInRange,
-      threadAvgMinutesContributedAllTime,
+      threadAvgHoursContributedInRange,
+      threadAvgHoursContributedAllTime,
     ]);
 
-    const threadMaxMinutesAuthoredAllTime = Array.from(
+    const threadMaxHoursAuthoredAllTime = Array.from(
       allTimeThreadsAuthored.values(),
     ).reduce(
       (a, b) =>
@@ -384,7 +390,7 @@ export class UserViewDto {
         ),
       0,
     );
-    const threadMaxMinutesContributedAllTime = Array.from(
+    const threadMaxHoursContributedAllTime = Array.from(
       allTimeThreadsContributed.values(),
     ).reduce(
       (a, b) =>
@@ -394,7 +400,7 @@ export class UserViewDto {
         ),
       0,
     );
-    const threadMaxMinutesAuthoredInRange = days.reduce(
+    const threadMaxHoursAuthoredInRange = days.reduce(
       (a, b) =>
         Math.max(
           a,
@@ -406,7 +412,7 @@ export class UserViewDto {
         ),
       0,
     );
-    const threadMaxMinutesContributedInRange = days.reduce(
+    const threadMaxHoursContributedInRange = days.reduce(
       (a, b) =>
         Math.max(
           a,
@@ -418,28 +424,28 @@ export class UserViewDto {
         ),
       0,
     );
-    const threadMaxMinutesAllTime = Math.max(
-      threadMaxMinutesAuthoredAllTime,
-      threadMaxMinutesContributedAllTime,
+    const threadMaxHoursAllTime = Math.max(
+      threadMaxHoursAuthoredAllTime,
+      threadMaxHoursContributedAllTime,
     );
-    const threadMaxMinutesInRange = Math.max(
-      threadMaxMinutesAuthoredInRange,
-      threadMaxMinutesContributedInRange,
+    const threadMaxHoursInRange = Math.max(
+      threadMaxHoursAuthoredInRange,
+      threadMaxHoursContributedInRange,
     );
-    summary.set("threadMaxMinutes", [
+    summary.set("threadMaxHours", [
       "Maximum thread duration",
-      threadMaxMinutesInRange,
-      threadMaxMinutesAllTime,
+      threadMaxHoursInRange,
+      threadMaxHoursAllTime,
     ]);
-    summary.set("threadAuthoredMaxMinutes", [
+    summary.set("threadAuthoredMaxHours", [
       "Maximum thread duration authored by you",
-      threadMaxMinutesAuthoredInRange,
-      threadMaxMinutesAuthoredAllTime,
+      threadMaxHoursAuthoredInRange,
+      threadMaxHoursAuthoredAllTime,
     ]);
-    summary.set("threadContributedMaxMinutes", [
+    summary.set("threadContributedMaxHours", [
       "Maximum thread duration contributed by you",
-      threadMaxMinutesContributedInRange,
-      threadMaxMinutesContributedAllTime,
+      threadMaxHoursContributedInRange,
+      threadMaxHoursContributedAllTime,
     ]);
 
     const reactionsGivenAllTime = Array.from(allTimeReactionsGiven.values())

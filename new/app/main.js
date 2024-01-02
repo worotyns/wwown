@@ -10,6 +10,7 @@ function app() {
     t(key) {
       return this.__resources.get(key) || key;
     },
+
     goto(resource) {
       if (resource.startsWith("C")) {
         return "/channels/" + resource;
@@ -17,6 +18,7 @@ function app() {
         return "/users/" + resource;
       }
     },
+
     async init() {
       const start = Date.now();
       try {
@@ -47,9 +49,10 @@ function debounce(func, wait = 750) {
   };
 }
 
-function data(query, uri) {
+function data(query, path, resId) {
   return {
-    __uri: uri,
+    __resId: resId,
+    __path: path,
     __fetchTimeMs: 0,
     __queryParams: query,
     __item: {},
@@ -80,11 +83,18 @@ function data(query, uri) {
       return this.__item[path] || defaultValue;
     },
 
+    onRouteChange(resId) {
+      if (resId !== this.__resId) {
+        this.__resId = resId;
+        this.calculate();
+      }
+    },
+  
     async calculate() {
       const start = Date.now();
       try {
         const response = await fetch(
-          this.__uri + queryParamsFromQueryState(this.__queryParams),
+          `/${this.__path}/${this.__resId}` + queryParamsFromQueryState(this.__queryParams),
         );
         this.__item = await response.json();
       } catch (error) {
