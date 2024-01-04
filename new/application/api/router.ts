@@ -3,6 +3,7 @@ import { WhoWorksOnWhatNow } from "../../domain/wwown.ts";
 import { UserViewDto } from "./dtos/user_dto.ts";
 import { ChannelViewDto } from "./dtos/channel_dto.ts";
 import { DashboardViewDto } from "./dtos/dashboard_dto.ts";
+import { Events } from "../../domain/common/interfaces.ts";
 
 export function createRouter(wwown: WhoWorksOnWhatNow): Router {
   const router = new Router();
@@ -70,6 +71,28 @@ export function createRouter(wwown: WhoWorksOnWhatNow): Router {
   router
     .get("/resources", (context) => {
       context.response.body = wwown.resources.getAsResources();
+    });
+
+  // TODO: Remove this after migration
+  router
+    .post("/migrate", async (context) => {
+      const body = await context.request.body({ type: "json" }).value as Events;
+      
+      if (["hourly", "reaction", "channel", "user", "message"].includes(body.type)) {
+        try {
+          wwown.migrate({
+            type: body.type,
+            meta: {
+              ...body.meta,
+              timestamp: new Date(body.meta.timestamp),
+            },
+          } as Events);
+        } catch(error) {
+          throw error;
+        }
+      }
+
+      context.response.status = 201;
     });
 
   return router;

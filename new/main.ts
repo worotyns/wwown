@@ -1,15 +1,26 @@
 import { load } from "dotenv";
-import { migratedResource } from "./migrate.ts";
 import { createApiApplication } from "./application/api/api_application.ts";
 import { ProcessManager } from "./application/process_manager.ts";
 import { createLogger } from "./application/logger.ts";
 import { createFs } from "@worotyns/atoms";
 import { WhoWorksOnWhatNow } from "./domain/wwown.ts";
-import { createSlackService } from "./application/services/slack.ts";
+import { SlackEnvVars, createSlackService } from "./application/services/slack.ts";
+
+interface HttpApiEnvVars {
+  API_SERVER_BIND_ADDR: string;
+  API_SERVER_PORT: string;
+}
+
+interface WwownEnvVars {
+  ATOMS_PATH: string;
+}
+
+interface EnvVars extends SlackEnvVars, HttpApiEnvVars, WwownEnvVars {
+  [key: string]: string;
+}
 
 const { persist, restore } = createFs("./data");
-const env = await load({export: true});
-
+const env: EnvVars = await load({export: true}) as EnvVars;
 const logger = createLogger();
 
 let wwown: WhoWorksOnWhatNow;
@@ -18,8 +29,7 @@ try {
   wwown = await restore("wwown_prod", WhoWorksOnWhatNow);
 } catch (error) {
   if (error instanceof Deno.errors.NotFound) {
-    // wwown = new WhoWorksOnWhatNow();
-    wwown = migratedResource;
+    wwown = new WhoWorksOnWhatNow();
     console.log("File not found, start fresh instance");
   } else {
     logger.error(error);
@@ -38,7 +48,8 @@ const abortController = new AbortController();
 const slackPromise = slack.start();
 
 const serverPromise = app.listen({
-  port: 8000,
+  hostname: env.API_SERVER_BIND_ADDR || "127.0.0.1",
+  port: ~~env.API_SERVER_PORT || 8000,
   signal: abortController.signal,
 });
 
@@ -46,7 +57,7 @@ ProcessManager.create(
   [
     async () => {
       logger.log("Stopping slack");
-      slack.stop();
+      slack.disconnect();
       await slackPromise;
     },
     async () => {

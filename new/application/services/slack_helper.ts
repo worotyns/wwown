@@ -1,4 +1,4 @@
-import { App } from "npm:@slack/bolt";
+import { WebClient } from "slack-web";
 import { Logger } from "../logger.ts";
 
 type Channel = {
@@ -42,7 +42,7 @@ export class SlackHelper {
   private cache: Map<string, string> = new Map();
 
   constructor(
-    private readonly app: App,
+    private readonly client: WebClient,
     private readonly logger: Logger,
   ) {
   }
@@ -60,13 +60,13 @@ export class SlackHelper {
     const channelIds: Channel[] = [];
 
     while (true) {
-      const result = await this.app.client.conversations.list({
+      const result = await this.client.conversations.list({
         limit: 50,
         cursor,
       });
 
       if (result.ok) {
-        for (const channel of result.channels || []) {
+        for (const channel of result.channels as Channel[] || []) {
           if (channel) {
             channelIds.push(channel as Channel);
           }
@@ -94,7 +94,7 @@ export class SlackHelper {
         !channel.is_private && !channel.is_archived && !channel.is_member &&
         channel.id
       ) {
-        await this.app.client.conversations.join({
+        await this.client.conversations.join({
           channel: channel.id,
         });
         this.logger.log(`Joined channel: ${channel.name}`);
@@ -111,11 +111,11 @@ export class SlackHelper {
       return this.cache.get(channelId) as string;
     }
 
-    const resp = await this.app.client.conversations.info({
+    const resp: any = await this.client.conversations.info({
       channel: channelId,
     });
 
-    const name = resp?.channel?.name_normalized || "NA";
+    const name = resp.channel.name_normalized || "NA";
     this.registerInCache(channelId, name);
 
     return name;
@@ -126,7 +126,7 @@ export class SlackHelper {
       return this.cache.get(userId) as string;
     }
 
-    const userResponse = await this.app.client.users.info({
+    const userResponse: any = await this.client.users.info({
       user: userId,
     });
 
@@ -139,10 +139,10 @@ export class SlackHelper {
   public resolveAuthorOfThreadByThreadTs(
     threadTs: string,
   ): Promise<null | string> {
-    return this.app.client.conversations.replies({
+    return this.client.conversations.replies({
       channel: threadTs,
       ts: threadTs,
-    }).then((resp) => {
+    }).then((resp: any) => {
       if (resp.messages && resp.messages.length > 0) {
         return resp.messages[0].user || null;
       }

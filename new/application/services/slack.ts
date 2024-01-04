@@ -1,21 +1,28 @@
-import bolt from "npm:@slack/bolt";
+import { SocketModeClient } from "slack";
+import { WebClient } from "slack-web";
 import { SlackHelper } from "./slack_helper.ts";
 import { Logger } from "../logger.ts";
 import { WhoWorksOnWhatNow } from "../../domain/wwown.ts";
 import { SlackDate } from "../../domain/common/date_time.ts";
 
-export function createSlackService(wwown: WhoWorksOnWhatNow, env: Record<string, string>, logger: Logger) {
-  const app = new bolt.App({
-    token: env.SLACK_BOT_TOKEN,
-    signingSecret: env.SLACK_SIGNING_SECRET,
-    socketMode: true,
-    appToken: env.SLACK_APP_TOKEN,
-    port: ~~(env.PORT || 3000),
-  });
+export interface SlackEnvVars {
+  SLACK_BOT_TOKEN: string;
+  SLACK_SIGNING_SECRET: string;
+  SLACK_APP_TOKEN: string;
+}
 
-  const slackHelper = new SlackHelper(app, logger);
+export function createSlackService(wwown: WhoWorksOnWhatNow, env: SlackEnvVars, logger: Logger) {
+  
+  const slackWebClient = new WebClient(env.SLACK_APP_TOKEN);
+  const socketModeClient = new SocketModeClient({ appToken: env.SLACK_APP_TOKEN });
+  const slackHelper = new SlackHelper(slackWebClient, logger);
 
-  app.event("reaction_added", async ({ event }) => {
+  // Attach listeners to events by type. See: https://api.slack.com/events/message
+  socketModeClient.addEventListener("reaction_added", async ({ detail: { body, ack } }) => {
+    ack()
+
+    const event = body.event;
+
     wwown.register({
       type: "reaction",
       meta: {
@@ -52,9 +59,87 @@ export function createSlackService(wwown: WhoWorksOnWhatNow, env: Record<string,
         timestamp: new Date(),
       },
     });
+  })
+
+  socketModeClient.addEventListener("message", async ({ detail: { body, ack } }) => {
+    ack()
+    const message = body.event;
+
+    if (!message.user) {
+      return;
+    }
+
+    if (message.thread_ts) {
+      if (!message.parent_user_id) {
+        logger.error("Cannot resolve parent user id for thread: " + message.thread_ts);
+      }
+
+      wwown.register({
+        type: "thread",
+        meta: {
+          parentUserId: message.parent_user_id,
+          threadId: message.thread_ts,
+          channelId: message.channel,
+          timestamp: SlackDate(message.ts),
+          userId: message.user,
+          count: 1,
+        },
+      });
+    } else {
+      wwown.register({
+        type: "message",
+        meta: {
+          channelId: message.channel,
+          timestamp: SlackDate(message.ts),
+          userId: message.user,
+          count: 1,
+        },
+      });
+    }
+
+    const [channelName, userName] = await slackHelper.resolveNames(
+      message.channel,
+      message.user,
+    );
+
+    wwown.resources.register({
+      type: "user",
+      meta: {
+        userId: message.user,
+        userName: userName,
+        action: "add",
+        timestamp: new Date(),
+      },
+    });
+
+    wwown.resources.register({
+      type: "channel",
+      meta: {
+        channelId: message.channel,
+        channelName: channelName,
+        action: "add",
+        timestamp: new Date(),
+      },
+    });
+  })
+
+  socketModeClient.addEventListener("channel_archive", ({ detail: { body, ack } }) => {
+    ack()
+    const event = body.event;
+    wwown.register({
+      type: "channel",
+      meta: {
+        channelId: event.channel,
+        channelName: "NA",
+        action: "remove",
+        timestamp: new Date(),
+      },
+    });
   });
 
-  app.event("channel_created", async ({ event }) => {
+  socketModeClient.addEventListener("channel_created", async ({ detail: { body, ack } }) => {
+    ack()
+    const event = body.event;
     const [channelName, userName] = await slackHelper.resolveNames(
       event.channel.id,
       event.channel.creator,
@@ -80,12 +165,28 @@ export function createSlackService(wwown: WhoWorksOnWhatNow, env: Record<string,
       },
     });
 
-    await app.client.conversations.join({
+    await slackWebClient.conversations.join({
       channel: event.channel.id,
     });
   });
 
-  app.event("channel_rename", ({ event }) => {
+  socketModeClient.addEventListener("channel_deleted", ({ detail: { body, ack } }) => {
+    ack()
+    const event = body.event;
+    wwown.register({
+      type: "channel",
+      meta: {
+        channelId: event.channel,
+        channelName: "NA",
+        action: "remove",
+        timestamp: new Date(),
+      },
+    });
+  });
+
+  socketModeClient.addEventListener("channel_rename", ({ detail: { body, ack } }) => {
+    ack()
+    const event = body.event;
     wwown.register({
       type: "channel",
       meta: {
@@ -95,103 +196,21 @@ export function createSlackService(wwown: WhoWorksOnWhatNow, env: Record<string,
         timestamp: new Date(),
       },
     });
-    return Promise.resolve();
   });
 
-  app.event("channel_deleted", ({ event }) => {
+  socketModeClient.addEventListener("channel_unarchive", ({ detail: { body, ack } }) => {
+    ack()
+    const event = body.event;
     wwown.register({
       type: "channel",
       meta: {
-        channelId: event.channel,
-        channelName: "NA",
-        action: "remove",
-        timestamp: new Date(),
-      },
-    });
-    return Promise.resolve();
-  });
-
-  app.event("channel_archive", ({ event }) => {
-    wwown.register({
-      type: "channel",
-      meta: {
-        channelId: event.channel,
-        channelName: "NA",
-        action: "remove",
-        timestamp: new Date(),
-      },
-    });
-    return Promise.resolve();
-  });
-
-  app.message(/.*/, async ({ message }) => {
-    
-    logger.info(message);
-
-    const user = (message as any).user;
-    const thread = (message as any).thread_ts;
-
-    if (!user) {
-      return;
-    }
-
-    if (thread) {
-      const parentUserId = await slackHelper.resolveAuthorOfThreadByThreadTs(
-        thread,
-      );
-      if (parentUserId) {
-        logger.info({parentUserId, thread, message});
-        wwown.register({
-          type: "thread",
-          meta: {
-            parentUserId: parentUserId, // TODO via API get thread author
-            threadId: thread,
-            channelId: message.channel,
-            timestamp: SlackDate(message.ts),
-            userId: user,
-            count: 1,
-          },
-        });
-      } else {
-        logger.error("Cannot resolve parent user id for thread: " + thread);
-      }
-    } else {
-      wwown.register({
-        type: "message",
-        meta: {
-          channelId: message.channel,
-          timestamp: SlackDate(message.ts),
-          userId: user,
-          count: 1,
-        },
-      });
-    }
-
-    const [channelName, userName] = await slackHelper.resolveNames(
-      message.channel,
-      user,
-    );
-
-    wwown.resources.register({
-      type: "user",
-      meta: {
-        userId: user,
-        userName: userName,
-        action: "add",
-        timestamp: new Date(),
-      },
-    });
-
-    wwown.resources.register({
-      type: "channel",
-      meta: {
-        channelId: message.channel,
-        channelName: channelName,
+        channelId: event.channel.id,
+        channelName: event.channel.name_normalized,
         action: "add",
         timestamp: new Date(),
       },
     });
   });
 
-  return app;
+  return socketModeClient
 }

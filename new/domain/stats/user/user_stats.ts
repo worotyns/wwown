@@ -158,6 +158,7 @@ export class UserStats {
           Object.assign(new BasicStats(), {
             ...item[1],
             lastTs: new Date(item[1].lastTs),
+            firstTs: new Date(item[1].firstTs),
           }),
         ]),
     );

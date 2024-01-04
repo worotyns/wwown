@@ -122,6 +122,7 @@ export class ChannelStats {
           item[0],
           Object.assign(new BasicStats(), {
             ...item[1],
+            firstTs: new Date(item[1].firstTs),
             lastTs: new Date(item[1].lastTs),
           }),
         ]),
