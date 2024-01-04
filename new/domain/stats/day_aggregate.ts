@@ -111,6 +111,15 @@ export class DayAggregate extends Atom<DayAggregate> {
     return `day_aggregator_${DayRaw(day)}`;
   }
 
+  static createForIdentity(identity: string) {
+    return Object.assign(
+      new DayAggregate(),
+      {
+        identity: identity,
+      },
+    );
+  }
+
   static createForDay(day: DateWithoutTime) {
     return Object.assign(
       new DayAggregate(),
@@ -139,7 +148,8 @@ export class DayAggregate extends Atom<DayAggregate> {
   }
 
   static deserialize(json: PropertiesOnly<DayAggregate>): DayAggregate {
-    return Object.assign(new DayAggregate(), {
+    console.log()
+    return Object.assign(DayAggregate.createForIdentity(json.identity), {
       ...json,
       users: DayAggregate.deserializeUserStatsWithKeyAsSerializedMap(
         json.users,

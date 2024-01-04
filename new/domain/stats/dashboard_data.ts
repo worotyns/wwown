@@ -20,7 +20,7 @@ export class DashboardData {
     const range = generateDayRawRange(params.from, params.to);
 
     return range.map((day) =>
-      this.days.getOrSet(day, () => new DayAggregate())
+      this.days.getOrMock(day, () => DayAggregate.createForDay(new Date(day)))
     );
   }
 }

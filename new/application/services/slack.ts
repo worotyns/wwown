@@ -13,7 +13,7 @@ export interface SlackEnvVars {
 
 export function createSlackService(wwown: WhoWorksOnWhatNow, env: SlackEnvVars, logger: Logger) {
   
-  const slackWebClient = new WebClient(env.SLACK_APP_TOKEN);
+  const slackWebClient = new WebClient(env.SLACK_BOT_TOKEN);
   const socketModeClient = new SocketModeClient({ appToken: env.SLACK_APP_TOKEN });
   const slackHelper = new SlackHelper(slackWebClient, logger);
 

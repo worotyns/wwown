@@ -22,7 +22,7 @@ export class UserData {
     const range = generateDayRawRange(params.from, params.to);
 
     return range.map((day) =>
-      this.days.getOrSet(day, () => new UserStats(this.userId))
+      this.days.getOrMock(day, () => new UserStats(this.userId))
     );
   }
 }

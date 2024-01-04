@@ -9,7 +9,7 @@ export function createRouter(wwown: WhoWorksOnWhatNow): Router {
   const router = new Router();
 
   router
-    .get("/users/:userId", (context) => {
+    .get("/api/users/:userId", (context) => {
       const from = context.request.url.searchParams.get("from");
       const to = context.request.url.searchParams.get("to");
       const lastItems = context.request.url.searchParams.get("lastItems");
@@ -29,7 +29,7 @@ export function createRouter(wwown: WhoWorksOnWhatNow): Router {
     });
 
   router
-    .get("/channels/:channelId", (context) => {
+    .get("/api/channels/:channelId", (context) => {
       const from = context.request.url.searchParams.get("from");
       const to = context.request.url.searchParams.get("to");
       const lastItems = context.request.url.searchParams.get("lastItems");
@@ -49,7 +49,7 @@ export function createRouter(wwown: WhoWorksOnWhatNow): Router {
     });
 
   router
-    .get("/dashboard", (context) => {
+    .get("/api/dashboard", (context) => {
       const from = context.request.url.searchParams.get("from");
       const to = context.request.url.searchParams.get("to");
       const lastItems = context.request.url.searchParams.get("lastItems");
@@ -69,16 +69,16 @@ export function createRouter(wwown: WhoWorksOnWhatNow): Router {
     });
 
   router
-    .get("/resources", (context) => {
+    .get("/api/resources", (context) => {
       context.response.body = wwown.resources.getAsResources();
     });
 
   // TODO: Remove this after migration
   router
-    .post("/migrate", async (context) => {
+    .post("/api/migrate", async (context) => {
       const body = await context.request.body({ type: "json" }).value as Events;
       
-      if (["hourly", "reaction", "channel", "user", "message"].includes(body.type)) {
+      if (body.type) {
         try {
           wwown.migrate({
             type: body.type,

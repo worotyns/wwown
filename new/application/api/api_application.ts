@@ -11,8 +11,6 @@ export function createApiApplication(wwown: WhoWorksOnWhatNow): Application {
   app.use(router.allowedMethods());
   app.use(async (ctx, next) => {
     if (ctx.request.url.pathname.startsWith("/api")) {
-      ctx.response.status = 404;
-      ctx.response.body = "Not found";
       return next();
     }
 

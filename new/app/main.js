@@ -24,7 +24,7 @@ function app() {
       const start = Date.now();
       try {
         const response = await fetch(
-          "/resources",
+          "/api/resources",
         );
         this.__resourcesRaw = await response.json();
         this.__resources = new Map(
@@ -92,9 +92,9 @@ function data(query, path, resId) {
 
     getPath() {
       if (this.__resId) {
-        return `${this.__path}/${this.__resId}`;
+        return `/api/${this.__path}/${this.__resId}`;
       }
-      return this.__path;
+      return `/api/${this.__path}`;
     },
 
     async calculate() {

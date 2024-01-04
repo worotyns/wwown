@@ -112,7 +112,9 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
 
   public getDashboardData() {
     return new DashboardData(
-      this.days,
+      new SerializableMap(
+        Array.from(this.days)
+      ),
     );
   }
 
@@ -125,7 +127,7 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
     for (const [day, dayAggregate] of this.days.entries()) {
       days.set(
         day,
-        dayAggregate.channels.getOrSet(
+        dayAggregate.channels.getOrMock(
           channelId,
           () => new ChannelStats(channelId),
         ),
@@ -134,7 +136,7 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
 
     return new ChannelData(
       channelId,
-      this.channels.getOrSet(
+      this.channels.getOrMock(
         channelId,
         () => new ChannelStats(channelId),
       ),
@@ -151,7 +153,7 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
     for (const [day, dayAggregate] of this.days.entries()) {
       days.set(
         day,
-        dayAggregate.users.getOrSet(
+        dayAggregate.users.getOrMock(
           userId,
           () => new UserStats(userId),
         ),
@@ -160,7 +162,7 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
 
     return new UserData(
       userId,
-      this.users.getOrSet(
+      this.users.getOrMock(
         userId,
         () => new UserStats(userId),
       ),

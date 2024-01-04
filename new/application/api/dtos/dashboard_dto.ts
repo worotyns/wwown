@@ -126,7 +126,7 @@ export class DashboardViewDto {
       for (
         const [channelId, channel] of extendedStats.days.getOrSet(
           day,
-          () => new DayAggregate(),
+          () => DayAggregate.createForDay(new Date(day)),
         ).channels.entries()
       ) {
         uniqueChannels.add(channelId);

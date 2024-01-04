@@ -22,7 +22,7 @@ export class ChannelData {
     const range = generateDayRawRange(params.from, params.to);
 
     return range.map((day) =>
-      this.days.getOrSet(day, () => new ChannelStats(this.channelId))
+      this.days.getOrMock(day, () => new ChannelStats(this.channelId))
     );
   }
 }
