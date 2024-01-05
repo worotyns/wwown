@@ -1,6 +1,7 @@
-data.db
-node_modules
-dist
 .env
 fly.toml
 wwown.nomad
+.DS_Store
+wwown/data
+wwown/scripts
+.env
