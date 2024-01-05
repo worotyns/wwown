@@ -1,39 +1,40 @@
 # Info
 
-Slackbot that enter to each channel and monitor engagement.
-It's experiment for monitor who work on what now.
+Slackbot that enter to each channel and monitor engagement. It's experiment for
+monitor who work on what now.
 
 What's cover now?
- - time tracking @mention,
- - channel specific activity tracking,
- - incidents log with @mention,
- - reporting dashboard simple app,
+
+- time tracking @mention,
+- channel specific activity tracking,
+- incidents log with @mention,
+- reporting dashboard simple app,
 
 ## Demo
 
 Example: https://wwown-demo.fly.dev
 
-Invitation link: https://join.slack.com/t/wwown-rocks/shared_invite/zt-21ktjx6on-0rsvgzU8Y6T1_BEOy2cLGg
+Invitation link:
+https://join.slack.com/t/wwown-rocks/shared_invite/zt-21ktjx6on-0rsvgzU8Y6T1_BEOy2cLGg
 
 ---
 
 ## Setup env
-`cp .env.example .env`
-`vim .env`
+
+`cp .env.example .env` `vim .env`
 
 ## Development
-0. Build
-`yarn build`
 
-1. Create DB
-`yarn run migrations`
+0. Build `yarn build`
 
-2. Run APP
-`yarn run start`
+1. Create DB `yarn run migrations`
+
+2. Run APP `yarn run start`
 
 ## Info
 
 ## Slack manifest
+
 ```yaml
 display_information:
   name: wwown
@@ -85,21 +86,25 @@ settings:
 ```
 
 ## Required tokens:
- - Signing Secret
- - App Token with "connection:write" scope (starts with: xapp-)
- - Bot Token - after add to workspace you will get it (starts with: xoxb-)
- 
+
+- Signing Secret
+- App Token with "connection:write" scope (starts with: xapp-)
+- Bot Token - after add to workspace you will get it (starts with: xoxb-)
+
 ## Deployment via fly.io
+
 1. FlyIO Secrets
+
 ```sh
-  fly secrets set SLACK_BOT_TOKEN="xoxb-xxx"
-  fly secrets set SLACK_SIGNING_SECRET="xxx"
-  fly secrets set SLACK_APP_TOKEN="xapp-1-xxx"
+fly secrets set SLACK_BOT_TOKEN="xoxb-xxx"
+fly secrets set SLACK_SIGNING_SECRET="xxx"
+fly secrets set SLACK_APP_TOKEN="xapp-1-xxx"
 ```
 
 2. FlyIO Deploy
+
 ```sh
-  fly deploy
+fly deploy
 ```
 
 ## License

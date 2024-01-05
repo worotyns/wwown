@@ -20,10 +20,19 @@ import { DashboardData } from "./stats/dashboard_data.ts";
  */
 export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
   /**
+   * Startup purposes override identity.
+   */
+  static createWithIdentity(identity: string): WhoWorksOnWhatNow {
+    return Object.assign(new WhoWorksOnWhatNow(), {
+      identity,
+    });
+  }
+
+  /**
    * Identity determine file name on disk
    * and is used to identify the application state.
    */
-  public readonly identity = "wwown_prod";
+  public readonly identity: string = "wwown";
 
   /**
    * @deprecated - used only once for initialize old sqldata data
@@ -113,7 +122,7 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
   public getDashboardData() {
     return new DashboardData(
       new SerializableMap(
-        Array.from(this.days)
+        Array.from(this.days),
       ),
     );
   }

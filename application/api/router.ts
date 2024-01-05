@@ -77,7 +77,7 @@ export function createRouter(wwown: WhoWorksOnWhatNow): Router {
   router
     .post("/api/migrate", async (context) => {
       const body = await context.request.body({ type: "json" }).value as Events;
-      
+
       if (body.type) {
         try {
           wwown.migrate({
@@ -87,7 +87,7 @@ export function createRouter(wwown: WhoWorksOnWhatNow): Router {
               timestamp: new Date(body.meta.timestamp),
             },
           } as Events);
-        } catch(error) {
+        } catch (error) {
           throw error;
         }
       }

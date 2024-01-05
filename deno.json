@@ -1,11 +1,16 @@
 {
   "tasks": {
-    "dev": "deno run --watch main.ts"
+    "dev": "deno run --watch main.ts",
+    "fix": "deno fmt --ignore=deps",
+    "start": "deno run -A main.ts",
+    "build": "deno cache main.ts && deno task generate:emoji",
+    "generate:emoji": "sh emojis/generate.sh",
+    "test": "deno test -A ."
   },
   "imports": {
     "dotenv": "https://deno.land/std@0.210.0/dotenv/mod.ts",
     "slack": "https://deno.land/x/slack_socket_mode@1.0.0/mod.ts",
-    "slack-web": "https://deno.land/x/slack_web_api@1.0.3/mod.ts",    
+    "slack-web": "https://deno.land/x/slack_web_api@1.0.3/mod.ts",
     "oak": "https://deno.land/x/oak@v12.6.1/mod.ts",
     "@worotyns/atoms": "https://deno.land/x/atoms@0.0.4/mod.ts",
     "@testing/asserts": "https://deno.land/std@0.210.0/assert/mod.ts"

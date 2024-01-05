@@ -2,6 +2,6 @@
 fly.toml
 wwown.nomad
 .DS_Store
-wwown/data
-wwown/scripts
+data
+scripts
 .env

@@ -4,7 +4,10 @@ import { ProcessManager } from "./application/process_manager.ts";
 import { createLogger } from "./application/logger.ts";
 import { createFs } from "@worotyns/atoms";
 import { WhoWorksOnWhatNow } from "./domain/wwown.ts";
-import { SlackEnvVars, createSlackService } from "./application/services/slack.ts";
+import {
+  createSlackService,
+  SlackEnvVars,
+} from "./application/services/slack.ts";
 
 interface HttpApiEnvVars {
   API_SERVER_BIND_ADDR: string;
@@ -19,18 +22,20 @@ interface EnvVars extends SlackEnvVars, HttpApiEnvVars, WwownEnvVars {
   [key: string]: string;
 }
 
-const { persist, restore } = createFs("./data");
-const env: EnvVars = await load({export: true}) as EnvVars;
+const env: EnvVars = await load({ export: true }) as EnvVars;
+const entrypoint: string = env.ATOMS_ENTRYPOINT || "wwown_prod";
+
+const { persist, restore } = createFs(env.ATOMS_PATH);
 const logger = createLogger();
 
 let wwown: WhoWorksOnWhatNow;
 
 try {
-  wwown = await restore("wwown_prod", WhoWorksOnWhatNow);
+  wwown = await restore(entrypoint, WhoWorksOnWhatNow);
 } catch (error) {
   if (error instanceof Deno.errors.NotFound) {
-    wwown = new WhoWorksOnWhatNow();
-    console.log("File not found, start fresh instance");
+    wwown = WhoWorksOnWhatNow.createWithIdentity(entrypoint);
+    console.log("File not found, start fresh instance: " + entrypoint);
   } else {
     logger.error(error);
     Deno.exit(1);

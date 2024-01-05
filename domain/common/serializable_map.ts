@@ -1,5 +1,4 @@
 export class SerializableMap<T, R> extends Map<T, R> {
-
   // Get value or create temporary one and set them
   getOrSet(key: T, defaultValue: () => R): R {
     if (this.has(key)) {

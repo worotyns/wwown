@@ -148,7 +148,7 @@ export class DayAggregate extends Atom<DayAggregate> {
   }
 
   static deserialize(json: PropertiesOnly<DayAggregate>): DayAggregate {
-    console.log()
+    console.log();
     return Object.assign(DayAggregate.createForIdentity(json.identity), {
       ...json,
       users: DayAggregate.deserializeUserStatsWithKeyAsSerializedMap(
