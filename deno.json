@@ -3,8 +3,7 @@
     "dev": "deno run --watch main.ts",
     "fix": "deno fmt --ignore=deps",
     "start": "deno run -A main.ts",
-    "build": "deno cache main.ts && deno task generate:emoji",
-    "generate:emoji": "sh emojis/generate.sh",
+    "build": "deno cache main.ts && deno run -A emojis.ts",
     "test": "deno test -A ."
   },
   "imports": {

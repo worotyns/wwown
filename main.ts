@@ -22,10 +22,9 @@ interface EnvVars extends SlackEnvVars, HttpApiEnvVars, WwownEnvVars {
   [key: string]: string;
 }
 
-const env: EnvVars = await load({ export: true }) as EnvVars;
-const entrypoint: string = env.ATOMS_ENTRYPOINT || "wwown_prod";
+const entrypoint: string = Deno.env.get('ATOMS_ENTRYPOINT') || "wwown_prod";
 
-const { persist, restore } = createFs(env.ATOMS_PATH);
+const { persist, restore } = createFs(Deno.env.get('ATOMS_PATH')!);
 const logger = createLogger();
 
 let wwown: WhoWorksOnWhatNow;
@@ -42,7 +41,11 @@ try {
   }
 }
 const app = createApiApplication(wwown);
-const slack = createSlackService(wwown, env, logger);
+const slack = createSlackService(wwown, {
+  SLACK_APP_TOKEN: Deno.env.get('SLACK_APP_TOKEN')!,
+  SLACK_BOT_TOKEN: Deno.env.get('SLACK_BOT_TOKEN')!,
+  SLACK_SIGNING_SECRET: Deno.env.get('SLACK_SIGNING_SECRET')!,
+}, logger);
 
 setInterval(async () => {
   await persist(wwown);
@@ -53,8 +56,8 @@ const abortController = new AbortController();
 const slackPromise = slack.start();
 
 const serverPromise = app.listen({
-  hostname: env.API_SERVER_BIND_ADDR || "127.0.0.1",
-  port: ~~env.API_SERVER_PORT || 8000,
+  hostname: Deno.env.get('API_SERVER_BIND_ADDR') || "0.0.0.0",
+  port: ~~(Deno.env.get('API_SERVER_PORT') || "8000"),
   signal: abortController.signal,
 });
 

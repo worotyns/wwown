@@ -6,7 +6,13 @@ import { DashboardViewDto } from "./dtos/dashboard_dto.ts";
 import { Events } from "../../domain/common/interfaces.ts";
 
 export function createRouter(wwown: WhoWorksOnWhatNow): Router {
+  
   const router = new Router();
+
+  router.get("/ping", (context) => {
+    context.response.body = "pong";
+    context.response.status = 200;
+  })
 
   router
     .get("/api/users/:userId", (context) => {

@@ -1,50 +1,24 @@
-# syntax = docker/dockerfile:1
+FROM denoland/deno:1.39.2
 
-# Adjust NODE_VERSION as desired
-ARG NODE_VERSION=16.20.0
-FROM node:${NODE_VERSION}-slim as base
+# The port that your application listens to.
+EXPOSE 4000
 
-LABEL fly_launch_runtime="Node.js"
-
-# Node.js app lives here
 WORKDIR /app
 
-# Set production environment
-ENV NODE_ENV="production"
+# Prefer not to run as root.
+# USER deno
 
+# These steps will be re-run upon each file change in your working directory:
+COPY . .
 
-# Throw-away build stage to reduce size of final image
-FROM base as build
+# Compile the main app so that it doesn't need to be compiled each startup/entry.
+RUN deno task build
 
-# Install packages needed to build node modules
-RUN apt-get update -qq && \
-    apt-get install -y build-essential pkg-config python
+RUN mkdir -p /wwown/atoms/db/atoms
+RUN chmod 755 /wwown
 
-# Install node modules
-COPY --link package.json yarn.lock ./
-RUN yarn install --frozen-lockfile --production=false
-
-# Copy application code
-COPY --link . .
-
-# Build application
-RUN yarn run build
-
-# Remove development dependencies
-RUN yarn install --production=true
-
-
-# Final stage for app image
-FROM base
-
-# Copy built application
-COPY --from=build /app /app
-
-# Setup sqlite3 on a separate volume
-RUN mkdir -p /data
-RUN chmod 755 /app
-VOLUME /data
+VOLUME /db/atoms
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 4000
-CMD [ "yarn", "run", "start" ]
+CMD [ "deno", "task", "start" ]
