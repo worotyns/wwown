@@ -5,7 +5,7 @@ import { createRouter } from "./router.ts";
 export function createApiApplication(wwown: WhoWorksOnWhatNow): Application {
   const app = new Application();
   const router = createRouter(wwown);
-  const ROOT_DIR = "./app";
+  const ROOT_DIR = "./frontend";
 
   app.use(router.routes());
   app.use(router.allowedMethods());
