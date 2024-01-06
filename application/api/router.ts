@@ -3,7 +3,6 @@ import { WhoWorksOnWhatNow } from "../../domain/wwown.ts";
 import { UserViewDto } from "./dtos/user_dto.ts";
 import { ChannelViewDto } from "./dtos/channel_dto.ts";
 import { DashboardViewDto } from "./dtos/dashboard_dto.ts";
-import { Events } from "../../domain/common/interfaces.ts";
 
 export function createRouter(
   wwown: WhoWorksOnWhatNow,

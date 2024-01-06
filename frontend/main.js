@@ -1,3 +1,4 @@
+// deno-lint-ignore-file
 const emojiRequest = fetch("./sctuc.json").then((response) => response.json());
 
 function app() {
