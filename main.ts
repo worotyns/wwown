@@ -1,4 +1,4 @@
-import "dotenv";
+import { load } from "dotenv";
 import { createApiApplication } from "./application/api/api_application.ts";
 import { ProcessManager } from "./application/process_manager.ts";
 import { createLogger } from "./application/logger.ts";
@@ -6,21 +6,9 @@ import { createFs } from "@worotyns/atoms";
 import { WhoWorksOnWhatNow } from "./domain/wwown.ts";
 import {
   createSlackService,
-  SlackEnvVars,
 } from "./application/services/slack.ts";
 
-interface HttpApiEnvVars {
-  API_SERVER_BIND_ADDR: string;
-  API_SERVER_PORT: string;
-}
-
-interface WwownEnvVars {
-  ATOMS_PATH: string;
-}
-
-interface EnvVars extends SlackEnvVars, HttpApiEnvVars, WwownEnvVars {
-  [key: string]: string;
-}
+await load({export: true, allowEmptyValues: true});
 
 const entrypoint: string = Deno.env.get('ATOMS_ENTRYPOINT') || "wwown_prod";
 
