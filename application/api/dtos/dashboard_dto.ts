@@ -39,38 +39,34 @@ export class DashboardViewDto {
       SlackChannelId,
       SerializableMap<SlackUserId, ScoreOpacity>
     > = new SerializableMap();
-    for (const dayAggregate of extendedStats.getDayAggregatesForRange(params)) {
-      for (const [channelId, channel] of dayAggregate.channels.entries()) {
-        for (const [userId, user] of channel.messages.entries()) {
-          const channelItem = wwown.getOrSet(
-            channelId,
-            () => new SerializableMap(),
-          );
 
-          const normalizeTs = (ts: Date) =>
-            normalizeValue(
-              ts.getTime(),
-              params.from.getTime(),
-              params.to.getTime(),
-              0.05,
-              1.00,
-            );
-
-          const lastTs = channelItem.getOrSet(
-            userId,
-            () => normalizeTs(user.lastTs),
-          );
-
-          const normalized = normalizeTs(user.lastTs);
-
-          if (lastTs < normalized) {
-            channelItem.set(userId, normalized);
-          }
-
-          wwown.set(channelId, channelItem);
+    const isInRangeFromParams = (ts: Date): boolean => {
+      return ts.getTime() >= params.from.getTime() &&
+        ts.getTime() <= params.to.getTime();
+    };
+    
+    const normalizeTs = (ts: Date) =>
+      normalizeValue(
+        ts.getTime(),
+        params.from.getTime(),
+        params.to.getTime(),
+        0.05,
+        1.00,
+      );
+    
+    // Set channels map (last in range)
+    for (const [channelId, user] of extendedStats.channelUsers.entries()) {
+      for (const [userId, userStats] of user.entries()) {
+        if (!isInRangeFromParams(userStats)) {
+          continue;
         }
+        
+        const channelItem = wwown.getOrSet(channelId, () => new SerializableMap());
+        channelItem.set(userId, Math.max(normalizeTs(userStats), channelItem.getOrSet(userId, () => 0)));
       }
     }
+
+
 
     return Array.from(wwown).map(([channelId, channel]) => [
       channelId,

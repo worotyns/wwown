@@ -1,7 +1,6 @@
 import { Atom, PropertiesOnly } from "@worotyns/atoms";
 import {
   InteractionEvents,
-  MigrationEvents,
   SlackUserId,
 } from "../common/interfaces.ts";
 import { SlackChannelId } from "../common/interfaces.ts";
@@ -22,47 +21,6 @@ export class DayAggregate extends Atom<DayAggregate> {
 
   public channels: SerializableMap<SlackChannelId, ChannelStats> =
     new SerializableMap();
-
-  public migrate(
-    event: MigrationEvents,
-  ) {
-    switch (event.type) {
-      case "reaction":
-        this.channels.getOrSet(
-          event.meta.channelId,
-          () => new ChannelStats(event.meta.channelId),
-        ).register(event);
-
-        // Two dimensional stats - bidirection registration for user, and receiver
-        this.users.getOrSet(
-          event.meta.userId,
-          () => new UserStats(event.meta.userId),
-        ).register(event);
-
-        if (event.meta.itemUserId) {
-          this.users.getOrSet(
-            event.meta.itemUserId,
-            () => new UserStats(event.meta.itemUserId!),
-          ).register(event);
-        }
-
-        break;
-      case "thread":
-      case "message":
-      case "hourly":
-        this.channels.getOrSet(
-          event.meta.channelId,
-          () => new ChannelStats(event.meta.channelId),
-        ).migrate(event);
-        this.users.getOrSet(
-          event.meta.userId,
-          () => new UserStats(event.meta.userId),
-        ).migrate(event);
-        break;
-      default:
-        throw new Error(`Unknown event type: ${(event as Events).type}`);
-    }
-  }
 
   public register(
     event: InteractionEvents,

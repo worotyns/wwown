@@ -5,7 +5,6 @@ import {
   FirstActivityAt,
   InteractionEvents,
   LastActivityAt,
-  MigrationEvents,
   SlackUserId,
   TwoDigitHour,
 } from "../../common/interfaces.ts";
@@ -41,39 +40,6 @@ export class ChannelStats {
 
   public firstAt: FirstActivityAt = new Date(0);
   public lastAt: LastActivityAt = new Date(0);
-
-  /**
-   * @deprecated - used only once for migration data from SQLLite data
-   */
-  public migrate(event: MigrationEvents) {
-    this.touchTimes(event.meta.timestamp);
-    switch (event.type) {
-      case "thread":
-        this.threads.getOrSet(
-          event.meta.threadId,
-          () => new BasicStats(),
-        ).inc(event.meta.count, event.meta.timestamp);
-        break;
-      case "reaction":
-        this.reactions.getOrSet(
-          event.meta.emoji,
-          () => new BasicStats(),
-        ).inc(event.meta.count, event.meta.timestamp);
-        break;
-      case "message":
-        this.messages.getOrSet(event.meta.userId, () => new BasicStats())
-          .inc(event.meta.count, event.meta.timestamp);
-        break;
-      case "hourly":
-        this.hourly.getOrSet(Hour(event.meta.timestamp), () => new BasicStats())
-          .inc(event.meta.count, event.meta.timestamp);
-        break;
-      default:
-        throw new Error(
-          `Unknown event type: ${(event as MigrationEvents).type}`,
-        );
-    }
-  }
 
   public register(
     event: InteractionEvents,

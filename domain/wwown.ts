@@ -3,6 +3,7 @@ import { Resources } from "./resources.ts";
 import {
   DateWithoutTimeRaw,
   Events,
+  LastActivityAt,
   SlackChannelId,
   SlackUserId,
 } from "./common/interfaces.ts";
@@ -34,55 +35,26 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
    */
   public readonly identity: string = "wwown";
 
-  /**
-   * @deprecated - used only once for initialize old sqldata data
-   */
-  public migrate(event: Events) {
+  public touchActivity(event: Events) {
     switch (event.type) {
-      case "reaction":
-        this.resources.touch(event);
-        this.getDayAggregate(event.meta.timestamp).register(event);
-
-        this.channels.getOrSet(
-          event.meta.channelId,
-          () => new ChannelStats(event.meta.channelId),
-        ).register(event);
-
-        // Bidirectional registration for user, and receiver
-        this.users.getOrSet(
-          event.meta.userId,
-          () => new UserStats(event.meta.userId),
-        ).register(event);
-
-        if (event.meta.itemUserId) {
-          this.users.getOrSet(
-            event.meta.itemUserId,
-            () => new UserStats(event.meta.itemUserId!),
-          ).register(event);
-        }
-        break;
-      case "thread":
-      case "message":
-      case "hourly":
-        this.resources.touch(event);
-        this.getDayAggregate(event.meta.timestamp).migrate(event);
-        this.users.getOrSet(
-          event.meta.userId,
-          () => new UserStats(event.meta.userId),
-        ).migrate(event);
-        this.channels.getOrSet(
-          event.meta.channelId,
-          () => new ChannelStats(event.meta.channelId),
-        ).migrate(event);
-        break;
       case "user":
       case "channel":
-        this.resources.register(event);
         break;
+      case "message":
+      case "thread":
+      case "reaction": {
+        const channelsItem = this.channelUsers.getOrSet(event.meta.channelId, () => new SerializableMap());
+        channelsItem.getOrSet(event.meta.userId, () => new Date(event.meta.timestamp));
+        channelsItem.set(event.meta.userId, new Date(event.meta.timestamp));
+        break;
+      }
     }
   }
 
   public register(event: Events) {
+
+    this.touchActivity(event);
+
     switch (event.type) {
       case "reaction":
         this.resources.touch(event);
@@ -121,6 +93,9 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
 
   public getDashboardData() {
     return new DashboardData(
+      new SerializableMap(
+        Array.from(this.channelUsers),
+      ),
       new SerializableMap(
         Array.from(this.days),
       ),
@@ -196,6 +171,25 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
   public readonly users: SerializableMap<SlackUserId, UserStats> =
     new SerializableMap();
 
+
+  /**
+   * This is aggregated data for all-time-period with one user -> channel granularity.
+   */
+  public readonly channelUsers: SerializableMap<SlackChannelId, SerializableMap<SlackUserId, LastActivityAt>> =
+  new SerializableMap();
+
+  /**
+   * @deprecated
+   */
+  public migrateChannelUsers() {
+    for (const [channelId, channel] of this.channels.entries()) {
+      const item = this.channelUsers.getOrSet(channelId, () => new SerializableMap());
+      for (const [userId, user] of channel.messages.entries()) {
+        item.getOrSet(userId, () => new Date(user.lastTs));
+      }
+    }
+  }
+
   /**
    * Contains information about each day of activity with detailed information.
    * This is aggregated data for user, and channel with one day granularity.
@@ -251,6 +245,17 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
       users: WhoWorksOnWhatNow.deserializeUserStatsWithKeyAsSerializedMap(
         value.users,
       ),
+      channelUsers: new SerializableMap(((value.channelUsers || []) as any).map((item: Array<[SlackUserId, LastActivityAt]>) => {
+        return [
+          item[0],
+          new SerializableMap((item[1] as any || []).map((item: [SlackUserId, LastActivityAt]) => {
+            return [
+              item[0],
+              new Date(item[1]),
+            ];
+          }))
+        ]
+      })),
       days: new SerializableMap(
         (value.days as unknown as Array<[DateWithoutTimeRaw, DayAggregate]>)
           .map(

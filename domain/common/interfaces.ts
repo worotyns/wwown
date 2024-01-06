@@ -36,30 +36,12 @@ export type Events =
   | MessageEvent
   | ThreadMessageEvent
   | ChannelEvent
-  | ReactionMessageEvent
-  | HourlyEvent;
+  | ReactionMessageEvent;
 
 export type InteractionEvents =
   | MessageEvent
   | ThreadMessageEvent
   | ReactionMessageEvent;
-
-/**
- * @deprecated - used only for migrations
- */
-export type MigrationEvents = InteractionEvents | HourlyEvent;
-/**
- * @deprecated - used only for migrations
- */
-export interface HourlyEvent {
-  type: "hourly";
-  meta: {
-    channelId: SlackChannelId;
-    userId: SlackUserId;
-    timestamp: Date;
-    count: Total; // Used only for migration testing field - usualy will be 1
-  };
-}
 
 export type ResourceEvents = UserEvent | ChannelEvent;
 

@@ -2,7 +2,10 @@ import { Application, send } from "oak";
 import { WhoWorksOnWhatNow } from "../../domain/wwown.ts";
 import { createRouter } from "./router.ts";
 
-export function createApiApplication(wwown: WhoWorksOnWhatNow, healthCallback: () => [string, boolean]): Application {
+export function createApiApplication(
+  wwown: WhoWorksOnWhatNow,
+  healthCallback: () => [string, boolean],
+): Application {
   const app = new Application();
   const router = createRouter(wwown, healthCallback);
   const ROOT_DIR = "./frontend";

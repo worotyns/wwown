@@ -4,6 +4,7 @@ Slackbot that enter to each channel and monitor engagement. It's experiment for
 monitor who work on what now.
 
 What's cover now?
+
 - global dashboard with activity,
 - last active channels, and last user on that channels,
 - user specific stats

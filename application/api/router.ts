@@ -5,20 +5,22 @@ import { ChannelViewDto } from "./dtos/channel_dto.ts";
 import { DashboardViewDto } from "./dtos/dashboard_dto.ts";
 import { Events } from "../../domain/common/interfaces.ts";
 
-export function createRouter(wwown: WhoWorksOnWhatNow, healthCallback: () => [string, boolean]): Router {
-  
+export function createRouter(
+  wwown: WhoWorksOnWhatNow,
+  healthCallback: () => [string, boolean],
+): Router {
   const router = new Router();
 
   router.get("/ping", (context) => {
     context.response.body = "pong";
     context.response.status = 200;
-  })
+  });
 
   router.get("/health", (context) => {
     const [msg, ok] = healthCallback();
     context.response.body = msg;
     context.response.status = ok ? 200 : 500;
-  })
+  });
 
   router
     .get("/api/users/:userId", (context) => {
@@ -85,27 +87,11 @@ export function createRouter(wwown: WhoWorksOnWhatNow, healthCallback: () => [st
       context.response.body = wwown.resources.getAsResources();
     });
 
-  // TODO: Remove this after migration
-  router
-    .post("/api/migrate", async (context) => {
-      const body = await context.request.body({ type: "json" }).value as Events;
-
-      if (body.type) {
-        try {
-          wwown.migrate({
-            type: body.type,
-            meta: {
-              ...body.meta,
-              timestamp: new Date(body.meta.timestamp),
-            },
-          } as Events);
-        } catch (error) {
-          throw error;
-        }
-      }
-
-      context.response.status = 201;
-    });
+  router.get('/migration/channelusers', (context) => {
+    wwown.migrateChannelUsers();
+    context.response.body = "OK";
+    context.response.status = 200;
+  })
 
   return router;
 }
