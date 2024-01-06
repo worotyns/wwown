@@ -1,8 +1,5 @@
 import { Atom, PropertiesOnly } from "@worotyns/atoms";
-import {
-  InteractionEvents,
-  SlackUserId,
-} from "../common/interfaces.ts";
+import { InteractionEvents, SlackUserId } from "../common/interfaces.ts";
 import { SlackChannelId } from "../common/interfaces.ts";
 import { DateWithoutTime } from "../common/interfaces.ts";
 import { SerializableMap } from "../common/serializable_map.ts";

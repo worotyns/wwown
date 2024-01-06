@@ -43,8 +43,14 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
       case "message":
       case "thread":
       case "reaction": {
-        const channelsItem = this.channelUsers.getOrSet(event.meta.channelId, () => new SerializableMap());
-        channelsItem.getOrSet(event.meta.userId, () => new Date(event.meta.timestamp));
+        const channelsItem = this.channelUsers.getOrSet(
+          event.meta.channelId,
+          () => new SerializableMap(),
+        );
+        channelsItem.getOrSet(
+          event.meta.userId,
+          () => new Date(event.meta.timestamp),
+        );
         channelsItem.set(event.meta.userId, new Date(event.meta.timestamp));
         break;
       }
@@ -52,7 +58,6 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
   }
 
   public register(event: Events) {
-
     this.touchActivity(event);
 
     switch (event.type) {
@@ -171,19 +176,23 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
   public readonly users: SerializableMap<SlackUserId, UserStats> =
     new SerializableMap();
 
-
   /**
    * This is aggregated data for all-time-period with one user -> channel granularity.
    */
-  public readonly channelUsers: SerializableMap<SlackChannelId, SerializableMap<SlackUserId, LastActivityAt>> =
-  new SerializableMap();
+  public readonly channelUsers: SerializableMap<
+    SlackChannelId,
+    SerializableMap<SlackUserId, LastActivityAt>
+  > = new SerializableMap();
 
   /**
    * @deprecated
    */
   public migrateChannelUsers() {
     for (const [channelId, channel] of this.channels.entries()) {
-      const item = this.channelUsers.getOrSet(channelId, () => new SerializableMap());
+      const item = this.channelUsers.getOrSet(
+        channelId,
+        () => new SerializableMap(),
+      );
       for (const [userId, user] of channel.messages.entries()) {
         item.getOrSet(userId, () => new Date(user.lastTs));
       }
@@ -245,17 +254,25 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
       users: WhoWorksOnWhatNow.deserializeUserStatsWithKeyAsSerializedMap(
         value.users,
       ),
-      channelUsers: new SerializableMap(((value.channelUsers || []) as any).map((item: Array<[SlackUserId, LastActivityAt]>) => {
-        return [
-          item[0],
-          new SerializableMap((item[1] as any || []).map((item: [SlackUserId, LastActivityAt]) => {
+      channelUsers: new SerializableMap(
+        ((value.channelUsers || []) as any).map(
+          (item: Array<[SlackUserId, LastActivityAt]>) => {
             return [
               item[0],
-              new Date(item[1]),
+              new SerializableMap(
+                (item[1] as any || []).map(
+                  (item: [SlackUserId, LastActivityAt]) => {
+                    return [
+                      item[0],
+                      new Date(item[1]),
+                    ];
+                  },
+                ),
+              ),
             ];
-          }))
-        ]
-      })),
+          },
+        ),
+      ),
       days: new SerializableMap(
         (value.days as unknown as Array<[DateWithoutTimeRaw, DayAggregate]>)
           .map(

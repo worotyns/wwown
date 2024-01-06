@@ -44,7 +44,7 @@ export class DashboardViewDto {
       return ts.getTime() >= params.from.getTime() &&
         ts.getTime() <= params.to.getTime();
     };
-    
+
     const normalizeTs = (ts: Date) =>
       normalizeValue(
         ts.getTime(),
@@ -53,20 +53,27 @@ export class DashboardViewDto {
         0.05,
         1.00,
       );
-    
+
     // Set channels map (last in range)
     for (const [channelId, user] of extendedStats.channelUsers.entries()) {
       for (const [userId, userStats] of user.entries()) {
         if (!isInRangeFromParams(userStats)) {
           continue;
         }
-        
-        const channelItem = wwown.getOrSet(channelId, () => new SerializableMap());
-        channelItem.set(userId, Math.max(normalizeTs(userStats), channelItem.getOrSet(userId, () => 0)));
+
+        const channelItem = wwown.getOrSet(
+          channelId,
+          () => new SerializableMap(),
+        );
+        channelItem.set(
+          userId,
+          Math.max(
+            normalizeTs(userStats),
+            channelItem.getOrSet(userId, () => 0),
+          ),
+        );
       }
     }
-
-
 
     return Array.from(wwown).map(([channelId, channel]) => [
       channelId,

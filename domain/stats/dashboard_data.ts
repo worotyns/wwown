@@ -1,5 +1,10 @@
 import { generateDayRawRange } from "../common/date_time.ts";
-import { DateWithoutTimeRaw, LastActivityAt, SlackChannelId, SlackUserId } from "../common/interfaces.ts";
+import {
+  DateWithoutTimeRaw,
+  LastActivityAt,
+  SlackChannelId,
+  SlackUserId,
+} from "../common/interfaces.ts";
 import { SerializableMap } from "../common/serializable_map.ts";
 import { ChannelStats } from "./channel/channel_stats.ts";
 import { DayAggregate } from "./day_aggregate.ts";
@@ -13,7 +18,10 @@ export interface DashboardDataParams {
 
 export class DashboardData {
   constructor(
-    public readonly channelUsers: SerializableMap<SlackChannelId, SerializableMap<SlackUserId, LastActivityAt>>,
+    public readonly channelUsers: SerializableMap<
+      SlackChannelId,
+      SerializableMap<SlackUserId, LastActivityAt>
+    >,
     public readonly days: SerializableMap<DateWithoutTimeRaw, DayAggregate>,
   ) {}
 
