@@ -82,7 +82,7 @@ export class DashboardViewDto {
         Array
           .from(channel)
           .map(([userId, scoreOpacity]) => [userId, scoreOpacity])
-          .sort((a, b) => ~~b[1] - ~~a[1]) as Array<[SlackUserId, ScoreOpacity]>,
+          .sort((a, b) => Number(b[1]) - Number(a[1])) as Array<[SlackUserId, ScoreOpacity]>,
       ]);
       
     return serialized
