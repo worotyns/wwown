@@ -8,12 +8,15 @@ import {
   createSlackService,
 } from "./application/services/slack.ts";
 
+const logger = createLogger();
 await load({export: true, allowEmptyValues: true});
 
 const entrypoint: string = Deno.env.get('ATOMS_ENTRYPOINT') || "wwown_prod";
+const path: string = Deno.env.get('ATOMS_PATH')!
 
-const { persist, restore } = createFs(Deno.env.get('ATOMS_PATH')!);
-const logger = createLogger();
+logger.info(`Entrypoint is: ${entrypoint}, path: ${path}`);
+
+const { persist, restore } = createFs(path);
 
 let wwown: WhoWorksOnWhatNow;
 
@@ -22,7 +25,7 @@ try {
 } catch (error) {
   if (error instanceof Deno.errors.NotFound) {
     wwown = WhoWorksOnWhatNow.createWithIdentity(entrypoint);
-    console.log("File not found, start fresh instance: " + entrypoint);
+    logger.info("File not found, start fresh instance: " + entrypoint);
   } else {
     logger.error(error);
     Deno.exit(1);
@@ -39,9 +42,11 @@ const app = createApiApplication(wwown, () => {
   return [slack.connected ? "OK" : "Slack not connected", slack.connected]
 });
 
+const persistInterval = ~~(Deno.env.get('ATOMS_PERSIST_INTERVAL') || "300_000");
+
 setInterval(async () => {
   await persist(wwown);
-}, 600_000); // Every 5 minutes persist data
+}, persistInterval);
 
 const abortController = new AbortController();
 
