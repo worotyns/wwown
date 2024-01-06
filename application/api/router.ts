@@ -5,13 +5,19 @@ import { ChannelViewDto } from "./dtos/channel_dto.ts";
 import { DashboardViewDto } from "./dtos/dashboard_dto.ts";
 import { Events } from "../../domain/common/interfaces.ts";
 
-export function createRouter(wwown: WhoWorksOnWhatNow): Router {
+export function createRouter(wwown: WhoWorksOnWhatNow, healthCallback: () => [string, boolean]): Router {
   
   const router = new Router();
 
   router.get("/ping", (context) => {
     context.response.body = "pong";
     context.response.status = 200;
+  })
+
+  router.get("/health", (context) => {
+    const [msg, ok] = healthCallback();
+    context.response.body = msg;
+    context.response.status = ok ? 200 : 500;
   })
 
   router

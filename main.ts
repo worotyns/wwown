@@ -1,4 +1,4 @@
-import { load } from "dotenv";
+import "dotenv";
 import { createApiApplication } from "./application/api/api_application.ts";
 import { ProcessManager } from "./application/process_manager.ts";
 import { createLogger } from "./application/logger.ts";
@@ -40,12 +40,16 @@ try {
     Deno.exit(1);
   }
 }
-const app = createApiApplication(wwown);
+
 const slack = createSlackService(wwown, {
   SLACK_APP_TOKEN: Deno.env.get('SLACK_APP_TOKEN')!,
   SLACK_BOT_TOKEN: Deno.env.get('SLACK_BOT_TOKEN')!,
   SLACK_SIGNING_SECRET: Deno.env.get('SLACK_SIGNING_SECRET')!,
 }, logger);
+
+const app = createApiApplication(wwown, () => {
+  return [slack.connected ? "OK" : "Slack not connected", slack.connected]
+});
 
 setInterval(async () => {
   await persist(wwown);
