@@ -6,9 +6,7 @@ import {
   SlackUserId,
 } from "../common/interfaces.ts";
 import { SerializableMap } from "../common/serializable_map.ts";
-import { ChannelStats } from "./channel/channel_stats.ts";
 import { DayAggregate } from "./day_aggregate.ts";
-import { UserStats } from "./user/user_stats.ts";
 
 export interface DashboardDataParams {
   lastItems: number;

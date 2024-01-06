@@ -111,6 +111,7 @@ export class SlackHelper {
       return this.cache.get(channelId) as string;
     }
 
+    // deno-lint-ignore no-explicit-any
     const resp: any = await this.client.conversations.info({
       channel: channelId,
     });
@@ -126,6 +127,7 @@ export class SlackHelper {
       return this.cache.get(userId) as string;
     }
 
+    // deno-lint-ignore no-explicit-any
     const userResponse: any = await this.client.users.info({
       user: userId,
     });
@@ -142,6 +144,7 @@ export class SlackHelper {
     return this.client.conversations.replies({
       channel: threadTs,
       ts: threadTs,
+    // deno-lint-ignore no-explicit-any
     }).then((resp: any) => {
       if (resp.messages && resp.messages.length > 0) {
         return resp.messages[0].user || null;

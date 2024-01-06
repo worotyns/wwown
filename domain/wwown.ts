@@ -255,13 +255,13 @@ export class WhoWorksOnWhatNow extends Atom<WhoWorksOnWhatNow> {
         value.users,
       ),
       channelUsers: new SerializableMap(
-        ((value.channelUsers || []) as any).map(
-          (item: Array<[SlackUserId, LastActivityAt]>) => {
+        ((value.channelUsers || []) as unknown as Array<[string, Array<[string, string]>]>).map(
+          (item) => {
             return [
               item[0],
               new SerializableMap(
-                (item[1] as any || []).map(
-                  (item: [SlackUserId, LastActivityAt]) => {
+                (item[1] || []).map(
+                  (item) => {
                     return [
                       item[0],
                       new Date(item[1]),
