@@ -78,10 +78,11 @@ export class DashboardViewDto {
     const serialized: Array<[SlackChannelId, Array<[SlackUserId, ScoreOpacity]>]> = Array
       .from(wwown)
       .map(([channelId, channel]) => [
-          channelId,
-          Array
-            .from(channel)
-            .map(([userId, lastTs]) => [userId, lastTs])
+        channelId,
+        Array
+          .from(channel)
+          .map(([userId, scoreOpacity]) => [userId, scoreOpacity])
+          .sort((a, b) => ~~b[1] - ~~a[1]) as Array<[SlackUserId, ScoreOpacity]>,
       ]);
       
     return serialized
