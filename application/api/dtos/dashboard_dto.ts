@@ -75,14 +75,25 @@ export class DashboardViewDto {
       }
     }
 
-    return Array
+    const serialized: Array<[SlackChannelId, Array<[SlackUserId, ScoreOpacity]>]> = Array
       .from(wwown)
       .map(([channelId, channel]) => [
-        channelId,
-        Array.from(channel).map(([userId, lastTs]) => [userId, lastTs]).sort(
-          (a, b) => (b[1] as number) - (a[1] as number),
-        ) as [SlackUserId, ScoreOpacity][],
+          channelId,
+          Array
+            .from(channel)
+            .map(([userId, lastTs]) => [userId, lastTs])
       ]);
+      
+    return serialized
+      .sort((channelData, nextChannelData) =>
+        nextChannelData[1]
+          .reduce(
+            (max: number, item: [SlackUserId, ScoreOpacity]) => 
+              Math.max(item[1], max), 0) - 
+        channelData[1]
+          .reduce((max: number, item: [SlackUserId, ScoreOpacity]) => 
+              Math.max(item[1], max), 0)
+      ) as Array<[SlackChannelId, [SlackUserId, ScoreOpacity][]]>;
   }
 
   static getActivity(
