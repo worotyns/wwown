@@ -87,11 +87,5 @@ export function createRouter(
       context.response.body = wwown.resources.getAsResources();
     });
 
-  router.get('/migration/channelusers', (context) => {
-    wwown.migrateChannelUsers();
-    context.response.body = "OK";
-    context.response.status = 200;
-  })
-
   return router;
 }
