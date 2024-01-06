@@ -4,7 +4,8 @@ function app() {
   return {
     __fromDate:
       new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString().split("T")[0],
-    __toDate: new Date(Date.now() + 24 * 3600 * 1000).toISOString().split("T")[0],
+    __toDate:
+      new Date(Date.now() + 24 * 3600 * 1000).toISOString().split("T")[0],
     __lastItems: 10,
     __resources: new Map(),
     __resourcesRaw: [],

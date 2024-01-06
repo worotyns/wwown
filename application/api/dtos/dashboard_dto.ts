@@ -75,19 +75,14 @@ export class DashboardViewDto {
       }
     }
 
-    return Array.from(wwown).map(([channelId, channel]) => [
-      channelId,
-      Array.from(channel).map(([userId, lastTs]) => [userId, lastTs]).sort(
-        (a, b) => (b[1] as number) - (a[1] as number),
-      ) as [SlackUserId, ScoreOpacity][],
-      // deno-lint-ignore no-explicit-any
-    ]).sort((a: any, b: any) =>
-      b[1].reduce(
-        (sum: number, item: [SlackUserId, ScoreOpacity]) => sum + item[1],
-        0,
-      ) - a[1].reduce((sum: number, item: [SlackUserId, ScoreOpacity]) =>
-        sum + item[1], 0)
-    ) as Array<[SlackChannelId, [SlackUserId, ScoreOpacity][]]>;
+    return Array
+      .from(wwown)
+      .map(([channelId, channel]) => [
+        channelId,
+        Array.from(channel).map(([userId, lastTs]) => [userId, lastTs]).sort(
+          (a, b) => (b[1] as number) - (a[1] as number),
+        ) as [SlackUserId, ScoreOpacity][],
+      ]);
   }
 
   static getActivity(
