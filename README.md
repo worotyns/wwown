@@ -4,28 +4,19 @@ Slackbot that enter to each channel and monitor engagement. It's experiment for
 monitor who work on what now.
 
 What's cover now?
-
-- time tracking @mention,
-- channel specific activity tracking,
-- incidents log with @mention,
-- reporting dashboard simple app,
-
-## Demo
-
-Example: https://wwown-demo.fly.dev
-
-Invitation link:
-https://join.slack.com/t/wwown-rocks/shared_invite/zt-21ktjx6on-0rsvgzU8Y6T1_BEOy2cLGg
+- global dashboard with activity,
+- last active channels, and last user on that channels,
+- user specific stats
 
 ---
 
 ## Setup env
 
-`cp .env.example .env` `vim .env`
+`cp .env.example .env && vim .env`
 
 ## Development
 
-0. Build `yarn build`
+0. Build `de build`
 
 1. Create DB `yarn run migrations`
 
