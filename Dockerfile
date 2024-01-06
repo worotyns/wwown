@@ -15,7 +15,7 @@ COPY . .
 RUN deno task build
 
 RUN mkdir -p /db/atoms
-RUN chmod 755 /wwown
+RUN chmod 755 /app
 
 VOLUME /db
 
