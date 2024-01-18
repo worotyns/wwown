@@ -118,14 +118,20 @@ export class DashboardViewDto {
     for (const dayAggregate of extendedStats.getDayAggregatesForRange(params)) {
       for (const [_, channel] of dayAggregate.channels.entries()) {
         const values: number[] = [];
+
         for (const [_, channelStats] of channel.messages.entries()) {
           values.push(channelStats.total);
         }
+
+        for (const [_, thread] of channel.threads.entries()) {
+          values.push(thread.total);
+        }
+
         daysMaxes.push(values.reduce((a, b) => a + b, 0));
       }
     }
 
-    const max = Math.max(...daysMaxes);
+    const max = Math.max(...daysMaxes) * 0.7 // to add more colour :D
 
     for (const day of generateDayRawRange(params.from, params.to)) {
       const uniqueUsers: Set<SlackUserId> = new Set();
@@ -143,6 +149,10 @@ export class DashboardViewDto {
         for (const [userId, user] of channel.messages.entries()) {
           uniqueUsers.add(userId);
           values.push(user.total);
+        }
+
+        for (const [_, thread] of channel.threads.entries()) {
+          values.push(thread.total);
         }
       }
 
