@@ -26,6 +26,7 @@ import { SerializableMap } from "../../../domain/common/serializable_map.ts";
 import { BasicStats } from "../../../domain/stats/common/basic_stats.ts";
 import { UserStats } from "../../../domain/stats/user/user_stats.ts";
 import { normalizeEmoji, normalizeValue } from "./utils.ts";
+import { ConsoleLogger } from "https://deno.land/x/slack_web_api@1.0.3/deps.ts";
 
 /**
  * Collected user information for user page
@@ -674,25 +675,6 @@ export class UserViewDto {
     ];
   }
 
-  static calculateMinMaxAndSumOfHourlyInteractionsDistributionInRange(
-    extended: UserData,
-    params: UserDataParams,
-  ): [Min, Max, Total] {
-    const values = [];
-
-    for (const dayAggregate of extended.getDayAggregatesForRange(params)) {
-      for (const [_, value] of dayAggregate.hourly.entries()) {
-        values.push(value.total);
-      }
-    }
-
-    return [
-      Math.min(...values),
-      Math.max(...values),
-      values.reduce((a, b) => a + b, 0),
-    ];
-  }
-
   static calculateMinMaxAndSumOfHourlyInteractionsDistributionAllTime(
     extended: UserData,
   ): [Min, Max, Total] {
@@ -713,38 +695,49 @@ export class UserViewDto {
     extendedStats: UserData,
     params: UserDataParams,
   ): Array<HourPercentDistribution> {
-    const [_min, _max, sum] = this
-      .calculateMinMaxAndSumOfHourlyInteractionsDistributionInRange(
-        extendedStats,
-        params,
-      );
-
     const distribution: SerializableMap<TwoDigitHour, Percent> =
       new SerializableMap();
 
     const hoursRange = new Array(24).fill(0).map((_, i) =>
       i.toString().padStart(2, "0")
     );
+    
+    const daysForParams = extendedStats.getDayAggregatesForRange(params);
 
-    for (const dayAggregate of extendedStats.getDayAggregatesForRange(params)) {
+    for (const dayAggregate of daysForParams) {
       for (const hour of hoursRange) {
         const value = dayAggregate.hourly.getOrSet(
           hour,
           () => new BasicStats(),
         );
         const current = distribution.get(hour) || 0;
-        const percent = value.total ? value.total / sum : 0;
-        distribution.set(hour, current + percent);
+        distribution.set(hour, current + value.total);
       }
     }
 
+    const min = Math.min(...distribution.values());
+    const max = Math.max(...distribution.values());
+
+    const normalizeSize = (val: number) =>
+      normalizeValue(
+        val,
+        min,
+        max,
+        0,
+        1,
+      );
+
+    for (const [hour, value] of distribution.entries()) {
+      distribution.set(hour, normalizeSize(value));
+    }
+    
     return distribution.toJSON();
   }
 
   static getHourlyInteractionsDistributionAllTime(
     extendedStats: UserData,
   ): Array<HourPercentDistribution> {
-    const [_min, _max, sum] = this
+    const [min, max] = this
       .calculateMinMaxAndSumOfHourlyInteractionsDistributionAllTime(
         extendedStats,
       );
@@ -756,14 +749,23 @@ export class UserViewDto {
       i.toString().padStart(2, "0")
     );
 
+    const normalizeSize = (val: number) =>
+    normalizeValue(
+      val,
+      min,
+      max,
+      0,
+      1,
+    );
+    
     for (const hour of hoursRange) {
       const value = extendedStats.allTime.hourly.getOrSet(
         hour,
         () => new BasicStats(),
       );
+
       const current = distribution.get(hour) || 0;
-      const percent = value.total ? value.total / sum : 0;
-      distribution.set(hour, current + percent);
+      distribution.set(hour, current + normalizeSize(value.total));
     }
 
     return distribution.toJSON();
