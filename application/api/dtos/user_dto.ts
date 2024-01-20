@@ -330,13 +330,13 @@ export class UserViewDto {
 
     const threadAvgHoursAuthoredAllTime =
       Array.from(allTimeThreadsAuthored.values()).reduce(
-        (a, b) => a + (b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000,
+        (a, b) => a + (b.lastTs.getTime() - b.firstTs.getTime()) / 3_600_000,
         0,
       ) / threadCountAuthoredAllTime;
 
     const threadAvgHoursContributedAllTime =
       Array.from(allTimeThreadsContributed.values()).reduce(
-        (a, b) => a + (b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000,
+        (a, b) => a + (b.lastTs.getTime() - b.firstTs.getTime()) / 3_600_000,
         0,
       ) / threadCountContributedAllTime;
 
@@ -345,7 +345,7 @@ export class UserViewDto {
         a + Array.from(b.threads.authored.values()).reduce(
           (a, b) =>
             a +
-            (b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000,
+            (b.lastTs.getTime() - b.firstTs.getTime()) / 3_600_000,
           0,
         ),
       0,
@@ -356,7 +356,7 @@ export class UserViewDto {
         a + Array.from(b.threads.contributed.values()).reduce(
           (a, b) =>
             a +
-            (b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000,
+            (b.lastTs.getTime() - b.firstTs.getTime()) / 3_600_000,
           0,
         ),
       0,
@@ -372,19 +372,19 @@ export class UserViewDto {
 
     summary.set("threadAvgHours", [
       "Average thread duration (hours)",
-      threadAvgHoursInRange,
-      threadAvgHoursAllTime,
+      Math.abs(threadAvgHoursInRange),
+      Math.abs(threadAvgHoursAllTime),
     ]);
 
     summary.set("threadAuthoredAvgHours", [
       "Average thread duration (hours) authored by you",
-      threadAvgHoursAuthoredInRange,
-      threadAvgHoursAuthoredAllTime,
+      Math.abs(threadAvgHoursAuthoredInRange),
+      Math.abs(threadAvgHoursAuthoredAllTime),
     ]);
     summary.set("threadContributedAvgHours", [
       "Average thread duration (hours) contributed by you",
-      threadAvgHoursContributedInRange,
-      threadAvgHoursContributedAllTime,
+      Math.abs(threadAvgHoursContributedInRange),
+      Math.abs(threadAvgHoursContributedAllTime),
     ]);
 
     const threadMaxHoursAuthoredAllTime = Array.from(
@@ -393,7 +393,7 @@ export class UserViewDto {
       (a, b) =>
         Math.max(
           a,
-          (b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000,
+          (b.lastTs.getTime() - b.firstTs.getTime()) / 3_600_000,
         ),
       0,
     );
@@ -403,7 +403,7 @@ export class UserViewDto {
       (a, b) =>
         Math.max(
           a,
-          (b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000,
+          (b.lastTs.getTime() - b.firstTs.getTime()) / 3_600_000,
         ),
       0,
     );
@@ -414,7 +414,7 @@ export class UserViewDto {
           Array.from(b.threads.authored.values()).reduce((a, b) =>
             Math.max(
               a,
-              (b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000,
+              (b.lastTs.getTime() - b.firstTs.getTime()) / 3_600_000,
             ), 0),
         ),
       0,
@@ -426,7 +426,7 @@ export class UserViewDto {
           Array.from(b.threads.contributed.values()).reduce((a, b) =>
             Math.max(
               a,
-              (b.firstTs.getTime() - b.lastTs.getTime()) / 3_600_000,
+              (b.lastTs.getTime() - b.firstTs.getTime()) / 3_600_000,
             ), 0),
         ),
       0,
