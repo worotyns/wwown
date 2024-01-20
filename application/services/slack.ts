@@ -83,6 +83,7 @@ export function createSlackService(
         if (!message.parent_user_id) {
           logger.error(
             "Cannot resolve parent user id for thread: " + message.thread_ts,
+            message
           );
         }
 
